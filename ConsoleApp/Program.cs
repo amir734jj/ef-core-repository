@@ -29,8 +29,11 @@ namespace ConsoleApp
             var dto = (await repo.Get(1)).DeepClone();
             dto.Name = "Bar";
             await repo.Update(entity.Id, dto);
+
+            var updatedEntity = await repo.Get(1);
             
-            (await repo.Get(1)).Name.ShouldBe("Bar");
+            updatedEntity.Name.ShouldBe("Bar");
+            updatedEntity.Children.ShouldNotBeNull();
         }
     }
 }

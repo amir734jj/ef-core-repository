@@ -1,6 +1,7 @@
 using System.Linq;
 using ConsoleApp.Models;
 using Core.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace ConsoleApp.Profiles
 {
@@ -23,7 +24,7 @@ namespace ConsoleApp.Profiles
 
         public IQueryable<DummyModel> Include<TQueryable>(TQueryable queryable) where TQueryable : IQueryable<DummyModel>
         {
-            return queryable;
+            return queryable.Include(x => x.Children);
         }
     }
 }
