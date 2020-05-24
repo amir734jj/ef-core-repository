@@ -4,9 +4,9 @@ Simple repository for Ef.Core with basic CRUD functionality
 
 ### How to use
 
-- Entity should implement `IEntity<TSource, TId>`
+- Entity should implement `IEntity<TId>`
 ```c#
-public class DummyModel : IEntity<DummyModel, int>
+public class DummyModel : IEntity<int>
 {
     public int Id { get; set; }
     
