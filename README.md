@@ -2,7 +2,9 @@
 
 Simple repository for Ef.Core with basic CRUD functionality
 
-### How to use
+The reason I implemented this is because I kept writing basic CRUD functionality over and over again.
+
+#### How to use
 
 - Entity should implement `IEntity<TId>`
 ```c#
@@ -61,6 +63,8 @@ var serviceProvider = services
 - Use `IBasicCrud`
 ```c#
 IEfRepository repo = ... // DI inject IEfRepository
+
+// Get IBasicCrud instance
 IBasicCrud<DummyModel> = repo.For<DummyModel>();
 ```
 
