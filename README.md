@@ -70,7 +70,7 @@ Task<IEnumerable<TSource>> GetAll();
 
 Task<TSource> Get(id);
 
-Task<TSource> Save(instance);
+Task<TSource> Save(dto);
 
 Task<TSource> Delete(id);
 
