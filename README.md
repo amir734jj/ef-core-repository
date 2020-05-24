@@ -2,9 +2,9 @@
 
 Simple repository for Ef.Core with basic CRUD functionality
 
-The reason I implemented this is that I kept writing basic CRUD functionality over and over again.
+The reason I implemented this is because I found myself re-writing basic CRUD functionality over and over again.
 
-#### How to use
+#### Basic setup
 
 - Entity should implement `IEntity<TId>`
 ```c#
