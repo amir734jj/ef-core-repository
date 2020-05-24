@@ -23,7 +23,7 @@ public class DummyModelProfile : IEntityProfile<DummyModel, int>
 {
     private readonly IEntityProfileAuxiliary<Nested, int> _auxiliary;
 
-    // Inject utility for list add/delete
+    // Optionally inject utility for list add/delete
     public DummyModelProfile(IEntityProfileAuxiliary<Nested, int> auxiliary)
     {
         _auxiliary = auxiliary;
