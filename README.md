@@ -16,13 +16,14 @@ public class DummyModel : IEntity<int>
 }
 ```
 
-- Create profile
+- Create profile which is used to update an entity given a DTO
 
 ```c#
 public class DummyModelProfile : IEntityProfile<DummyModel, int> 
 {
     private readonly IEntityProfileAuxiliary<Nested, int> _auxiliary;
 
+    // Inject utility for list add/delete
     public DummyModelProfile(IEntityProfileAuxiliary<Nested, int> auxiliary)
     {
         _auxiliary = auxiliary;
@@ -31,19 +32,25 @@ public class DummyModelProfile : IEntityProfile<DummyModel, int>
     public DummyModel Update(DummyModel entity, DummyModel dto)
     {
         entity.Name = dto.Name;
+
+        // ModifyList will try to add/delete entities based on Id based on whether they
+        // appear in dto.Children or not 
         entity.Children = _auxiliary.ModifyList(entity.Children, dto.Children);
 
+        // Return entity or response
+        // This will be used as a return value for update method in BasicCrud
         return entity;
     }
 
+    // Intercept IQueryable to include related entities
     public IQueryable<DummyModel> Include<TQueryable>(TQueryable queryable) where TQueryable : IQueryable<DummyModel>
     {
-        return queryable;
+        return queryable.Children();
     }
 }
 ```
 
-- Register dependency
+- Register dependency via `IServiceCollection` extension
 
 ```c#
 var serviceProvider = services
@@ -53,11 +60,11 @@ var serviceProvider = services
 
 - Use `IBasicCrud`
 ```c#
-IEfRepository repo = ... // DI inject instance
+IEfRepository repo = ... // DI inject IEfRepository
 IBasicCrud<DummyModel> = repo.For<DummyModel>();
 ```
 
-- Available methods
+- Available methods in `IBasicCrud`
 ```c#
 Task<IEnumerable<TSource>> GetAll();
 
