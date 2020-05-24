@@ -4,6 +4,8 @@ Simple repository for Ef.Core with basic CRUD functionality
 
 The reason I implemented this is because I found myself re-writing basic CRUD functionality over and over again.
 
+[NuGet](https://www.nuget.org/packages/SimpleEfCoreRepository/)
+
 #### Basic setup
 
 - Entity should implement `IEntity<TId>`
