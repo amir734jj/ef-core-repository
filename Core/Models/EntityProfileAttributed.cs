@@ -1,6 +1,6 @@
 using System;
 
-namespace Core.Models
+namespace EfCoreRepository.Models
 {
     internal class EntityProfileAttributed
     {

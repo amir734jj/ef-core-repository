@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Core.Interfaces
+namespace EfCoreRepository.Interfaces
 {
     public interface IEntity<TId>
     {

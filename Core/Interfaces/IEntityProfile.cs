@@ -1,6 +1,6 @@
 using System.Linq;
 
-namespace Core.Interfaces
+namespace EfCoreRepository.Interfaces
 {
     public interface IEntityProfile<TSource, TId>
         where TSource : class, IEntity<TId>

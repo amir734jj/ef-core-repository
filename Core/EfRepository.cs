@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Core.Interfaces;
-using Core.Models;
+using EfCoreRepository.Interfaces;
+using EfCoreRepository.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Core
+namespace EfCoreRepository
 {
     internal class EfRepository : IEfRepository
     {

@@ -2,8 +2,8 @@
 using System.Threading.Tasks;
 using ConsoleApp.Extensions;
 using ConsoleApp.Models;
-using Core.Extensions;
-using Core.Interfaces;
+using EfCoreRepository.Extensions;
+using EfCoreRepository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

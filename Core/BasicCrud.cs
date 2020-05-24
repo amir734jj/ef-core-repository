@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Core.Interfaces;
+using EfCoreRepository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Core
+namespace EfCoreRepository
 {
     internal class BasicCrud<TSource, TId> : IBasicCrud<TSource, TId> where TSource : class, IEntity<TId>
     {

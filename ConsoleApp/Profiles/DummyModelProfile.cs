@@ -1,6 +1,6 @@
 using System.Linq;
 using ConsoleApp.Models;
-using Core.Interfaces;
+using EfCoreRepository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace ConsoleApp.Profiles

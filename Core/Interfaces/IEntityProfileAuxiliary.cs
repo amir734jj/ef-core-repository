@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Core.Interfaces
+namespace EfCoreRepository.Interfaces
 {
     public interface IEntityProfileAuxiliary<TProperty, TId>
         where TProperty : class, IEntity<TId>

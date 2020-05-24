@@ -1,12 +1,12 @@
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
-using Core.Interfaces;
-using Core.Models;
+using EfCoreRepository.Interfaces;
+using EfCoreRepository.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Core
+namespace EfCoreRepository
 {
     internal class EfRepositoryFactory : IEfRepositoryFactory
     {

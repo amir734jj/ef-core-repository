@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using Core.Interfaces;
+using EfCoreRepository.Interfaces;
 
-namespace Core
+namespace EfCoreRepository
 {
     internal class EntityProfileAuxiliary<TProperty, TId> : IEntityProfileAuxiliary<TProperty, TId>
         where TProperty : class, IEntity<TId>

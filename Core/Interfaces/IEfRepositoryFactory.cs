@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace Core.Interfaces
+namespace EfCoreRepository.Interfaces
 {
     public interface IEfRepositoryFactory
     {

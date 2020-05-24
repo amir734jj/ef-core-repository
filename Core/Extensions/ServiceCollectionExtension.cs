@@ -1,9 +1,9 @@
 using System;
-using Core.Interfaces;
+using EfCoreRepository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Core.Extensions
+namespace EfCoreRepository.Extensions
 {
     public static class ServiceCollectionExtension
     {

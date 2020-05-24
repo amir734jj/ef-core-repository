@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Core.Interfaces
+namespace EfCoreRepository.Interfaces
 {
     public interface IBasicCrud<TSource, in TId> where TSource: class, IEntity<TId>
     {
