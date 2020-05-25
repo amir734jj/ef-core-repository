@@ -7,9 +7,9 @@ namespace ConsoleApp.Profiles
 {
     public class DummyModelProfile : IEntityProfile<DummyModel, int> 
     {
-        private readonly IEntityProfileAuxiliary<Nested, int> _auxiliary;
+        private readonly IEntityProfileAuxiliary _auxiliary;
 
-        public DummyModelProfile(IEntityProfileAuxiliary<Nested, int> auxiliary)
+        public DummyModelProfile(IEntityProfileAuxiliary auxiliary)
         {
             _auxiliary = auxiliary;
         }
@@ -17,7 +17,7 @@ namespace ConsoleApp.Profiles
         public DummyModel Update(DummyModel entity, DummyModel dto)
         {
             entity.Name = dto.Name;
-            entity.Children = _auxiliary.ModifyList(entity.Children, dto.Children);
+            entity.Children = _auxiliary.ModifyList<Nested, int>(entity.Children, dto.Children);
 
             return entity;
         }

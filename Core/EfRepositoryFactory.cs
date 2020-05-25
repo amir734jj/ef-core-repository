@@ -39,7 +39,7 @@ namespace EfCoreRepository
                 .Where(x => x.GenericType != null)
                 .ToList();
             
-            _serviceCollection.Add(ServiceDescriptor.Singleton(typeof(IEntityProfileAuxiliary<,>), typeof(EntityProfileAuxiliary<,>)));
+            _serviceCollection.Add(ServiceDescriptor.Singleton(typeof(IEntityProfileAuxiliary), typeof(EntityProfileAuxiliary)));
 
             _serviceCollection.Add(ServiceDescriptor.Singleton<IEfRepository>(serviceProvider =>
             {

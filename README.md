@@ -23,10 +23,10 @@ public class DummyModel : IEntity<int>
 ```c#
 public class DummyModelProfile : IEntityProfile<DummyModel, int> 
 {
-    private readonly IEntityProfileAuxiliary<Nested, int> _auxiliary;
+    private readonly IEntityProfileAuxiliary _auxiliary;
 
     // Optionally inject utility for list add/delete
-    public DummyModelProfile(IEntityProfileAuxiliary<Nested, int> auxiliary)
+    public DummyModelProfile(IEntityProfileAuxiliary auxiliary)
     {
         _auxiliary = auxiliary;
     }
@@ -37,7 +37,7 @@ public class DummyModelProfile : IEntityProfile<DummyModel, int>
 
         // ModifyList will try to add/delete entities based on Id based on whether they
         // appear in dto.Children or not 
-        entity.Children = _auxiliary.ModifyList(entity.Children, dto.Children);
+        entity.Children = _auxiliary.ModifyList<Nested, int>(entity.Children, dto.Children);
 
         // Return entity or response
         // This will be used as a return value for update method in BasicCrud
