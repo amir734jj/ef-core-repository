@@ -39,9 +39,11 @@ namespace EfCoreRepository
                 .Where(x => x.GenericType != null)
                 .ToList();
             
-            _serviceCollection.Add(ServiceDescriptor.Singleton(typeof(IEntityProfileAuxiliary), typeof(EntityProfileAuxiliary)));
+            // DbContext is registered by default as scoped
+            // https://docs.microsoft.com/en-us/ef/core/miscellaneous/configuring-dbcontext#implicitly-sharing-dbcontext-instances-across-multiple-threads-via-dependency-injection
+            _serviceCollection.Add(ServiceDescriptor.Scoped(typeof(IEntityProfileAuxiliary), typeof(EntityProfileAuxiliary)));
 
-            _serviceCollection.Add(ServiceDescriptor.Singleton<IEfRepository>(serviceProvider =>
+            _serviceCollection.Add(ServiceDescriptor.Scoped<IEfRepository>(serviceProvider =>
             {
                 return new EfRepository(profiles.Select(tuple => new EntityProfileAttributed
                 {
