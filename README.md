@@ -1,8 +1,9 @@
 # EF.Core.Repository
 
 Simple repository for Ef.Core with basic CRUD functionality
-
-The reason I implemented this is because I found myself re-writing basic CRUD functionality over and over again.
+The reason I implemented this is because I found myself re-writing basic CRUD functionality over and over again. Most of the time:
+- use `.include(...)` to include eager load associated entities
+- update (add/delete/update) children properties by Id
 
 [NuGet](https://www.nuget.org/packages/SimpleEfCoreRepository/)
 
@@ -49,7 +50,7 @@ public class DummyModelProfile : IEntityProfile<DummyModel, int>
     // Intercept IQueryable to include related entities
     public IQueryable<DummyModel> Include<TQueryable>(TQueryable queryable) where TQueryable : IQueryable<DummyModel>
     {
-        return queryable.Children();
+        return queryable.Include(x => x.Children);
     }
 }
 ```
