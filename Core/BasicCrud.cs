@@ -5,18 +5,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EfCoreRepository
 {
-    internal class BasicCrud<TSource, TId> : IBasicCrud<TSource, TId> where TSource : class, IEntity<TId>
+    internal class BasicCrud<TSource, TId> : IBasicCrudSession<TSource, TId> where TSource : class, IEntity<TId>
     {
         private readonly IEntityProfile<TSource, TId> _profile;
         
         private readonly DbContext _dbContext;
+        
+        private readonly bool _session;
 
         private readonly DbSet<TSource> _dbSet;
 
-        public BasicCrud(IEntityProfile<TSource, TId> profile, DbContext dbContext)
+        public BasicCrud(IEntityProfile<TSource, TId> profile, DbContext dbContext, bool session)
         {
             _profile = profile;
             _dbContext = dbContext;
+            _session = session;
             _dbSet = dbContext.Set<TSource>();
         }
         
@@ -48,8 +51,11 @@ namespace EfCoreRepository
         {
             await _dbSet.AddAsync(instance);
             
-            await _dbContext.SaveChangesAsync();
-            
+            if (!_session)
+            {
+                await _dbContext.SaveChangesAsync();
+            }
+
             return instance;
         }
 
@@ -66,8 +72,11 @@ namespace EfCoreRepository
             {
                 _dbSet.Remove(entity);
                 
-                await _dbContext.SaveChangesAsync();
-                
+                if (!_session)
+                {
+                    await _dbContext.SaveChangesAsync();
+                }
+
                 return entity;
             }
 
@@ -87,13 +96,31 @@ namespace EfCoreRepository
             if (entity != null)
             {
                 var result = _profile.Update(entity, dto);
-                
-                await _dbContext.SaveChangesAsync();
 
+                if (!_session)
+                {
+                    await _dbContext.SaveChangesAsync();
+                }
+                
                 return result;
             }
 
             return null;
+        }
+
+        public void Dispose()
+        {
+            _dbContext.SaveChanges();
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            return new ValueTask(_dbContext.SaveChangesAsync());
+        }
+
+        public IBasicCrudSession<TSource, TId> Session()
+        {
+            return new BasicCrud<TSource, TId>(_profile, _dbContext, true);
         }
     }
 }
