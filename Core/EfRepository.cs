@@ -28,7 +28,7 @@ namespace EfCoreRepository
                 throw new Exception($"Failed to find profile for {typeof(TSource).Name}<{typeof(TId).Name}>");
             }
 
-            return new BasicCrud<TSource, TId>((IEntityProfile<TSource, TId>) profile.Profile, _dbContext);
+            return new BasicCrud<TSource, TId>((IEntityProfile<TSource, TId>) profile.Profile, _dbContext, false);
         }
     }
 }
