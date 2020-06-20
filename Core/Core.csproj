@@ -6,9 +6,9 @@
         <Description>Strem ripper with async event system</Description>
         <RepositoryUrl>https://github.com/amir734jj/Stream-ripper</RepositoryUrl>
         <PackageProjectUrl>https://github.com/amir734jj/ef-core-repository</PackageProjectUrl>
-        <AssemblyVersion>1.0.3</AssemblyVersion>
-        <PackageReleaseNotes>Added session functionality</PackageReleaseNotes>
-        <Version>1.0.3</Version>
+        <AssemblyVersion>1.0.4</AssemblyVersion>
+        <PackageReleaseNotes>Added session functionality and refactored interfaces</PackageReleaseNotes>
+        <Version>1.0.4</Version>
         <RootNamespace>EfCoreRepository</RootNamespace>
         <AssemblyName>SimpleEfCoreRepository</AssemblyName>
     </PropertyGroup>
