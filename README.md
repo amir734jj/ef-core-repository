@@ -82,4 +82,8 @@ Task<TSource> Save(dto);
 Task<TSource> Delete(id);
 
 Task<TSource> Update(id, dto);
+
+// This is useful if you want to defer SaveChanges in session mode
+// Changes are not automatically saved back to DbContext in session mode
+IBasicCrud<TSource, TId> Session();
 ```
