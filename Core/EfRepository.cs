@@ -19,7 +19,7 @@ namespace EfCoreRepository
             _profiles = profiles.ToList();
         }
 
-        public IBasicCrud<TSource, TId> For<TSource, TId>() where TSource: class, IEntity<TId>
+        public IBasicCrudType<TSource, TId> For<TSource, TId>() where TSource: class, IEntity<TId>
         {
             var profile = _profiles.FirstOrDefault(x => x.IdType == typeof(TId) && x.SourceType == typeof(TSource));
 

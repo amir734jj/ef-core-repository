@@ -14,11 +14,5 @@ namespace EfCoreRepository.Interfaces
         Task<TSource> Delete(TId id);
 
         Task<TSource> Update(TId id, TSource dto);
-        
-        /// <summary>
-        /// For complex and multi-action
-        /// </summary>
-        /// <returns></returns>
-        IBasicCrudSession<TSource, TId> Session();
     }
 }

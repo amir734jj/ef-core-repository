@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EfCoreRepository
 {
-    internal class BasicCrud<TSource, TId> : IBasicCrudSession<TSource, TId> where TSource : class, IEntity<TId>
+    internal class BasicCrud<TSource, TId> : IBasicCrudType<TSource, TId>, IBasicCrudSession<TSource, TId> where TSource : class, IEntity<TId>
     {
         private readonly IEntityProfile<TSource, TId> _profile;
         
