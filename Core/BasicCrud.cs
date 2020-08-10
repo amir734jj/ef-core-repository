@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using EfCoreRepository.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -39,7 +42,11 @@ namespace EfCoreRepository
         /// <returns></returns>
         public virtual async Task<TSource> Get(TId id)
         {
-            return await _profile.Include(_dbSet).FirstOrDefaultAsync(x => Equals(x.Id, id));
+            Expression<Func<TSource, bool>> getByIdExpr = x => Equals(x.Id, id);
+
+            var cacheResult = _dbSet.Local.FirstOrDefault(getByIdExpr.Compile());
+            
+            return cacheResult ?? await _profile.Include(_dbSet).FirstOrDefaultAsync(getByIdExpr);
         }
 
         /// <summary>
