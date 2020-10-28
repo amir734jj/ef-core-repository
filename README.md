@@ -5,7 +5,8 @@ The reason I implemented this is because I found myself re-writing basic CRUD fu
 - use `.include(...)` to include eager load associated entities
 - update (add/delete/update) children properties by Id
 
-[NuGet](https://www.nuget.org/packages/SimpleEfCoreRepository/)
+[![NuGet Status](https://img.shields.io/nuget/v/SimpleEfCoreRepository.svg)](https://www.nuget.org/packages/SimpleEfCoreRepository/)
+
 
 #### Basic setup
 
@@ -71,7 +72,7 @@ IEfRepository repo = ... // DI inject IEfRepository
 IBasicCrud<DummyModel> = repo.For<DummyModel>();
 ```
 
-- Available methods in `IBasicCrud`
+- Available methods in `IBasicCrud` or `IBasicCrudType`
 ```c#
 Task<IEnumerable<TSource>> GetAll();
 
