@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using EfCoreRepository.Interfaces;
@@ -43,15 +45,22 @@ namespace EfCoreRepository
             // https://docs.microsoft.com/en-us/ef/core/miscellaneous/configuring-dbcontext#implicitly-sharing-dbcontext-instances-across-multiple-threads-via-dependency-injection
             _serviceCollection.Add(ServiceDescriptor.Scoped(typeof(IEntityProfileAuxiliary), typeof(EntityProfileAuxiliary)));
 
-            _serviceCollection.Add(ServiceDescriptor.Scoped<IEfRepository>(serviceProvider =>
+            _serviceCollection.Add(ServiceDescriptor.Scoped<IEfRepository>(serviceProvider => new EfRepository(profiles.Select(tuple =>
             {
-                return new EfRepository(profiles.Select(tuple => new EntityProfileAttributed
+                var (sourceType, genericType) = tuple;
+
+                if (genericType == null)
                 {
-                    SourceType = tuple.GenericType.GetGenericArguments().First(),
-                    IdType = tuple.GenericType.GetGenericArguments().Last(),
-                    Profile = ActivatorUtilities.CreateInstance(serviceProvider, tuple.SourceType)
-                }), serviceProvider.GetService<TDbContext>());
-            }));
+                    throw new Exception("Profiles generic type is null");
+                }
+                    
+                return new EntityProfileAttributed
+                {
+                    SourceType = genericType.GetGenericArguments().First(),
+                    IdType = genericType.GetGenericArguments().Last(),
+                    Profile = ActivatorUtilities.CreateInstance(serviceProvider, sourceType)
+                };
+            }), serviceProvider.GetService<TDbContext>())));
         }
     }
 }

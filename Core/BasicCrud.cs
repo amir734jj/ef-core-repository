@@ -5,21 +5,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EfCoreRepository
 {
-    internal class BasicCrud<TSource, TId> : IBasicCrudType<TSource, TId>, IBasicCrudSession<TSource, TId> where TSource : class, IEntity<TId>
+    internal class BasicCrud<TSource, TId> : IBasicCrudWrapper<TSource, TId>, IBasicCrudSession<TSource, TId> where TSource : class, IEntity<TId>
     {
         private readonly IEntityProfile<TSource, TId> _profile;
         
         private readonly DbContext _dbContext;
         
+        private readonly bool _outerSession;
+
         private readonly bool _session;
 
         private readonly DbSet<TSource> _dbSet;
 
-        public BasicCrud(IEntityProfile<TSource, TId> profile, DbContext dbContext, bool session)
+        public BasicCrud(IEntityProfile<TSource, TId> profile, DbContext dbContext, bool outerSession, bool innerSession)
         {
             _profile = profile;
             _dbContext = dbContext;
-            _session = session;
+            _outerSession = outerSession;
+            _session = innerSession || outerSession;
             _dbSet = dbContext.Set<TSource>();
         }
         
@@ -110,17 +113,25 @@ namespace EfCoreRepository
 
         public void Dispose()
         {
-            _dbContext.SaveChanges();
+            if (!_outerSession)
+            {
+                _dbContext.SaveChanges();
+            }
         }
 
         public ValueTask DisposeAsync()
         {
-            return new ValueTask(_dbContext.SaveChangesAsync());
+            if (!_outerSession)
+            {
+                return new ValueTask(_dbContext.SaveChangesAsync());
+            }
+
+            return new ValueTask(Task.CompletedTask);
         }
 
         public IBasicCrudSession<TSource, TId> Session()
         {
-            return new BasicCrud<TSource, TId>(_profile, _dbContext, true);
+            return new BasicCrud<TSource, TId>(_profile, _dbContext, _outerSession, true);
         }
     }
 }

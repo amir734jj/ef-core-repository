@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using ConsoleApp.Extensions;
 using ConsoleApp.Models;
@@ -23,17 +25,20 @@ namespace ConsoleApp
                     .Profiles(Assembly.GetExecutingAssembly()))
                 .BuildServiceProvider();
 
-            var repo = serviceProvider.GetService<IEfRepository>().For<DummyModel, int>();
-
-            var entity = await repo.Save(new DummyModel {Name = "Foo"});
-            var dto = (await repo.Get(1)).DeepClone();
+            var repository = serviceProvider.GetService<IEfRepository>();
+            var dal = repository.For<DummyModel, int>();
+            var entity = await dal.Save(new DummyModel {Name = "Foo", Children = new List<Nested> { new Nested()}});
+            var dto = (await dal.Get(1)).DeepClone();
             dto.Name = "Bar";
-            await repo.Update(entity.Id, dto);
+            await dal.Update(entity.Id, dto);
 
-            var updatedEntity = await repo.Get(1);
+            var updatedEntity = await dal.Get(1);
             
             updatedEntity.Name.ShouldBe("Bar");
             updatedEntity.Children.ShouldNotBeNull();
+
+            var children = await repository.For<Nested, int>().GetAll();
+            children.Count().ShouldNotBe(0);
         }
     }
 }
