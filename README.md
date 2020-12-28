@@ -25,7 +25,7 @@ public class DummyModel : IEntity<int>
 - Create profile which is used to update an entity given a DTO
 
 ```c#
-public class DummyModelProfile : IEntityProfile<DummyModel, int> 
+public class DummyModelProfile : IEntityProfile<DummyModel> 
 {
     private readonly IEntityProfileAuxiliary _auxiliary;
 
@@ -35,17 +35,13 @@ public class DummyModelProfile : IEntityProfile<DummyModel, int>
         _auxiliary = auxiliary;
     }
 
-    public DummyModel Update(DummyModel entity, DummyModel dto)
+    public void Update(DummyModel entity, DummyModel dto)
     {
         entity.Name = dto.Name;
 
         // ModifyList will try to add/delete entities based on Id based on whether they
         // appear in dto.Children or not 
         entity.Children = _auxiliary.ModifyList<Nested, int>(entity.Children, dto.Children);
-
-        // Return entity or response
-        // This will be used as a return value for update method in BasicCrud
-        return entity;
     }
 
     // Intercept IQueryable to include related entities
@@ -77,6 +73,8 @@ IBasicCrud<DummyModel> = repo.For<DummyModel>();
 Task<IEnumerable<TSource>> GetAll();
 
 Task<TSource> Get(id);
+
+Task<IEnumerable<TSource>> GetWhere(Expression<Func<TSource, bool>> expression);
 
 Task<TSource> Save(dto);
 
