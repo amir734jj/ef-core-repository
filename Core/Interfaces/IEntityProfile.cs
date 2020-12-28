@@ -1,9 +1,10 @@
 using System.Linq;
+using System.Security;
 
+[assembly: SecurityRules(SecurityRuleSet.Level1, SkipVerificationInFullTrust = true)]
 namespace EfCoreRepository.Interfaces
 {
-    public interface IEntityProfile<TSource, TId>
-        where TSource : class, IEntity<TId>
+    public interface IEntityProfile<TSource> where TSource : class, IUntypedEntity
     {
         /// <summary>
         /// Updated entity given dto

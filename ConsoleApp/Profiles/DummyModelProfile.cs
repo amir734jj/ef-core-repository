@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ConsoleApp.Profiles
 {
-    public class DummyModelProfile : IEntityProfile<DummyModel, int> 
+    public class DummyModelProfile : IEntityProfile<DummyModel> 
     {
         private readonly IEntityProfileAuxiliary _auxiliary;
 

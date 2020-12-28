@@ -6,9 +6,8 @@ namespace EfCoreRepository.Interfaces
         /// Get basic CRUD
         /// </summary>
         /// <typeparam name="TSource"></typeparam>
-        /// <typeparam name="TId"></typeparam>
         /// <returns></returns>
-        IBasicCrudWrapper<TSource, TId> For<TSource, TId>() where TSource : class, IEntity<TId>;
+        IBasicCrudWrapper<TSource> For<TSource>() where TSource : class, IUntypedEntity;
 
         /// <summary>
         /// Session mode will delay the save changes until 

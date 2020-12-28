@@ -8,9 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EfCoreRepository
 {
-    internal class BasicCrud<TSource, TId> : IBasicCrudWrapper<TSource, TId>, IBasicCrudSession<TSource, TId> where TSource : class, IEntity<TId>
+    internal class BasicCrud<TSource> : IBasicCrudWrapper<TSource>, IBasicCrudSession<TSource> where TSource : class, IUntypedEntity
     {
-        private readonly IEntityProfile<TSource, TId> _profile;
+        private readonly IEntityProfile<TSource> _profile;
         
         private readonly DbContext _dbContext;
         
@@ -20,7 +20,7 @@ namespace EfCoreRepository
 
         private readonly DbSet<TSource> _dbSet;
 
-        public BasicCrud(IEntityProfile<TSource, TId> profile, DbContext dbContext, bool outerSession, bool innerSession)
+        public BasicCrud(IEntityProfile<TSource> profile, DbContext dbContext, bool outerSession, bool innerSession)
         {
             _profile = profile;
             _dbContext = dbContext;
@@ -43,9 +43,15 @@ namespace EfCoreRepository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public virtual async Task<TSource> Get(TId id)
+        public async Task<TSource> Get<TId>(TId id) where TId : struct
         {
-            return await _profile.Include(_dbSet).FirstOrDefaultAsync(x => Equals(x.Id, id));
+            var parameter = Expression.Parameter(typeof(TSource));
+            
+            var body = Expression.Equal(Expression.PropertyOrField(parameter, "Id"), Expression.Constant(id));
+            
+            var expression = Expression.Lambda<Func<TSource, bool>>(body, parameter);
+            
+            return await _profile.Include(_dbSet).FirstOrDefaultAsync(expression);
         }
 
         /// <summary>
@@ -80,7 +86,7 @@ namespace EfCoreRepository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public virtual async Task<TSource> Delete(TId id)
+        public virtual async Task<TSource> Delete<TId>(TId id) where TId: struct
         {
             var entity = await Get(id);
 
@@ -105,7 +111,7 @@ namespace EfCoreRepository
         /// <param name="id"></param>
         /// <param name="dto"></param>
         /// <returns></returns>
-        public virtual async Task<TSource> Update(TId id, TSource dto)
+        public virtual async Task<TSource> Update<TId>(TId id, TSource dto) where TId: struct
         {
             var entity = await Get(id);
 
@@ -142,9 +148,9 @@ namespace EfCoreRepository
             return new ValueTask(Task.CompletedTask);
         }
 
-        public IBasicCrudSession<TSource, TId> Session()
+        public IBasicCrudSession<TSource> Session()
         {
-            return new BasicCrud<TSource, TId>(_profile, _dbContext, _outerSession, true);
+            return new BasicCrud<TSource>(_profile, _dbContext, _outerSession, true);
         }
     }
 }

@@ -31,9 +31,11 @@ namespace EfCoreRepository
             return entity;
         }
 
-        public List<TProperty> ModifyList<TProperty, TId>(List<TProperty> entity, List<TProperty> dto) where TProperty : IEntity<TId>
+        public List<TProperty> ModifyList<TProperty, TId>(List<TProperty> entity, List<TProperty> dto)
+            where TProperty : IUntypedEntity
+            where TId: struct
         {
-            return ModifyList(entity, dto, x => x.Id);
+            return ModifyList(entity, dto, x => x.GetId<TId>());
         }
     }
 }

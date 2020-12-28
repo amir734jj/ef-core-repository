@@ -28,21 +28,21 @@ namespace EfCoreRepository
             return new EfRepository(_profiles, _dbContext, true);
         }
 
-        public IBasicCrudWrapper<TSource, TId> For<TSource, TId>() where TSource: class, IEntity<TId>
+        public IBasicCrudWrapper<TSource> For<TSource>() where TSource: class, IUntypedEntity
         {
-            var profile = _profiles.FirstOrDefault(x => x.IdType == typeof(TId) && x.SourceType == typeof(TSource));
+            var profile = _profiles.FirstOrDefault(x => x.SourceType == typeof(TSource));
 
             if (profile == null)
             {
-                throw new Exception($"Failed to find profile for {typeof(TSource).Name}<{typeof(TId).Name}>");
+                throw new Exception($"Failed to find profile for {typeof(TSource).Name}>");
             }
 
-            return new BasicCrud<TSource, TId>((IEntityProfile<TSource, TId>) profile.Profile, _dbContext, _session, false);
+            return new BasicCrud<TSource>((IEntityProfile<TSource>) profile.Profile, _dbContext, _session, false);
         }
 
-        IBasicCrud<TSource, TId> IEfRepositorySession.For<TSource, TId>()
+        IBasicCrud<TSource> IEfRepositorySession.For<TSource>()
         {
-            return For<TSource, TId>();
+            return For<TSource>();
         }
 
         public ValueTask DisposeAsync()

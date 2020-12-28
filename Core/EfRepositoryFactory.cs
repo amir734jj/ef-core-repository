@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using EfCoreRepository.Interfaces;
@@ -36,7 +35,7 @@ namespace EfCoreRepository
                 .Select(type => (
                     SourceType: type,
                     GenericType: type.GetInterfaces().FirstOrDefault(i =>
-                        i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEntityProfile<,>))
+                        i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEntityProfile<>))
                 ))
                 .Where(x => x.GenericType != null)
                 .ToList();
@@ -57,7 +56,6 @@ namespace EfCoreRepository
                 return new EntityProfileAttributed
                 {
                     SourceType = genericType.GetGenericArguments().First(),
-                    IdType = genericType.GetGenericArguments().Last(),
                     Profile = ActivatorUtilities.CreateInstance(serviceProvider, sourceType)
                 };
             }), serviceProvider.GetService<TDbContext>())));

@@ -26,7 +26,7 @@ namespace ConsoleApp
                 .BuildServiceProvider();
 
             var repository = serviceProvider.GetService<IEfRepository>();
-            var dal = repository.For<DummyModel, int>();
+            var dal = repository.For<DummyModel>();
             var entity = await dal.Save(new DummyModel {Name = "Foo", Children = new List<Nested> { new Nested()}});
             var dto = (await dal.Get(1)).DeepClone();
             dto.Name = "Bar";
@@ -37,7 +37,7 @@ namespace ConsoleApp
             updatedEntity.Name.ShouldBe("Bar");
             updatedEntity.Children.ShouldNotBeNull();
 
-            var children = await repository.For<Nested, int>().GetAll();
+            var children = await repository.For<Nested>().GetAll();
             children.Count().ShouldNotBe(0);
         }
     }
