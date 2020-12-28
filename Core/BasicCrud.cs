@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using EfCoreRepository.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -43,6 +46,16 @@ namespace EfCoreRepository
         public virtual async Task<TSource> Get(TId id)
         {
             return await _profile.Include(_dbSet).FirstOrDefaultAsync(x => Equals(x.Id, id));
+        }
+
+        /// <summary>
+        /// Returns filters list of entities
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<TSource>> GetWhere(Expression<Func<TSource, bool>> expression)
+        {
+            return await _profile.Include(_dbSet).Where(expression).ToListAsync();
         }
 
         /// <summary>
@@ -98,14 +111,14 @@ namespace EfCoreRepository
 
             if (entity != null)
             {
-                var result = _profile.Update(entity, dto);
+                _profile.Update(entity, dto);
 
                 if (!_session)
                 {
                     await _dbContext.SaveChangesAsync();
                 }
                 
-                return result;
+                return entity;
             }
 
             return null;

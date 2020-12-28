@@ -10,12 +10,18 @@ namespace EfCoreRepository.Interfaces
         /// </summary>
         /// <param name="entity"></param>
         /// <param name="dto"></param>
-        TSource Update(TSource entity, TSource dto);
+        void Update(TSource entity, TSource dto)
+        {
+            // No change
+        }
 
         /// <summary>
         /// Intercept the IQueryable to include
         /// </summary>
         /// <returns></returns>
-        IQueryable<TSource> Include<TQueryable>(TQueryable queryable) where TQueryable : IQueryable<TSource>;
+        IQueryable<TSource> Include<TQueryable>(TQueryable queryable) where TQueryable : IQueryable<TSource>
+        {
+            return queryable;
+        }
     }
 }

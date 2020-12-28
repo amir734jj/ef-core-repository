@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace EfCoreRepository.Interfaces
@@ -8,6 +10,8 @@ namespace EfCoreRepository.Interfaces
         Task<IEnumerable<TSource>> GetAll();
 
         Task<TSource> Get(TId id);
+        
+        Task<IEnumerable<TSource>> GetWhere(Expression<Func<TSource, bool>> expression);
 
         Task<TSource> Save(TSource instance);
 
