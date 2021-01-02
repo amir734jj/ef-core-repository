@@ -72,19 +72,25 @@ IBasicCrud<DummyModel> = repo.For<DummyModel>();
 ```c#
 Task<IEnumerable<TSource>> GetAll();
 
+Task<IEnumerable<TSource>> GetAll<TId>(param TId[] ids);
+
+Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, bool>>);
+
 Task<TSource> Get(id);
 
 Task<TSource> Get(Expression<Func<TSource, bool>>);
 
 Task<TSource> Save(dto);
 
-Task<TSource> Delete(id);
-
-Task<TSource> Delete(Expression<Func<TSource, bool>>);
+Task<IEnumerable<TSource>> Save(param TSource[] dtos);
 
 Task<TSource> Update(id, dto);
 
 Task<TSource> Update(Expression<Func<TSource, bool>>, dto);
+
+Task<TSource> Delete(id);
+
+Task<TSource> Delete(Expression<Func<TSource, bool>>);
 
 // This is useful if you want to defer SaveChanges in session mode
 // Changes are not automatically saved back to DbContext in session mode
