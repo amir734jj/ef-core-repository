@@ -74,7 +74,7 @@ Task<IEnumerable<TSource>> GetAll();
 
 Task<TSource> Get(id);
 
-Task<IEnumerable<TSource>> Get(Expression<Func<TSource, bool>>);
+Task<TSource> Get(Expression<Func<TSource, bool>>);
 
 Task<TSource> Save(dto);
 
