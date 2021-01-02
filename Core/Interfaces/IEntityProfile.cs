@@ -1,7 +1,5 @@
 using System.Linq;
-using System.Security;
 
-[assembly: SecurityRules(SecurityRuleSet.Level1, SkipVerificationInFullTrust = true)]
 namespace EfCoreRepository.Interfaces
 {
     public interface IEntityProfile<TSource> where TSource : class, IUntypedEntity
@@ -11,18 +9,12 @@ namespace EfCoreRepository.Interfaces
         /// </summary>
         /// <param name="entity"></param>
         /// <param name="dto"></param>
-        void Update(TSource entity, TSource dto)
-        {
-            // No change
-        }
+        void Update(TSource entity, TSource dto);
 
         /// <summary>
         /// Intercept the IQueryable to include
         /// </summary>
         /// <returns></returns>
-        IQueryable<TSource> Include<TQueryable>(TQueryable queryable) where TQueryable : IQueryable<TSource>
-        {
-            return queryable;
-        }
+        IQueryable<TSource> Include<TQueryable>(TQueryable queryable) where TQueryable : IQueryable<TSource>;
     }
 }

@@ -3,7 +3,8 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using ConsoleApp.Extensions;
-using ConsoleApp.Models;
+using Core.Tests;
+using Core.Tests.Models;
 using EfCoreRepository.Extensions;
 using EfCoreRepository.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +23,7 @@ namespace ConsoleApp
                 .Configure<LoggerFilterOptions>(cfg => cfg.MinLevel = LogLevel.Trace)
                 .AddDbContext<EntityDbContext>(x => x.UseInMemoryDatabase("test"))
                 .AddEfRepository<EntityDbContext>(options => options
-                    .Profiles(Assembly.GetExecutingAssembly()))
+                    .Profiles(Assembly.Load("Core.Tests")))
                 .BuildServiceProvider();
 
             var repository = serviceProvider.GetService<IEfRepository>();

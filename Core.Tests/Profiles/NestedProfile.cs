@@ -1,13 +1,16 @@
 using System.Linq;
-using System.Security;
-using ConsoleApp.Models;
+using Core.Tests.Models;
 using EfCoreRepository.Interfaces;
 
-[assembly: SecurityRules(SecurityRuleSet.Level1, SkipVerificationInFullTrust = true)]
-namespace ConsoleApp.Profiles
+namespace Core.Tests.Profiles
 {
     public class NestedProfile : IEntityProfile<Nested>
     {
+        public void Update(Nested entity, Nested dto)
+        {
+            // No change
+        }
+
         public IQueryable<Nested> Include<TQueryable>(TQueryable queryable) where TQueryable : IQueryable<Nested>
         {
             return queryable;

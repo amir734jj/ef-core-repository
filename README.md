@@ -74,13 +74,17 @@ Task<IEnumerable<TSource>> GetAll();
 
 Task<TSource> Get(id);
 
-Task<IEnumerable<TSource>> GetWhere(Expression<Func<TSource, bool>> expression);
+Task<IEnumerable<TSource>> Get(Expression<Func<TSource, bool>>);
 
 Task<TSource> Save(dto);
 
 Task<TSource> Delete(id);
 
+Task<TSource> Delete(Expression<Func<TSource, bool>>);
+
 Task<TSource> Update(id, dto);
+
+Task<TSource> Update(Expression<Func<TSource, bool>>, dto);
 
 // This is useful if you want to defer SaveChanges in session mode
 // Changes are not automatically saved back to DbContext in session mode

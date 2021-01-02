@@ -1,7 +1,7 @@
-using ConsoleApp.Models;
+using Core.Tests.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace ConsoleApp
+namespace Core.Tests
 {
     public sealed class EntityDbContext : DbContext
     {

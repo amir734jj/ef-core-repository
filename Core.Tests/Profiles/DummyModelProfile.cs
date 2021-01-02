@@ -1,9 +1,9 @@
 using System.Linq;
-using ConsoleApp.Models;
+using Core.Tests.Models;
 using EfCoreRepository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace ConsoleApp.Profiles
+namespace Core.Tests.Profiles
 {
     public class DummyModelProfile : IEntityProfile<DummyModel> 
     {

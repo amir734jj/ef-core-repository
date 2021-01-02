@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using EfCoreRepository.Interfaces;
 
-namespace ConsoleApp.Models
+namespace Core.Tests.Models
 {
     public class DummyModel : IEntity<int>
     {

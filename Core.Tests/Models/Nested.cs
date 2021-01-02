@@ -1,6 +1,6 @@
 using EfCoreRepository.Interfaces;
 
-namespace ConsoleApp.Models
+namespace Core.Tests.Models
 {
     public class Nested : IEntity<int>
     {

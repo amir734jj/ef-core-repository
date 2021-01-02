@@ -45,13 +45,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public async Task<TSource> Get<TId>(TId id) where TId : struct
         {
-            var parameter = Expression.Parameter(typeof(TSource));
-            
-            var body = Expression.Equal(Expression.PropertyOrField(parameter, "Id"), Expression.Constant(id));
-            
-            var expression = Expression.Lambda<Func<TSource, bool>>(body, parameter);
-            
-            return await _profile.Include(_dbSet).FirstOrDefaultAsync(expression);
+            return await _profile.Include(_dbSet).FirstOrDefaultAsync(LambdaFactory(id));
         }
 
         /// <summary>
@@ -59,9 +53,52 @@ namespace EfCoreRepository
         /// </summary>
         /// <param name="expression"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<TSource>> GetWhere(Expression<Func<TSource, bool>> expression)
+        public async Task<TSource> Get(Expression<Func<TSource, bool>> expression)
+        {
+            return await _profile.Include(_dbSet).FirstOrDefaultAsync(expression);
+        }
+
+        public async Task<IEnumerable<TSource>> GetAllWhere(Expression<Func<TSource, bool>> expression)
         {
             return await _profile.Include(_dbSet).Where(expression).ToListAsync();
+        }
+
+        public async Task<TSource> Update(Expression<Func<TSource, bool>> expression, TSource dto)
+        {
+            var entity = await Get(expression);
+
+            if (entity != null)
+            {
+                _profile.Update(entity, dto);
+
+                if (!_session)
+                {
+                    await _dbContext.SaveChangesAsync();
+                }
+                
+                return entity;
+            }
+
+            return null;
+        }
+
+        public async Task<TSource> Delete(Expression<Func<TSource, bool>> expression)
+        {
+            var entity = await Get(expression);
+
+            if (entity != null)
+            {
+                _dbSet.Remove(entity);
+                
+                if (!_session)
+                {
+                    await _dbContext.SaveChangesAsync();
+                }
+
+                return entity;
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -88,21 +125,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public virtual async Task<TSource> Delete<TId>(TId id) where TId: struct
         {
-            var entity = await Get(id);
-
-            if (entity != null)
-            {
-                _dbSet.Remove(entity);
-                
-                if (!_session)
-                {
-                    await _dbContext.SaveChangesAsync();
-                }
-
-                return entity;
-            }
-
-            return null;
+            return await Delete(LambdaFactory(id));
         }
 
         /// <summary>
@@ -113,21 +136,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public virtual async Task<TSource> Update<TId>(TId id, TSource dto) where TId: struct
         {
-            var entity = await Get(id);
-
-            if (entity != null)
-            {
-                _profile.Update(entity, dto);
-
-                if (!_session)
-                {
-                    await _dbContext.SaveChangesAsync();
-                }
-                
-                return entity;
-            }
-
-            return null;
+            return await Update(LambdaFactory(id), dto);
         }
 
         public void Dispose()
@@ -151,6 +160,17 @@ namespace EfCoreRepository
         public IBasicCrudSession<TSource> Session()
         {
             return new BasicCrud<TSource>(_profile, _dbContext, _outerSession, true);
+        }
+
+        private static Expression<Func<TSource, bool>> LambdaFactory<TId>(TId id) where TId: struct
+        {
+            var parameter = Expression.Parameter(typeof(TSource));
+            
+            var body = Expression.Equal(Expression.PropertyOrField(parameter, "Id"), Expression.Constant(id));
+            
+            var expression = Expression.Lambda<Func<TSource, bool>>(body, parameter);
+
+            return expression;
         }
     }
 }
