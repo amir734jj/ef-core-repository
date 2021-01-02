@@ -29,7 +29,7 @@ public class DummyModelProfile : IEntityProfile<DummyModel>
 {
     private readonly IEntityProfileAuxiliary _auxiliary;
 
-    // Optionally inject utility for list add/delete
+    // Optionally inject this utility for list add/delete
     public DummyModelProfile(IEntityProfileAuxiliary auxiliary)
     {
         _auxiliary = auxiliary;
