@@ -28,6 +28,54 @@ namespace Core.Tests
         }
         
         [Fact]
+        public async Task Test__Save()
+        {
+            // Arrange
+            var model = new DummyModel
+            {
+                Name = "Foo", Children = new List<Nested>
+                {
+                    new Nested()
+                }
+            };
+
+            // Act
+            var result = await _repository.For<DummyModel>().Save(model);
+            
+            // Assert
+            Assert.Equal(model, result);
+            Assert.Equal(model, await _repository.For<DummyModel>().Get(model.Id));
+        }
+        
+        [Fact]
+        public async Task Test__SaveMany()
+        {
+            // Arrange
+            var model1 = new DummyModel
+            {
+                Name = "Foo", Children = new List<Nested>
+                {
+                    new Nested()
+                }
+            };
+            
+            var model2 = new DummyModel
+            {
+                Name = "Foo", Children = new List<Nested>
+                {
+                    new Nested()
+                }
+            };
+
+            // Act
+            var result = await _repository.For<DummyModel>().Save(model1, model2);
+            
+            // Assert
+            Assert.Equal(new List<DummyModel> { model1, model2}, result);
+            Assert.Equal(new List<DummyModel> { model1, model2},  await _repository.For<DummyModel>().GetAll(model1.Id, model2.Id));
+        }
+        
+        [Fact]
         public async Task Test__Get()
         {
             // Arrange
@@ -76,14 +124,55 @@ namespace Core.Tests
                     new Nested()
                 }
             };
-
-            // Act
             await _repository.For<DummyModel>().Save(model);
             
+            // Act
+            var result = await _repository.For<DummyModel>().GetAll();
+            
             // Assert
-            Assert.Equal(new List<DummyModel> { model }, await _repository.For<DummyModel>().GetAll());
+            Assert.Equal(new List<DummyModel> { model }, result);
         }
         
+        [Fact]
+        public async Task Test__GetAllIds()
+        {
+            // Arrange
+            var model = new DummyModel
+            {
+                Name = "Foo", Children = new List<Nested>
+                {
+                    new Nested()
+                }
+            };
+            await _repository.For<DummyModel>().Save(model);
+            
+            // Act
+            var result = await _repository.For<DummyModel>().GetAll(model.Id);
+            
+            // Assert
+            Assert.Equal(new List<DummyModel> { model }, result);
+        }
+        
+        [Fact]
+        public async Task Test__GetAllWhere()
+        {
+            // Arrange
+            var model = new DummyModel
+            {
+                Name = "Foo", Children = new List<Nested>
+                {
+                    new Nested()
+                }
+            };
+            await _repository.For<DummyModel>().Save(model);
+            
+            // Act
+            var result = await _repository.For<DummyModel>().GetAll(x => x.Id == model.Id);
+            
+            // Assert
+            Assert.Equal(new List<DummyModel> { model}, result);
+        }
+
         [Fact]
         public async Task Test__Update()
         {

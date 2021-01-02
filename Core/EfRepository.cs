@@ -16,7 +16,7 @@ namespace EfCoreRepository
 
         private readonly IList<EntityProfileAttributed> _profiles;
 
-        public EfRepository(IEnumerable<EntityProfileAttributed> profiles, DbContext dbContext, bool session = false)
+        public EfRepository(IEnumerable<EntityProfileAttributed> profiles, DbContext dbContext, bool session)
         {
             _dbContext = dbContext;
             _session = session;
@@ -37,7 +37,7 @@ namespace EfCoreRepository
                 throw new Exception($"Failed to find profile for {typeof(TSource).Name}>");
             }
 
-            return new BasicCrud<TSource>((IEntityProfile<TSource>) profile.Profile, _dbContext, _session, false);
+            return new BasicCrud<TSource>((IEntityProfile<TSource>) profile.Profile, _dbContext, _session);
         }
 
         IBasicCrud<TSource> IEfRepositorySession.For<TSource>()

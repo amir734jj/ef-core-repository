@@ -58,7 +58,7 @@ namespace EfCoreRepository
                     SourceType = genericType.GetGenericArguments().First(),
                     Profile = ActivatorUtilities.CreateInstance(serviceProvider, sourceType)
                 };
-            }), serviceProvider.GetService<TDbContext>())));
+            }), serviceProvider.GetService<TDbContext>(), false)));
         }
     }
 }

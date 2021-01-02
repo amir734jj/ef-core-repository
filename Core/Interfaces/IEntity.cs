@@ -12,17 +12,10 @@ namespace EfCoreRepository.Interfaces
         {
             return (TIdU) Convert.ChangeType(Id, typeof(TIdU));
         }
-
-        Type IUntypedEntity.GetIdType()
-        {
-            return typeof(TId);
-        }
     }
 
     public interface IUntypedEntity
     {
         TId GetId<TId>() where TId : struct;
-
-        Type GetIdType();
     }
 }
