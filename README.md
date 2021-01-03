@@ -74,31 +74,31 @@ IBasicCrud<DummyModel> = repo.For<DummyModel>();
 Task<IEnumerable<TSource>> GetAll();
 
 // Get all entities given an array of Ids
-Task<IEnumerable<TSource>> GetAll<TId>(param TId[] ids);
+Task<IEnumerable<TSource>> GetAll<TId>(param TId[]);
 
 // Get all entities given a filter expression
 Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, bool>>);
 
 // Get single entity by Id
-Task<TSource> Get(id);
+Task<TSource> Get<TId>(TId);
 
 // Get single entity given a filter expression
 Task<TSource> Get(Expression<Func<TSource, bool>>);
 
 // Save entity
-Task<TSource> Save(dto);
+Task<TSource> Save(TSource);
 
 // Save multiple entities
-Task<IEnumerable<TSource>> Save(param TSource[] dtos);
+Task<IEnumerable<TSource>> Save(param TSource[]);
 
 // Update entity by Id
-Task<TSource> Update(id, dto);
+Task<TSource> Update<TId>(TId, TSource);
 
 // Update entity by filter expression
-Task<TSource> Update(Expression<Func<TSource, bool>>, dto);
+Task<TSource> Update(Expression<Func<TSource, bool>>, TSource);
 
 // Delete entity by Id
-Task<TSource> Delete(id);
+Task<TSource> Delete<TId>(TId);
 
 // Delete entity given a filter expression
 Task<TSource> Delete(Expression<Func<TSource, bool>>);
