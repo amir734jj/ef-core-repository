@@ -110,4 +110,4 @@ IBasicCrud<TSource, TId> Session();
 
 Notes:
 
-- "Id" has a constraint of `: struct`, which means it accepts all primitive types, `GUID` and `String`.
+- "Id" has a type constraint of `: struct`, which means it accepts all primitive types including `GUID` and `String`.
