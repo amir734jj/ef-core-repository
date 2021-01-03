@@ -70,29 +70,44 @@ IBasicCrud<DummyModel> = repo.For<DummyModel>();
 
 - Available methods in `IBasicCrud` or `IBasicCrudType`
 ```c#
+// Get all entities without any filter
 Task<IEnumerable<TSource>> GetAll();
 
+// Get all entities given an array of Ids
 Task<IEnumerable<TSource>> GetAll<TId>(param TId[] ids);
 
+// Get all entities given a filter expression
 Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, bool>>);
 
+// Get single entity by Id
 Task<TSource> Get(id);
 
+// Get single entity given a filter expression
 Task<TSource> Get(Expression<Func<TSource, bool>>);
 
+// Save entity
 Task<TSource> Save(dto);
 
+// Save multiple entities
 Task<IEnumerable<TSource>> Save(param TSource[] dtos);
 
+// Update entity by Id
 Task<TSource> Update(id, dto);
 
+// Update entity by filter expression
 Task<TSource> Update(Expression<Func<TSource, bool>>, dto);
 
+// Delete entity by Id
 Task<TSource> Delete(id);
 
+// Delete entity given a filter expression
 Task<TSource> Delete(Expression<Func<TSource, bool>>);
 
 // This is useful if you want to defer SaveChanges in session mode
 // Changes are not automatically saved back to DbContext in session mode
 IBasicCrud<TSource, TId> Session();
 ```
+
+Notes:
+
+- "Id" should by a  
