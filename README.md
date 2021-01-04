@@ -111,3 +111,4 @@ IBasicCrud<TSource, TId> Session();
 Notes:
 
 - "Id" has a type constraint of `: struct`, which means it accepts all primitive types including `GUID` and `String`.
+- Including all associated entities will lead to "god object" which is *anti-pattern*. I recommend using [this library](https://github.com/VahidN/EFCoreSecondLevelCacheInterceptor) as L2 cache
