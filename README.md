@@ -107,7 +107,7 @@ Task<TSource> Delete(Expression<Func<TSource, bool>>);
 
 // This is useful if you want to defer SaveChanges in session mode
 // Changes are not automatically saved back to DbContext in session mode
-IBasicCrud<TSource, TId> Session();
+IBasicCrud<TSource> Session();
 ```
 
 Notes:
