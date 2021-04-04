@@ -1,8 +1,6 @@
-using System;
-
 namespace EfCoreRepository.Interfaces
 {
-    public interface IEfRepositorySession : IAsyncDisposable, IDisposable
+    public interface IEfRepositorySession
     {
         IBasicCrud<TSource> For<TSource>() where TSource : class, IUntypedEntity;
     }

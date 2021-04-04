@@ -258,6 +258,27 @@ namespace Core.Tests
             // Assert
             Assert.Empty(await _repository.For<DummyModel>().GetAll());
         }
+        
+        [Fact]
+        public async Task Test__LightSession()
+        {
+            // Arrange
+            var model = new DummyModel
+            {
+                Name = "Foo", Children = new List<Nested>
+                {
+                    new Nested()
+                }
+            };
+
+            await _repository.For<DummyModel>().Save(model);
+            
+            // Act
+            var entity = await _repository.For<DummyModel>().Light().Get(x => x.Id == model.Id);
+            
+            // Assert
+            Assert.Null(entity.Children);
+        }
 
         public Task InitializeAsync()
         {
@@ -266,7 +287,7 @@ namespace Core.Tests
 
         public async Task DisposeAsync()
         {
-            await using var repo = _repository.For<DummyModel>().Session();
+            await using var repo = _repository.For<DummyModel>().Delayed();
             
             var models = await repo.GetAll();
             

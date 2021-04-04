@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 using EfCoreRepository.Interfaces;
+using EfCoreRepository.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace EfCoreRepository
@@ -16,16 +17,26 @@ namespace EfCoreRepository
 
         private readonly DbContext _dbContext;
 
-        private readonly bool _session;
+        private readonly SessionType _sessionType;
 
         private readonly DbSet<TSource> _dbSet;
 
-        public BasicCrud(IEntityProfile<TSource> profile, DbContext dbContext, bool session)
+        public BasicCrud(IEntityProfile<TSource> profile, DbContext dbContext, SessionType sessionType)
         {
             _profile = profile;
             _dbContext = dbContext;
-            _session = session;
+            _sessionType = sessionType;
             _dbSet = dbContext.Set<TSource>();
+        }
+
+        private IQueryable<TSource> GetQueryable()
+        {
+            if (_sessionType.HasFlag(SessionType.LightWeight))
+            {
+                return _dbSet;
+            }
+
+            return _profile.Include(_dbSet);
         }
 
         /// <summary>
@@ -34,7 +45,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public virtual async Task<IEnumerable<TSource>> GetAll()
         {
-            return await _profile.Include(_dbSet).ToListAsync();
+            return await GetQueryable().ToListAsync();
         }
 
         /// <summary>
@@ -44,7 +55,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public async Task<TSource> Get<TId>(TId id) where TId : struct
         {
-            return await _profile.Include(_dbSet).FirstOrDefaultAsync(LambdaFactory(id));
+            return await GetQueryable().FirstOrDefaultAsync(LambdaFactory(id));
         }
 
         /// <summary>
@@ -54,7 +65,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public async Task<TSource> Get(Expression<Func<TSource, bool>> expression)
         {
-            return await _profile.Include(_dbSet).FirstOrDefaultAsync(expression);
+            return await GetQueryable().FirstOrDefaultAsync(expression);
         }
 
         /// <summary>
@@ -71,7 +82,7 @@ namespace EfCoreRepository
             {
                 _profile.Update(entity, dto);
 
-                if (!_session)
+                if (!_sessionType.HasFlag(SessionType.Delayed))
                 {
                     await _dbContext.SaveChangesAsync();
                 }
@@ -95,7 +106,7 @@ namespace EfCoreRepository
             {
                 _dbSet.Remove(entity);
 
-                if (!_session)
+                if (!_sessionType.HasFlag(SessionType.Delayed))
                 {
                     await _dbContext.SaveChangesAsync();
                 }
@@ -113,7 +124,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public async Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, bool>> filter)
         {
-            return await _profile.Include(_dbSet).Where(filter).ToListAsync();
+            return await GetQueryable().Where(filter).ToListAsync();
         }
 
         /// <summary>
@@ -124,7 +135,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public async Task<IEnumerable<TSource>> GetAll<TId>(params TId[] ids) where TId : struct
         {
-            return await _profile.Include(_dbSet).Where(LambdaFactory(ids)).ToListAsync();
+            return await GetQueryable().Where(LambdaFactory(ids)).ToListAsync();
         }
 
         /// <summary>
@@ -136,7 +147,7 @@ namespace EfCoreRepository
         {
             await _dbSet.AddRangeAsync(instances);
 
-            if (!_session)
+            if (!_sessionType.HasFlag(SessionType.Delayed))
             {
                 await _dbContext.SaveChangesAsync();
             }
@@ -153,7 +164,7 @@ namespace EfCoreRepository
         {
             await _dbSet.AddAsync(instance);
 
-            if (!_session)
+            if (!_sessionType.HasFlag(SessionType.Delayed))
             {
                 await _dbContext.SaveChangesAsync();
             }
@@ -187,7 +198,7 @@ namespace EfCoreRepository
         /// </summary>
         public void Dispose()
         {
-            if (_session)
+            if (_sessionType.HasFlag(SessionType.Delayed))
             {
                 _dbContext.SaveChanges();
             }
@@ -199,7 +210,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public ValueTask DisposeAsync()
         {
-            if (_session)
+            if (_sessionType.HasFlag(SessionType.Delayed))
             {
                 return new ValueTask(_dbContext.SaveChangesAsync());
             }
@@ -211,9 +222,14 @@ namespace EfCoreRepository
         /// Activates session mode which means SaveChanges will not get called unless repo is disposed
         /// </summary>
         /// <returns></returns>
-        public IBasicCrudSession<TSource> Session()
+        public IBasicCrudSession<TSource> Delayed()
         {
-            return new BasicCrud<TSource>(_profile, _dbContext, true);
+            return new BasicCrud<TSource>(_profile, _dbContext, _sessionType | SessionType.Delayed);
+        }
+
+        public IBasicCrudSession<TSource> Light()
+        {
+            return new BasicCrud<TSource>(_profile, _dbContext, _sessionType | SessionType.LightWeight);
         }
 
         /// <summary>
