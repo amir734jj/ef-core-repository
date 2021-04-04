@@ -5,6 +5,8 @@ The reason I implemented this is because I found myself re-writing basic CRUD fu
 - use `.include(...)` to include eager load associated entities
 - update (add/delete/update) children properties by Id
 
+Using repository pattern with entity framework enforces a consistent convension and that is what this library is aiming towards.
+
 [![NuGet Status](https://img.shields.io/nuget/v/SimpleEfCoreRepository.svg)](https://www.nuget.org/packages/SimpleEfCoreRepository/)
 [![Build Status](https://travis-ci.com/amir734jj/ef-core-repository.svg?branch=master)](https://travis-ci.com/amir734jj/ef-core-repository)
 
@@ -105,11 +107,7 @@ Task<TSource> Delete(Expression<Func<TSource, bool>>);
 
 // This is useful if you want to defer SaveChanges in session mode
 // Changes are not automatically saved back to DbContext in session mode
-IBasicCrud<TSource, TId> Delayed();
-
-// This is useful if you want don't want to include all related entities
-// or turn entities into a "god" object
-IBasicCrud<TSource, TId> Light();
+IBasicCrud<TSource, TId> Session();
 ```
 
 Notes:
