@@ -1,8 +1,14 @@
+using System;
 using System.Linq;
 
 namespace EfCoreRepository.Interfaces
 {
-    public interface IEntityProfile<TSource> where TSource : class, IUntypedEntity
+    public interface IEntityProfile
+    {
+        public Type GetGenericType { get; }
+    }
+    
+    public interface IEntityProfile<TSource> : IEntityProfile where TSource : class, IUntypedEntity
     {
         /// <summary>
         /// Updated entity given dto
@@ -16,5 +22,7 @@ namespace EfCoreRepository.Interfaces
         /// </summary>
         /// <returns></returns>
         IQueryable<TSource> Include<TQueryable>(TQueryable queryable) where TQueryable : IQueryable<TSource>;
+
+        Type IEntityProfile.GetGenericType => typeof(TSource);
     }
 }

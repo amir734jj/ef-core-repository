@@ -5,5 +5,7 @@ namespace Core.Tests.Models
     public class Nested : IEntity<int>
     {
         public int Id { get; set; }
+        
+        public virtual DummyModel ParentRef { get; set; }
     }
 }

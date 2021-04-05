@@ -6,6 +6,8 @@ namespace Core.Tests
     public sealed class EntityDbContext : DbContext
     {
         public DbSet<DummyModel> DummyModels { get; set; }
+        
+        public DbSet<Nested> Nesteds { get; set; }
 
         public EntityDbContext(DbContextOptions<EntityDbContext> options): base(options)
         {

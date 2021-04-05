@@ -9,6 +9,6 @@ namespace Core.Tests.Models
         
         public string Name { get; set; }
         
-        public List<Nested> Children { get; set; }
+        public virtual List<Nested> Children { get; set; }
     }
 }

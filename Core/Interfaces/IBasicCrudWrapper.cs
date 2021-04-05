@@ -1,6 +1,6 @@
 namespace EfCoreRepository.Interfaces
 {
-    public interface IBasicCrudWrapper<TSource> : IBasicCrud<TSource> where TSource : class, IUntypedEntity
+    public interface IBasicCrudWrapper<TSource> : IBasicCrud<TSource> where TSource : class
     {
         /// <summary>
         /// For complex and multi-action where we want to defer the save until the dispose takes place

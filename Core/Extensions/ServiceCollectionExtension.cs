@@ -9,11 +9,11 @@ namespace EfCoreRepository.Extensions
     {
         public static IServiceCollection AddEfRepository<TDbContext>(this IServiceCollection collection, Action<IEfRepositoryFactory> options) where TDbContext : DbContext
         {
-            var factory = new EfRepositoryFactory(collection);
+            var factory = new EfRepositoryFactory<TDbContext>(collection);
 
             options(factory);
             
-            factory.Build<TDbContext>();
+            factory.Build();
             
             return collection;
         }
