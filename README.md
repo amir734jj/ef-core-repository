@@ -60,7 +60,7 @@ public class DummyModelProfile : IEntityProfile<DummyModel>
 ```c#
 var serviceProvider = services
     .AddEfRepository<EntityDbContext>(options => options
-        .Profiles(Assembly.GetExecutingAssembly()));
+        .Profile(Assembly.GetExecutingAssembly()));
 ```
 
 - Use `IBasicCrud`
