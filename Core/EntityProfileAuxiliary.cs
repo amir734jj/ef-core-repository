@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using EfCoreRepository.Interfaces;
+using static EfCoreRepository.EntityUtility;
 
 namespace EfCoreRepository
 {
@@ -31,11 +32,9 @@ namespace EfCoreRepository
             return entity;
         }
 
-        public List<TProperty> ModifyList<TProperty, TId>(List<TProperty> entity, List<TProperty> dto)
-            where TProperty : IUntypedEntity
-            where TId: struct
+        public List<TProperty> ModifyList<TProperty, TId>(List<TProperty> entity, List<TProperty> dto) where TId: struct where TProperty : class
         {
-            return ModifyList(entity, dto, x => x.GetId<TId>());
+            return ModifyList(entity, dto, IdAccessExpression<TProperty, TId>().Compile());
         }
     }
 }

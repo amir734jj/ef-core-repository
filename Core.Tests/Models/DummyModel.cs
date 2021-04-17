@@ -1,10 +1,11 @@
 using System.Collections.Generic;
-using EfCoreRepository.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace Core.Tests.Models
 {
-    public class DummyModel : IEntity<int>
+    public class DummyModel
     {
+        [Key]
         public int Id { get; set; }
         
         public string Name { get; set; }

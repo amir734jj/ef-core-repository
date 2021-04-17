@@ -6,12 +6,12 @@ namespace EfCoreRepository.Interfaces
         /// For complex and multi-action where we want to defer the save until the dispose takes place
         /// </summary>
         /// <returns></returns>
-        IBasicCrudSession<TSource> Delayed();
+        IBasicCrudWrapper<TSource> Delayed();
         
         /// <summary>
         /// Avoids eager loading altogether for a lightweight session
         /// </summary>
         /// <returns></returns>
-        IBasicCrudSession<TSource> Light();
+        IBasicCrudWrapper<TSource> Light();
     }
 }

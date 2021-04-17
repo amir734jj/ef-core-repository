@@ -1,0 +1,98 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+
+namespace EfCoreRepository
+{
+    internal static class EntityUtility
+    {
+        private static readonly IDictionary<Type, string> IdLookup = new Dictionary<Type, string>();
+
+        /// <summary>
+        /// Finds ID property of a class
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public static string FindIdProperty<T>() where T : class
+        {
+            var type = typeof(T);
+
+            if (IdLookup.ContainsKey(type))
+            {
+                return IdLookup[type];
+            }
+            
+            var keyProperty = type
+                .GetProperties(BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty | BindingFlags.Instance)
+                .FirstOrDefault(x => x.GetCustomAttribute<KeyAttribute>() != null);
+            
+            if (keyProperty == null)
+            {
+                throw new Exception("Missing KEY attribute on the class declaration");
+            }
+            
+            IdLookup[type] = keyProperty.Name;
+            
+            return keyProperty.Name;
+        }
+
+        /// <summary>
+        /// Creates ID access expression
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TId"></typeparam>
+        /// <returns></returns>
+        public static Expression<Func<T, TId>> IdAccessExpression<T, TId>() where T : class
+        {
+            var source = Expression.Parameter(typeof(T));
+
+            return Expression.Lambda<Func<T, TId>>(Expression.PropertyOrField(source, FindIdProperty<T>()), source);
+        }
+
+        /// <summary>
+        /// Creates a lambda expression of x => x.Id == id
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <typeparam name="TId"></typeparam>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static Expression<Func<T, bool>> FilterExpression<T, TId>(params TId[] ids)
+            where T: class
+            where TId : struct
+        {
+            var parameter = Expression.Parameter(typeof(T));
+
+            Expression body;
+
+            switch (ids.Length)
+            {
+                case 0:
+                    body = Expression.Constant(true);
+                    break;
+                case 1:
+                    body = Expression.Equal(Expression.PropertyOrField(parameter, FindIdProperty<T>()),
+                        Expression.Constant(ids.First()));
+                    break;
+                default:
+                    var method = typeof(Enumerable)
+                        .GetRuntimeMethods()
+                        .Single(m => m.Name == nameof(Enumerable.Contains) && m.GetParameters().Length == 2);
+
+                    var containsMethod = method.MakeGenericMethod(typeof(TId));
+                    var containsInvoke = Expression
+                        .Call(containsMethod, Expression.Constant(ids), Expression.PropertyOrField(parameter, FindIdProperty<T>()));
+
+                    body = containsInvoke;
+                    break;
+            }
+
+            var expression = Expression.Lambda<Func<T, bool>>(body, parameter);
+
+            return expression;
+        }
+    }
+}

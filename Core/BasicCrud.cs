@@ -2,16 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Threading.Tasks;
 using EfCoreRepository.Interfaces;
 using EfCoreRepository.Models;
 using Microsoft.EntityFrameworkCore;
+using static EfCoreRepository.EntityUtility;
 
 namespace EfCoreRepository
 {
-    internal class BasicCrud<TSource> : IBasicCrudWrapper<TSource>, IBasicCrudSession<TSource>
-        where TSource : class, IUntypedEntity
+    internal class BasicCrud<TSource> : IBasicCrudWrapper<TSource> where TSource : class
     {
         private readonly IEntityProfile<TSource> _profile;
 
@@ -55,7 +54,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public async Task<TSource> Get<TId>(TId id) where TId : struct
         {
-            return await GetQueryable().FirstOrDefaultAsync(LambdaFactory(id));
+            return await GetQueryable().FirstOrDefaultAsync(FilterExpression<TSource, TId>(id));
         }
 
         /// <summary>
@@ -135,7 +134,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public async Task<IEnumerable<TSource>> GetAll<TId>(params TId[] ids) where TId : struct
         {
-            return await GetQueryable().Where(LambdaFactory(ids)).ToListAsync();
+            return await GetQueryable().Where(FilterExpression<TSource, TId>(ids)).ToListAsync();
         }
 
         /// <summary>
@@ -179,7 +178,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public virtual async Task<TSource> Delete<TId>(TId id) where TId : struct
         {
-            return await Delete(LambdaFactory(id));
+            return await Delete(FilterExpression<TSource, TId>(id));
         }
 
         /// <summary>
@@ -190,7 +189,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public virtual async Task<TSource> Update<TId>(TId id, TSource dto) where TId : struct
         {
-            return await Update(LambdaFactory(id), dto);
+            return await Update(FilterExpression<TSource, TId>(id), dto);
         }
 
         /// <summary>
@@ -217,60 +216,15 @@ namespace EfCoreRepository
 
             return new ValueTask(Task.CompletedTask);
         }
-
-        /// <summary>
-        /// Activates session mode which means SaveChanges will not get called unless repo is disposed
-        /// </summary>
-        /// <returns></returns>
-        public IBasicCrudSession<TSource> Delayed()
+        
+        public IBasicCrudWrapper<TSource> Delayed()
         {
-            return new BasicCrud<TSource>(_profile, _dbContext, _sessionType | SessionType.Delayed);
+            return new BasicCrud<TSource>(_profile, _dbContext ,_sessionType | SessionType.Delayed);
         }
 
-        public IBasicCrudSession<TSource> Light()
+        public IBasicCrudWrapper<TSource> Light()
         {
             return new BasicCrud<TSource>(_profile, _dbContext, _sessionType | SessionType.LightWeight);
-        }
-
-        /// <summary>
-        /// Creates a lambda expression of x => x.Id == id
-        /// </summary>
-        /// <param name="ids"></param>
-        /// <typeparam name="TId"></typeparam>
-        /// <returns></returns>
-        private static Expression<Func<TSource, bool>> LambdaFactory<TId>(params TId[] ids) where TId : struct
-        {
-            var parameter = Expression.Parameter(typeof(TSource));
-
-            Expression body;
-
-            switch (ids.Length)
-            {
-                case 0:
-                    body = Expression.Constant(true);
-                    break;
-                case 1:
-                    body = Expression.Equal(Expression.PropertyOrField(parameter, "Id"),
-                        Expression.Constant(ids.First()));
-                    break;
-                default:
-                {
-                    var method = typeof(Enumerable)
-                        .GetRuntimeMethods()
-                        .Single(m => m.Name == nameof(Enumerable.Contains) && m.GetParameters().Length == 2);
-
-                    var containsMethod = method.MakeGenericMethod(typeof(TId));
-                    var containsInvoke = Expression
-                        .Call(containsMethod, Expression.Constant(ids), Expression.PropertyOrField(parameter, "Id"));
-
-                    body = containsInvoke;
-                    break;
-                }
-            }
-
-            var expression = Expression.Lambda<Func<TSource, bool>>(body, parameter);
-
-            return expression;
         }
     }
 }

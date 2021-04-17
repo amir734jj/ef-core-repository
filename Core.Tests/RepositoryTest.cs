@@ -22,7 +22,7 @@ namespace Core.Tests
                 .AddDbContext<EntityDbContext>(x => x
                     .UseInMemoryDatabase("database"))
                 .AddEfRepository<EntityDbContext>(options => options
-                    .Profiles(Assembly.GetExecutingAssembly()))
+                    .Profile(Assembly.GetExecutingAssembly()))
                 .BuildServiceProvider();
 
             _repository = serviceProvider.GetService<IEfRepository>();

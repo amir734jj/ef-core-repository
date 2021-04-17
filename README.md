@@ -12,10 +12,11 @@ Using repository pattern with entity framework enforces a consistent convension 
 
 #### Basic setup
 
-- Entity should implement `IEntity<TId>`
+- Entity should have `[Key]` attribute
 ```c#
-public class DummyModel : IEntity<int>
+public class DummyModel
 {
+    [Key]
     public int Id { get; set; }
     
     public string Name { get; set; }

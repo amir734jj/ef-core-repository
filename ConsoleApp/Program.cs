@@ -10,6 +10,7 @@ using EfCoreRepository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Shouldly;
 
 namespace ConsoleApp
@@ -21,9 +22,10 @@ namespace ConsoleApp
             var serviceProvider = new ServiceCollection()
                 .AddLogging(cfg => cfg.AddConsole())
                 .Configure<LoggerFilterOptions>(cfg => cfg.MinLevel = LogLevel.Trace)
+                .Configure<JsonSerializerSettings>(x => x.ReferenceLoopHandling = ReferenceLoopHandling.Ignore)
                 .AddDbContext<EntityDbContext>(x => x.UseInMemoryDatabase("test"))
                 .AddEfRepository<EntityDbContext>(options => options
-                    .Profiles(Assembly.Load("Core.Tests")))
+                    .Profile(Assembly.Load("Core.Tests")))
                 .BuildServiceProvider();
 
             var repository = serviceProvider.GetService<IEfRepository>();

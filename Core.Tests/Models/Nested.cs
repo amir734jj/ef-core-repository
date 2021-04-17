@@ -1,9 +1,10 @@
-using EfCoreRepository.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace Core.Tests.Models
 {
-    public class Nested : IEntity<int>
+    public class Nested
     {
+        [Key]
         public int Id { get; set; }
         
         public virtual DummyModel ParentRef { get; set; }

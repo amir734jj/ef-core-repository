@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using EfCoreRepository.Interfaces;
@@ -14,7 +13,7 @@ namespace EfCoreRepository
     {
         private readonly IServiceCollection _serviceCollection;
 
-        private List<(Type SourceType, Type GenericType)> _profiles;
+        private readonly List<(Type SourceType, Type GenericType)> _profiles;
 
         public EfRepositoryFactory(IServiceCollection serviceCollection)
         {
@@ -22,37 +21,41 @@ namespace EfCoreRepository
             _profiles = new List<(Type SourceType, Type GenericType)>();
         }
         
-        public IEfRepositoryFactory Profiles(params Assembly[] assemblies)
+        public IEfRepositoryFactory Profile(params Assembly[] assemblies)
         {
-            _profiles = _profiles.Concat(assemblies
+            _profiles.AddRange(assemblies
                 .SelectMany(assembly => assembly.GetExportedTypes())
                 .Select(type => (
                     SourceType: type,
-                    GenericType: type.GetInterfaces().FirstOrDefault(i =>
-                        i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEntityProfile<>))
-                ))
-                .Where(x => x.GenericType != null)).ToList();
+                    GenericType: GetProfileGenericType(type)
+                )));
 
             return this;
         }
 
-        public IEfRepositoryFactory Profiles<T>(params T[] profiles) where T : class, IEntityProfile
+        public IEfRepositoryFactory Profile<T>(params T[] profiles) where T : class, IEntityProfile
         {
-            _profiles = _profiles.Concat(profiles.Select(x => (
-                SourceType: x.GetType(),
-                GenericType: x.GetType().GetInterfaces().FirstOrDefault(i =>
-                    i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEntityProfile<>))
-            ))).ToList();
+            _profiles.AddRange(profiles.Select(x => x.GetType()).Select(t => (
+                SourceType: t,
+                GenericType: GetProfileGenericType(t))));
+
+            return this;
+        }
+
+        public IEfRepositoryFactory Profile<T>() where T : class, IEntityProfile
+        {
+            var t = typeof(T);
+            _profiles.Add((t, GetProfileGenericType(t)));
 
             return this;
         }
 
         public void Build()
         {
-            AddEfRepository<TDbContext>(_profiles);
+            AddEfRepository(_profiles);
         }
 
-        private void AddEfRepository<TDbContext>(IReadOnlyCollection<(Type SourceType, Type GenericType)> profiles) where TDbContext: DbContext
+        private void AddEfRepository(IReadOnlyCollection<(Type SourceType, Type GenericType)> profiles)
         {
             // DbContext is registered by default as scoped
             // https://docs.microsoft.com/en-us/ef/core/miscellaneous/configuring-dbcontext#implicitly-sharing-dbcontext-instances-across-multiple-threads-via-dependency-injection
@@ -72,7 +75,13 @@ namespace EfCoreRepository
                     SourceType = genericType.GetGenericArguments().First(),
                     Profile = ActivatorUtilities.CreateInstance(serviceProvider, sourceType)
                 };
-            }), serviceProvider.GetService<TDbContext>())));
+            }).ToList(), serviceProvider.GetService<TDbContext>())));
+        }
+
+        private static Type GetProfileGenericType(Type t)
+        {
+            return t.GetInterfaces().FirstOrDefault(i =>
+                i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEntityProfile<>));
         }
     }
 }

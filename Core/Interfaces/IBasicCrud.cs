@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace EfCoreRepository.Interfaces
 {
-    public interface IBasicCrud<TSource> where TSource : class
+    public interface IBasicCrud<TSource> : IDisposable, IAsyncDisposable where TSource : class
     {
         #region Basics
 
