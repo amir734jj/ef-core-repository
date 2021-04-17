@@ -17,7 +17,7 @@ namespace Core.Tests.Profiles
         public void Update(DummyModel entity, DummyModel dto)
         {
             entity.Name = dto.Name;
-            entity.Children = _auxiliary.ModifyList<Nested, int>(entity.Children, dto.Children);
+            entity.Children = _auxiliary.ModifyList<Nested, int>(entity.Children, dto.Children).ToList();
         }
 
         public IQueryable<DummyModel> Include<TQueryable>(TQueryable queryable) where TQueryable : IQueryable<DummyModel>
