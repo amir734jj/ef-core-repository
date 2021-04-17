@@ -4,10 +4,14 @@ namespace EfCoreRepository.Interfaces
 {
     public interface IEfRepositoryFactory
     {
-        IEfRepositoryFactory Profile(params Assembly[] assemblies);
+        public IEfRepositoryFactory Profile(params Assembly[] assemblies);
 
-        IEfRepositoryFactory Profile<T>(params T[] profiles) where T : class, IEntityProfile;
+        public IEfRepositoryFactory Profile<TProfile, TEntity>(TProfile profile)
+            where TProfile : class, IEntityProfile<TEntity>
+            where TEntity : class;
 
-        IEfRepositoryFactory Profile<T>() where T : class, IEntityProfile;
+        public IEfRepositoryFactory Profile<TProfile, TEntity>()
+            where TProfile : class, IEntityProfile<TEntity>
+            where TEntity : class;
     }
 }

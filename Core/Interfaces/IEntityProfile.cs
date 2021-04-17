@@ -1,13 +1,8 @@
-using System;
 using System.Linq;
 
 namespace EfCoreRepository.Interfaces
 {
-    public interface IEntityProfile
-    {
-    }
-    
-    public interface IEntityProfile<TSource> : IEntityProfile where TSource : class
+    public interface IEntityProfile<TSource> where TSource : class
     {
         /// <summary>
         /// Updated entity given dto

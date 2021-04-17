@@ -23,8 +23,11 @@ namespace EfCoreRepository
         
         public IEfRepositoryFactory Profile(params Assembly[] assemblies)
         {
+            var profileType = typeof(IEntityProfile<>);
+
             _profiles.AddRange(assemblies
                 .SelectMany(assembly => assembly.GetExportedTypes())
+                .Where(x => x.IsClass && x.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == profileType))
                 .Select(type => (
                     SourceType: type,
                     GenericType: GetProfileGenericType(type)
@@ -33,18 +36,22 @@ namespace EfCoreRepository
             return this;
         }
 
-        public IEfRepositoryFactory Profile<T>(params T[] profiles) where T : class, IEntityProfile
+        public IEfRepositoryFactory Profile<TProfile, TEntity>(TProfile profile)
+            where TProfile : class, IEntityProfile<TEntity>
+            where TEntity : class
         {
-            _profiles.AddRange(profiles.Select(x => x.GetType()).Select(t => (
-                SourceType: t,
-                GenericType: GetProfileGenericType(t))));
+            var t = profile.GetType();
+
+            _profiles.Add((t, GetProfileGenericType(t)));
 
             return this;
         }
 
-        public IEfRepositoryFactory Profile<T>() where T : class, IEntityProfile
+        public IEfRepositoryFactory Profile<TProfile, TEntity>()
+            where TProfile : class, IEntityProfile<TEntity>
+            where TEntity : class
         {
-            var t = typeof(T);
+            var t = typeof(TProfile);
             _profiles.Add((t, GetProfileGenericType(t)));
 
             return this;
