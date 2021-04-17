@@ -8,7 +8,7 @@ namespace EfCoreRepository
 {
     internal class EntityProfileAuxiliary : IEntityProfileAuxiliary
     {
-        public List<TProperty> ModifyList<TProperty, TId>(List<TProperty> entity, List<TProperty> dto, Func<TProperty, TId> idSelector)
+        public IList<TProperty> ModifyList<TProperty, TId>(IList<TProperty> entity, IList<TProperty> dto, Func<TProperty, TId> idSelector)
         {
             entity ??= new List<TProperty>();
             dto ??= new List<TProperty>();
@@ -32,7 +32,7 @@ namespace EfCoreRepository
             return entity;
         }
 
-        public List<TProperty> ModifyList<TProperty, TId>(List<TProperty> entity, List<TProperty> dto) where TId: struct where TProperty : class
+        public IList<TProperty> ModifyList<TProperty, TId>(IList<TProperty> entity, IList<TProperty> dto) where TId: struct where TProperty : class
         {
             return ModifyList(entity, dto, IdAccessExpression<TProperty, TId>().Compile());
         }

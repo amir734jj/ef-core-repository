@@ -37,7 +37,7 @@ namespace EfCoreRepository
                 throw new Exception("Missing Key attribute on entity");
             }
 
-            return new BasicCrud<TSource>((IEntityProfile<TSource>) profile.Profile ,_dbContext, Generic);
+            return new BasicCrud<TSource>((IEntityProfile<TSource>) profile.Profile, _dbContext, Generic);
         }
     }
 }

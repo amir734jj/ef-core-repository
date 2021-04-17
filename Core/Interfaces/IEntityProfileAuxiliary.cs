@@ -12,10 +12,10 @@ namespace EfCoreRepository.Interfaces
         /// <param name="dto"></param>
         /// <param name="idSelector"></param>
         /// <returns></returns>
-        List<TProperty> ModifyList<TProperty, TId>(List<TProperty> entity, List<TProperty> dto,
+        IList<TProperty> ModifyList<TProperty, TId>(IList<TProperty> entity, IList<TProperty> dto,
             Func<TProperty, TId> idSelector);
 
-        List<TProperty> ModifyList<TProperty, TId>(List<TProperty> entity, List<TProperty> dto)
+        IList<TProperty> ModifyList<TProperty, TId>(IList<TProperty> entity, IList<TProperty> dto)
             where TProperty : class
             where TId : struct;
     }
