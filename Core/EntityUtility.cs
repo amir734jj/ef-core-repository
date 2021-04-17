@@ -32,7 +32,7 @@ namespace EfCoreRepository
             
             if (keyProperty == null)
             {
-                throw new Exception("Missing KEY attribute on the class declaration");
+                throw new Exception($"Missing KEY attribute on the class declaration for {type.Name}");
             }
             
             IdLookup[type] = keyProperty.Name;

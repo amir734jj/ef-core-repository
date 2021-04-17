@@ -74,9 +74,9 @@ namespace EfCoreRepository
 
                 if (genericType == null)
                 {
-                    throw new Exception("Profiles generic type is null");
+                    throw new Exception($"Profiles generic type is null for {sourceType.Name}");
                 }
-                    
+
                 return new EntityProfileAttributed
                 {
                     SourceType = genericType.GetGenericArguments().First(),
