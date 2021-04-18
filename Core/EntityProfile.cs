@@ -20,13 +20,20 @@ namespace EfCoreRepository
         /// <returns></returns>
         public abstract IQueryable<TSource> Include<TQueryable>(TQueryable queryable) where TQueryable : IQueryable<TSource>;
         
-        protected void ModifyList<TList, TProperty, TId>(TList entity, TList dto, Func<TProperty, TId> idSelector)
-            where TList: IList<TProperty>, new()
+        /// <summary>
+        /// Utility that applies addition/deletion to the list
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="dto"></param>
+        /// <param name="idSelector"></param>
+        /// <typeparam name="TProperty"></typeparam>
+        /// <typeparam name="TId"></typeparam>
+        protected void ModifyList<TProperty, TId>(IList<TProperty> entity, IList<TProperty> dto, Func<TProperty, TId> idSelector)
             where TProperty : class
             where TId: struct
         {
-            entity ??= new TList();
-            dto ??= new TList();
+            entity ??= new List<TProperty>();
+            dto ??= new List<TProperty>();
             
             // Apply addition
             foreach (var dtoPropValListItem in dto.Where(dtoPropValListItem =>
@@ -43,11 +50,6 @@ namespace EfCoreRepository
             {
                 entity.Remove(entityPropValListItem);
             }
-        }
-
-        protected void ModifyList<T>(List<T> entity, List<T> dto) where T : class
-        {
-            ModifyList(entity, dto, IdAccessExpression<T, int>().Compile());
         }
     }
 }

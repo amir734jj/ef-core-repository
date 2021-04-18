@@ -13,7 +13,7 @@ Using repository pattern with entity framework enforces a consistent convention 
 
 #### Basic setup
 
-- Entity should have Id property. Using `[Key]` is optional if Id property does not follow common naming convension.
+- Entity should have Id property. Using `[Key]` is optional if Id property does not follow common naming convention.
 ```c#
 public class DummyModel
 {
@@ -28,21 +28,13 @@ public class DummyModel
 ```c#
 public class DummyModelProfile : IEntityProfile<DummyModel> 
 {
-    private readonly IEntityProfileAuxiliary _auxiliary;
-
-    // Optionally inject this utility for list add/delete
-    public DummyModelProfile(IEntityProfileAuxiliary auxiliary)
-    {
-        _auxiliary = auxiliary;
-    }
-
     public void Update(DummyModel entity, DummyModel dto)
     {
         entity.Name = dto.Name;
 
         // ModifyList will try to add/delete entities based on Id based on whether they
         // appear in dto.Children or not 
-        entity.Children = _auxiliary.ModifyList<Nested, int>(entity.Children, dto.Children);
+        ModifyList(entity.Children, dto.Children, x => x.Id);
     }
 
     // Intercept IQueryable to include related entities

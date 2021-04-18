@@ -12,7 +12,7 @@ namespace Core.Tests.Profiles
         public override void Update(DummyModel entity, DummyModel dto)
         {
             entity.Name = dto.Name;
-            ModifyList(entity.Children, dto.Children);
+            ModifyList(entity.Children, dto.Children, x => x.Id);
         }
 
         public override IQueryable<DummyModel> Include<TQueryable>(TQueryable queryable)
