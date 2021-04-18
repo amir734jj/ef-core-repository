@@ -23,21 +23,19 @@ namespace EfCoreRepository
         
         public IEfRepositoryFactory Profile(params Assembly[] assemblies)
         {
-            var profileType = typeof(IEntityProfile<>);
-
             _profiles.AddRange(assemblies
                 .SelectMany(assembly => assembly.GetExportedTypes())
-                .Where(x => x.IsClass && x.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == profileType))
                 .Select(type => (
                     SourceType: type,
                     GenericType: GetProfileGenericType(type)
-                )));
+                ))
+                .Where(x => x.GenericType != null));
 
             return this;
         }
 
         public IEfRepositoryFactory Profile<TProfile, TEntity>(TProfile profile)
-            where TProfile : class, IEntityProfile<TEntity>
+            where TProfile : EntityProfile<TEntity>
             where TEntity : class
         {
             var t = profile.GetType();
@@ -48,7 +46,7 @@ namespace EfCoreRepository
         }
 
         public IEfRepositoryFactory Profile<TProfile, TEntity>()
-            where TProfile : class, IEntityProfile<TEntity>
+            where TProfile : EntityProfile<TEntity>
             where TEntity : class
         {
             var t = typeof(TProfile);
@@ -66,8 +64,6 @@ namespace EfCoreRepository
         {
             // DbContext is registered by default as scoped
             // https://docs.microsoft.com/en-us/ef/core/miscellaneous/configuring-dbcontext#implicitly-sharing-dbcontext-instances-across-multiple-threads-via-dependency-injection
-            _serviceCollection.Add(ServiceDescriptor.Scoped(typeof(IEntityProfileAuxiliary), typeof(EntityProfileAuxiliary)));
-
             _serviceCollection.Add(ServiceDescriptor.Scoped<IEfRepository>(serviceProvider => new EfRepository(profiles.Select(tuple =>
             {
                 var (sourceType, genericType) = tuple;
@@ -87,8 +83,13 @@ namespace EfCoreRepository
 
         private static Type GetProfileGenericType(Type t)
         {
-            return t.GetInterfaces().FirstOrDefault(i =>
-                i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEntityProfile<>));
+            if (t.BaseType != null && t.BaseType.IsGenericType &&
+                t.BaseType.GetGenericTypeDefinition() == typeof(EntityProfile<>))
+            {
+                return t.BaseType;
+            }
+
+            return null;
         }
     }
 }

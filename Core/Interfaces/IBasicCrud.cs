@@ -7,6 +7,22 @@ namespace EfCoreRepository.Interfaces
 {
     public interface IBasicCrud<TSource> : IDisposable, IAsyncDisposable where TSource : class
     {
+        #region Utilities
+
+        /// <summary>
+        /// For complex and multi-action where we want to defer the save until the dispose takes place
+        /// </summary>
+        /// <returns></returns>
+        IBasicCrud<TSource> Delayed();
+        
+        /// <summary>
+        /// Avoids eager loading altogether for a lightweight session
+        /// </summary>
+        /// <returns></returns>
+        IBasicCrud<TSource> Light();
+
+        #endregion
+        
         #region Basics
 
         Task<TSource> Save(TSource instance);

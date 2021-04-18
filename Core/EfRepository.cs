@@ -21,7 +21,7 @@ namespace EfCoreRepository
             _profiles = profiles;
         }
 
-        public IBasicCrudWrapper<TSource> For<TSource>() where TSource: class
+        public IBasicCrud<TSource> For<TSource>() where TSource: class
         {
             var profile = _profiles.FirstOrDefault(x => x.SourceType == typeof(TSource));
 
@@ -37,7 +37,7 @@ namespace EfCoreRepository
                 throw new Exception("Missing Key attribute on entity");
             }
 
-            return new BasicCrud<TSource>((IEntityProfile<TSource>) profile.Profile, _dbContext, Generic);
+            return new BasicCrud<TSource>((EntityProfile<TSource>) profile.Profile, _dbContext, Generic);
         }
     }
 }

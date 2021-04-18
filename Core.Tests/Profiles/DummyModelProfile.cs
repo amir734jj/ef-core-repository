@@ -1,26 +1,21 @@
+using System.Collections.Generic;
 using System.Linq;
 using Core.Tests.Models;
+using EfCoreRepository;
 using EfCoreRepository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Core.Tests.Profiles
 {
-    public class DummyModelProfile : IEntityProfile<DummyModel> 
+    public class DummyModelProfile : EntityProfile<DummyModel> 
     {
-        private readonly IEntityProfileAuxiliary _auxiliary;
-
-        public DummyModelProfile(IEntityProfileAuxiliary auxiliary)
-        {
-            _auxiliary = auxiliary;
-        }
-
-        public void Update(DummyModel entity, DummyModel dto)
+        public override void Update(DummyModel entity, DummyModel dto)
         {
             entity.Name = dto.Name;
-            entity.Children = _auxiliary.ModifyList<Nested, int>(entity.Children, dto.Children).ToList();
+            ModifyList(entity.Children, dto.Children);
         }
 
-        public IQueryable<DummyModel> Include<TQueryable>(TQueryable queryable) where TQueryable : IQueryable<DummyModel>
+        public override IQueryable<DummyModel> Include<TQueryable>(TQueryable queryable)
         {
             return queryable.Include(x => x.Children);
         }

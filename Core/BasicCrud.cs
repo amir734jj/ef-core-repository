@@ -10,9 +10,9 @@ using static EfCoreRepository.EntityUtility;
 
 namespace EfCoreRepository
 {
-    internal class BasicCrud<TSource> : IBasicCrudWrapper<TSource> where TSource : class
+    internal class BasicCrud<TSource> : IBasicCrud<TSource> where TSource : class
     {
-        private readonly IEntityProfile<TSource> _profile;
+        private readonly EntityProfile<TSource> _profile;
 
         private readonly DbContext _dbContext;
 
@@ -20,7 +20,7 @@ namespace EfCoreRepository
 
         private readonly DbSet<TSource> _dbSet;
 
-        public BasicCrud(IEntityProfile<TSource> profile, DbContext dbContext, SessionType sessionType)
+        public BasicCrud(EntityProfile<TSource> profile, DbContext dbContext, SessionType sessionType)
         {
             _profile = profile;
             _dbContext = dbContext;
@@ -217,12 +217,12 @@ namespace EfCoreRepository
             return new ValueTask(Task.CompletedTask);
         }
         
-        public IBasicCrudWrapper<TSource> Delayed()
+        public IBasicCrud<TSource> Delayed()
         {
             return new BasicCrud<TSource>(_profile, _dbContext ,_sessionType | SessionType.Delayed);
         }
 
-        public IBasicCrudWrapper<TSource> Light()
+        public IBasicCrud<TSource> Light()
         {
             return new BasicCrud<TSource>(_profile, _dbContext, _sessionType | SessionType.LightWeight);
         }

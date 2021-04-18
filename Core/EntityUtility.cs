@@ -4,12 +4,18 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using EfCoreRepository.Extensions;
 
 namespace EfCoreRepository
 {
     internal static class EntityUtility
     {
         private static readonly IDictionary<Type, string> IdLookup = new Dictionary<Type, string>();
+
+        /// <summary>
+        /// Common property names for ID
+        /// </summary>
+        private static readonly string[] IdNames = {"_id", "id"};
 
         /// <summary>
         /// Finds ID property of a class
@@ -25,18 +31,23 @@ namespace EfCoreRepository
             {
                 return IdLookup[type];
             }
-            
-            var keyProperty = type
-                .GetProperties(BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty | BindingFlags.Instance)
-                .FirstOrDefault(x => x.GetCustomAttribute<KeyAttribute>() != null);
-            
+
+            var properties = type
+                .GetProperties(BindingFlags.Public |
+                               BindingFlags.GetProperty |
+                               BindingFlags.SetProperty |
+                               BindingFlags.Instance);
+
+            var keyProperty = properties.FirstOrDefault(x => x.GetCustomAttribute<KeyAttribute>() != null) ??
+                              properties.FirstOrDefault(x => IdNames.Contains(x.Name, StringComparer.OrdinalIgnoreCase) && x.PropertyType.IsTypeCompatibleForId());
+
             if (keyProperty == null)
             {
                 throw new Exception($"Missing KEY attribute on the class declaration for {type.Name}");
             }
-            
+
             IdLookup[type] = keyProperty.Name;
-            
+
             return keyProperty.Name;
         }
 
@@ -61,7 +72,7 @@ namespace EfCoreRepository
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public static Expression<Func<T, bool>> FilterExpression<T, TId>(params TId[] ids)
-            where T: class
+            where T : class
             where TId : struct
         {
             var parameter = Expression.Parameter(typeof(T));
@@ -84,7 +95,8 @@ namespace EfCoreRepository
 
                     var containsMethod = method.MakeGenericMethod(typeof(TId));
                     var containsInvoke = Expression
-                        .Call(containsMethod, Expression.Constant(ids), Expression.PropertyOrField(parameter, FindIdProperty<T>()));
+                        .Call(containsMethod, Expression.Constant(ids),
+                            Expression.PropertyOrField(parameter, FindIdProperty<T>()));
 
                     body = containsInvoke;
                     break;

@@ -3,22 +3,20 @@
 Simple repository for Ef.Core with basic CRUD functionality
 The reason I implemented this is because I found myself re-writing basic CRUD functionality over and over again. Most of the time:
 - use `.include(...)` to include eager load associated entities
-- update (add/delete/update) children properties by Id
+- update (add/delete/update) children properties
+- 
 
-Using repository pattern with entity framework enforces a consistent convension and that is what this library is aiming towards.
+Using repository pattern with entity framework enforces a consistent convention and that is what this library is aiming towards.
 
 [![NuGet Status](https://img.shields.io/nuget/v/SimpleEfCoreRepository.svg)](https://www.nuget.org/packages/SimpleEfCoreRepository/)
 [![Build Status](https://travis-ci.com/amir734jj/ef-core-repository.svg?branch=master)](https://travis-ci.com/amir734jj/ef-core-repository)
 
 #### Basic setup
 
-- Entity should have `[Key]` attribute
+- Entity should have Id property. Using `[Key]` is optional if Id property does not follow common naming convension.
 ```c#
 public class DummyModel
 {
-    [Key]
-    public int Id { get; set; }
-    
     public string Name { get; set; }
 
     public List<Nested> Children { get; set; }

@@ -7,11 +7,11 @@ namespace EfCoreRepository.Interfaces
         public IEfRepositoryFactory Profile(params Assembly[] assemblies);
 
         public IEfRepositoryFactory Profile<TProfile, TEntity>(TProfile profile)
-            where TProfile : class, IEntityProfile<TEntity>
+            where TProfile : EntityProfile<TEntity>
             where TEntity : class;
 
         public IEfRepositoryFactory Profile<TProfile, TEntity>()
-            where TProfile : class, IEntityProfile<TEntity>
+            where TProfile : EntityProfile<TEntity>
             where TEntity : class;
     }
 }
