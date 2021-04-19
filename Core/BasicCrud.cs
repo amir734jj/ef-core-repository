@@ -155,15 +155,6 @@ namespace EfCoreRepository
         }
 
         /// <summary>
-        /// Returns source IQueryable
-        /// </summary>
-        /// <returns></returns>
-        public IQueryable<TSource> DbSet()
-        {
-            return _dbSet;
-        }
-
-        /// <summary>
         /// Count entities that pass filter expression
         /// </summary>
         /// <param name="expression"></param>

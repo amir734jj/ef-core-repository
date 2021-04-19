@@ -60,8 +60,6 @@ namespace EfCoreRepository.Interfaces
 
         public Task<IEnumerable<TSource>> Save(params TSource[] instances);
 
-        public IQueryable<TSource> DbSet();
-
         public Task<int> Count(Expression<Func<TSource, bool>> expression);
         
         public Task<int> Count();
