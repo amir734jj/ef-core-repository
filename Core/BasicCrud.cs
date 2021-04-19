@@ -155,6 +155,34 @@ namespace EfCoreRepository
         }
 
         /// <summary>
+        /// Returns source IQueryable
+        /// </summary>
+        /// <returns></returns>
+        public IQueryable<TSource> DbSet()
+        {
+            return _dbSet;
+        }
+
+        /// <summary>
+        /// Count entities that pass filter expression
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <returns></returns>
+        public async Task<int> Count(Expression<Func<TSource, bool>> expression)
+        {
+            return await _dbSet.CountAsync(expression);
+        }
+
+        /// <summary>
+        /// Count of all entities
+        /// </summary>
+        /// <returns></returns>
+        public async Task<int> Count()
+        {
+            return await _dbSet.CountAsync();
+        }
+
+        /// <summary>
         /// Saves an instance
         /// </summary>
         /// <param name="instance"></param>

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
@@ -13,52 +14,58 @@ namespace EfCoreRepository.Interfaces
         /// For complex and multi-action where we want to defer the save until the dispose takes place
         /// </summary>
         /// <returns></returns>
-        IBasicCrud<TSource> Delayed();
+        public IBasicCrud<TSource> Delayed();
         
         /// <summary>
         /// Avoids eager loading altogether for a lightweight session
         /// </summary>
         /// <returns></returns>
-        IBasicCrud<TSource> Light();
+        public IBasicCrud<TSource> Light();
 
         #endregion
         
         #region Basics
 
-        Task<TSource> Save(TSource instance);
+        public Task<TSource> Save(TSource instance);
         
-        Task<IEnumerable<TSource>> GetAll();
+        public Task<IEnumerable<TSource>> GetAll();
 
         #endregion
         
         #region IdAware
         
-        Task<TSource> Get<TId>(TId id) where TId : struct;
+        public Task<TSource> Get<TId>(TId id) where TId : struct;
         
-        Task<TSource> Delete<TId>(TId id) where TId : struct;
+        public Task<TSource> Delete<TId>(TId id) where TId : struct;
 
-        Task<TSource> Update<TId>(TId id, TSource dto) where TId : struct;
+        public Task<TSource> Update<TId>(TId id, TSource dto) where TId : struct;
 
         #endregion
 
         #region IdUnAware
 
-        Task<TSource> Get(Expression<Func<TSource, bool>> expression);
+        public Task<TSource> Get(Expression<Func<TSource, bool>> expression);
 
-        Task<TSource> Update(Expression<Func<TSource, bool>> expression, TSource dto);
+        public  Task<TSource> Update(Expression<Func<TSource, bool>> expression, TSource dto);
         
-        Task<TSource> Delete(Expression<Func<TSource, bool>> expression);
+        public Task<TSource> Delete(Expression<Func<TSource, bool>> expression);
         
         #endregion
 
         #region Misc
 
-        Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, bool>> filter);
+        public Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, bool>> filter);
 
-        Task<IEnumerable<TSource>> GetAll<TId>(params TId[] ids) where TId : struct;
+        public Task<IEnumerable<TSource>> GetAll<TId>(params TId[] ids) where TId : struct;
 
-        Task<IEnumerable<TSource>> Save(params TSource[] instances);
+        public Task<IEnumerable<TSource>> Save(params TSource[] instances);
+
+        public IQueryable<TSource> DbSet();
+
+        public Task<int> Count(Expression<Func<TSource, bool>> expression);
         
+        public Task<int> Count();
+
         #endregion
     }
 }
