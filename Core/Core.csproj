@@ -6,9 +6,9 @@
         <Description>EntityFramework.Core repository pattern</Description>
         <RepositoryUrl>https://github.com/amir734jj/ef-core-repository</RepositoryUrl>
         <PackageProjectUrl>https://github.com/amir734jj/ef-core-repository</PackageProjectUrl>
-        <AssemblyVersion>2.1.3</AssemblyVersion>
+        <AssemblyVersion>2.1.4</AssemblyVersion>
         <PackageReleaseNotes>Some small useful methods</PackageReleaseNotes>
-        <Version>2.1.3</Version>
+        <Version>2.1.4</Version>
         <RootNamespace>EfCoreRepository</RootNamespace>
         <AssemblyName>SimpleEfCoreRepository</AssemblyName>
     </PropertyGroup>
