@@ -4,7 +4,6 @@ Simple repository for Ef.Core with basic CRUD functionality
 The reason I implemented this is because I found myself re-writing basic CRUD functionality over and over again. Most of the time:
 - use `.include(...)` to include eager load associated entities
 - update (add/delete/update) children properties
-- 
 
 Using repository pattern with entity framework enforces a consistent convention and that is what this library is aiming towards.
 
