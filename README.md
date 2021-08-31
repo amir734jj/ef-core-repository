@@ -60,7 +60,7 @@ IEfRepository repo = ... // DI inject IEfRepository
 IBasicCrud<DummyModel> = repo.For<DummyModel>();
 ```
 
-- Available methods in `IBasicCrud` or `IBasicCrudType`
+- Available methods in `IBasicCrud`
 ```c#
 // Get all entities without any filter
 Task<IEnumerable<TSource>> GetAll();
