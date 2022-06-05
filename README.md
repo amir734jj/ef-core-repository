@@ -25,7 +25,7 @@ public class DummyModel
 - Create profile which is used to update an entity given a DTO
 
 ```c#
-public class DummyModelProfile : IEntityProfile<DummyModel> 
+public class DummyModelProfile : EntityProfile<DummyModel> 
 {
     public void Update(DummyModel entity, DummyModel dto)
     {
