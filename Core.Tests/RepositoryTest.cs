@@ -14,10 +14,12 @@ namespace Core.Tests
     public class RepositoryTest : IAsyncLifetime
     {
         private readonly IEfRepository _repository;
+        
+        private readonly ServiceProvider _serviceProvider;
 
         public RepositoryTest()
         {
-            var serviceProvider = new ServiceCollection()
+            _serviceProvider = new ServiceCollection()
                 .Configure<LoggerFilterOptions>(cfg => cfg.MinLevel = LogLevel.None)
                 .AddDbContext<EntityDbContext>(x => x
                     .UseInMemoryDatabase("database"))
@@ -25,13 +27,14 @@ namespace Core.Tests
                     .Profile(Assembly.GetExecutingAssembly()))
                 .BuildServiceProvider();
 
-            _repository = serviceProvider.GetService<IEfRepository>();
+            _repository = _serviceProvider.GetService<IEfRepository>();
         }
         
         [Fact]
         public async Task Test__Save()
         {
             // Arrange
+            var dbContext = _serviceProvider.GetService<EntityDbContext>();
             var model = new DummyModel
             {
                 Name = "Foo", Children = new List<Nested>
@@ -41,17 +44,18 @@ namespace Core.Tests
             };
 
             // Act
-            var result = await _repository.For<DummyModel>().Save(model);
+            var result = await _repository.For<DummyModel>(dbContext).Save(model);
             
             // Assert
             Assert.Equal(model, result);
-            Assert.Equal(model, await _repository.For<DummyModel>().Get(model.Id));
+            Assert.Equal(model, await _repository.For<DummyModel>(dbContext).Get(model.Id));
         }
         
         [Fact]
         public async Task Test__SaveMany()
         {
             // Arrange
+            var dbContext = _serviceProvider.GetService<EntityDbContext>();
             var model1 = new DummyModel
             {
                 Name = "Foo", Children = new List<Nested>
@@ -69,17 +73,18 @@ namespace Core.Tests
             };
 
             // Act
-            var result = await _repository.For<DummyModel>().Save(model1, model2);
+            var result = await _repository.For<DummyModel>(dbContext).Save(model1, model2);
             
             // Assert
             Assert.Equal(new List<DummyModel> { model1, model2}, result);
-            Assert.Equal(new List<DummyModel> { model1, model2},  await _repository.For<DummyModel>().GetAll(model1.Id, model2.Id));
+            Assert.Equal(new List<DummyModel> { model1, model2},  await _repository.For<DummyModel>(dbContext).GetAll(model1.Id, model2.Id));
         }
         
         [Fact]
         public async Task Test__Get()
         {
             // Arrange
+            var dbContext = _serviceProvider.GetService<EntityDbContext>();
             var model = new DummyModel
             {
                 Name = "Foo", Children = new List<Nested>
@@ -89,16 +94,17 @@ namespace Core.Tests
             };
 
             // Act
-            await _repository.For<DummyModel>().Save(model);
+            await _repository.For<DummyModel>(dbContext).Save(model);
             
             // Assert
-            Assert.Equal(model, await _repository.For<DummyModel>().Get(model.Id));
+            Assert.Equal(model, await _repository.For<DummyModel>(dbContext).Get(model.Id));
         }
         
         [Fact]
         public async Task Test__GetWhere()
         {
             // Arrange
+            var dbContext = _serviceProvider.GetService<EntityDbContext>();
             var model = new DummyModel
             {
                 Name = "Foo", Children = new List<Nested>
@@ -108,16 +114,17 @@ namespace Core.Tests
             };
 
             // Act
-            await _repository.For<DummyModel>().Save(model);
+            await _repository.For<DummyModel>(dbContext).Save(model);
             
             // Assert
-            Assert.Equal(model, await _repository.For<DummyModel>().Get(x => x.Id == model.Id));
+            Assert.Equal(model, await _repository.For<DummyModel>(dbContext).Get(x => x.Id == model.Id));
         }
         
         [Fact]
         public async Task Test__GetAll()
         {
             // Arrange
+            var dbContext = _serviceProvider.GetService<EntityDbContext>();
             var model = new DummyModel
             {
                Name = "Foo", Children = new List<Nested>
@@ -125,10 +132,10 @@ namespace Core.Tests
                     new Nested()
                 }
             };
-            await _repository.For<DummyModel>().Save(model);
+            await _repository.For<DummyModel>(dbContext).Save(model);
             
             // Act
-            var result = await _repository.For<DummyModel>().GetAll();
+            var result = await _repository.For<DummyModel>(dbContext).GetAll();
             
             // Assert
             Assert.Equal(new List<DummyModel> { model }, result);
@@ -138,6 +145,7 @@ namespace Core.Tests
         public async Task Test__GetAllIds()
         {
             // Arrange
+            var dbContext = _serviceProvider.GetService<EntityDbContext>();
             var model = new DummyModel
             {
                 Name = "Foo", Children = new List<Nested>
@@ -145,10 +153,10 @@ namespace Core.Tests
                     new Nested()
                 }
             };
-            await _repository.For<DummyModel>().Save(model);
+            await _repository.For<DummyModel>(dbContext).Save(model);
             
             // Act
-            var result = await _repository.For<DummyModel>().GetAll(model.Id);
+            var result = await _repository.For<DummyModel>(dbContext).GetAll(model.Id);
             
             // Assert
             Assert.Equal(new List<DummyModel> { model }, result);
@@ -158,6 +166,7 @@ namespace Core.Tests
         public async Task Test__GetAllWhere()
         {
             // Arrange
+            var dbContext = _serviceProvider.GetService<EntityDbContext>();
             var model = new DummyModel
             {
                 Name = "Foo", Children = new List<Nested>
@@ -165,10 +174,10 @@ namespace Core.Tests
                     new Nested()
                 }
             };
-            await _repository.For<DummyModel>().Save(model);
+            await _repository.For<DummyModel>(dbContext).Save(model);
             
             // Act
-            var result = await _repository.For<DummyModel>().GetAll(x => x.Id == model.Id);
+            var result = await _repository.For<DummyModel>(dbContext).GetAll(x => x.Id == model.Id);
             
             // Assert
             Assert.Equal(new List<DummyModel> { model}, result);
@@ -178,6 +187,7 @@ namespace Core.Tests
         public async Task Test__Update()
         {
             // Arrange
+            var dbContext = _serviceProvider.GetService<EntityDbContext>();
             var model = new DummyModel
             {
                  Name = "Foo", Children = new List<Nested>
@@ -186,20 +196,21 @@ namespace Core.Tests
                 }
             };
 
-            await _repository.For<DummyModel>().Save(model);
+            await _repository.For<DummyModel>(dbContext).Save(model);
             
             // Act
             model.Name = "Bar";
-            await _repository.For<DummyModel>().Update(model.Id, model);
+            await _repository.For<DummyModel>(dbContext).Update(model.Id, model);
             
             // Assert
-            Assert.Equal(model, await _repository.For<DummyModel>().Get(model.Id));
+            Assert.Equal(model, await _repository.For<DummyModel>(dbContext).Get(model.Id));
         }
         
         [Fact]
         public async Task Test__UpdateWhere()
         {
             // Arrange
+            var dbContext = _serviceProvider.GetService<EntityDbContext>();
             var model = new DummyModel
             {
                Name = "Foo", Children = new List<Nested>
@@ -208,20 +219,21 @@ namespace Core.Tests
                 }
             };
 
-            await _repository.For<DummyModel>().Save(model);
+            await _repository.For<DummyModel>(dbContext).Save(model);
             
             // Act
             model.Name = "Bar";
-            await _repository.For<DummyModel>().Update(x => x.Id == model.Id, model);
+            await _repository.For<DummyModel>(dbContext).Update(x => x.Id == model.Id, model);
             
             // Assert
-            Assert.Equal(model, await _repository.For<DummyModel>().Get(x => x.Id == 1));
+            Assert.Equal(model, await _repository.For<DummyModel>(dbContext).Get(x => x.Id == 1));
         }
         
         [Fact]
         public async Task Test__Delete()
         {
             // Arrange
+            var dbContext = _serviceProvider.GetService<EntityDbContext>();
             var model = new DummyModel
             {
                  Name = "Foo", Children = new List<Nested>
@@ -230,19 +242,20 @@ namespace Core.Tests
                 }
             };
 
-            await _repository.For<DummyModel>().Save(model);
+            await _repository.For<DummyModel>(dbContext).Save(model);
             
             // Act
-            await _repository.For<DummyModel>().Delete(model.Id);
+            await _repository.For<DummyModel>(dbContext).Delete(model.Id);
             
             // Assert
-            Assert.Empty(await _repository.For<DummyModel>().GetAll());
+            Assert.Empty(await _repository.For<DummyModel>(dbContext).GetAll());
         }
         
         [Fact]
         public async Task Test__DeleteWhere()
         {
             // Arrange
+            var dbContext = _serviceProvider.GetService<EntityDbContext>();
             var model = new DummyModel
             {
                 Name = "Foo", Children = new List<Nested>
@@ -251,35 +264,36 @@ namespace Core.Tests
                 }
             };
 
-            await _repository.For<DummyModel>().Save(model);
+            await _repository.For<DummyModel>(dbContext).Save(model);
             
             // Act
-            await _repository.For<DummyModel>().Delete(x => x.Id == model.Id);
+            await _repository.For<DummyModel>(dbContext).Delete(x => x.Id == model.Id);
             
             // Assert
-            Assert.Empty(await _repository.For<DummyModel>().GetAll());
+            Assert.Empty(await _repository.For<DummyModel>(dbContext).GetAll());
         }
         
         [Fact(Skip = "Not sure how to test light weight session")]
         public async Task Test__LightSession()
         {
             // Arrange
+            var dbContext = _serviceProvider.GetService<EntityDbContext>();
             var model = new DummyModel
             {
                 Name = "Foo", Children = new List<Nested>()
             };
 
-            await _repository.For<DummyModel>().Save(model);
+            await _repository.For<DummyModel>(dbContext).Save(model);
 
             var nested = new Nested
             {
                 ParentRef = model
             };
 
-            await _repository.For<Nested>().Save(nested);
+            await _repository.For<Nested>(dbContext).Save(nested);
             
             // Act
-            var entity = await _repository.For<DummyModel>().Light().Get(x => x.Id == model.Id);
+            var entity = await _repository.For<DummyModel>(dbContext).Light().Get(x => x.Id == model.Id);
             
             // Assert
             Assert.Null(entity.Children);
@@ -292,7 +306,9 @@ namespace Core.Tests
 
         public async Task DisposeAsync()
         {
-            await using var repo = _repository.For<DummyModel>().Delayed();
+            var dbContext = _serviceProvider.GetService<EntityDbContext>();
+
+            await using var repo = _repository.For<DummyModel>(dbContext).Delayed();
             
             var models = await repo.GetAll();
             

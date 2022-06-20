@@ -11,17 +11,14 @@ namespace EfCoreRepository
 {
     internal class EfRepository : IEfRepository
     {
-        private readonly DbContext _dbContext;
-        
         private readonly List<EntityProfileAttributed> _profiles;
 
-        public EfRepository(List<EntityProfileAttributed> profiles, DbContext dbContext)
+        public EfRepository(List<EntityProfileAttributed> profiles)
         {
-            _dbContext = dbContext;
             _profiles = profiles;
         }
 
-        public IBasicCrud<TSource> For<TSource>() where TSource: class
+        public IBasicCrud<TSource> For<TSource>(DbContext context) where TSource: class
         {
             var profile = _profiles.FirstOrDefault(x => x.SourceType == typeof(TSource));
 
@@ -37,7 +34,7 @@ namespace EfCoreRepository
                 throw new Exception("Missing Key attribute on entity");
             }
 
-            return new BasicCrud<TSource>((EntityProfile<TSource>) profile.Profile, _dbContext, Generic);
+            return new BasicCrud<TSource>((EntityProfile<TSource>) profile.Profile, context, Generic);
         }
     }
 }

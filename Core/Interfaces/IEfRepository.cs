@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace EfCoreRepository.Interfaces
 {
     public interface IEfRepository
@@ -7,6 +9,6 @@ namespace EfCoreRepository.Interfaces
         /// </summary>
         /// <typeparam name="TSource"></typeparam>
         /// <returns></returns>
-        IBasicCrud<TSource> For<TSource>() where TSource : class;
+        IBasicCrud<TSource> For<TSource>(DbContext context) where TSource : class;
     }
 }
