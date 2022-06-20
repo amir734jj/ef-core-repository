@@ -52,19 +52,6 @@ namespace EfCoreRepository
         }
 
         /// <summary>
-        /// Creates ID access expression
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="TId"></typeparam>
-        /// <returns></returns>
-        public static Expression<Func<T, TId>> IdAccessExpression<T, TId>() where T : class
-        {
-            var source = Expression.Parameter(typeof(T));
-
-            return Expression.Lambda<Func<T, TId>>(Expression.PropertyOrField(source, FindIdProperty<T>()), source);
-        }
-
-        /// <summary>
         /// Creates a lambda expression of x => x.Id == id
         /// </summary>
         /// <param name="ids"></param>

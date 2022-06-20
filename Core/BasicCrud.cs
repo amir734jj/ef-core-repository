@@ -20,6 +20,8 @@ namespace EfCoreRepository
 
         private readonly DbSet<TSource> _dbSet;
 
+        private bool _anyChanges;
+
         public BasicCrud(EntityProfile<TSource> profile, DbContext dbContext, SessionType sessionType)
         {
             _profile = profile;
@@ -30,6 +32,7 @@ namespace EfCoreRepository
 
         private IQueryable<TSource> GetQueryable()
         {
+            // Do not include any referenced entities if session is lightweight
             if (_sessionType.HasFlag(SessionType.LightWeight))
             {
                 return _dbSet;
@@ -44,7 +47,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public virtual async Task<IEnumerable<TSource>> GetAll()
         {
-            return await GetQueryable().ToListAsync();
+            return await GetQueryable().AsNoTracking().ToListAsync();
         }
 
         /// <summary>
@@ -54,7 +57,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public async Task<TSource> Get<TId>(TId id) where TId : struct
         {
-            return await GetQueryable().FirstOrDefaultAsync(FilterExpression<TSource, TId>(id));
+            return await GetQueryable().AsNoTracking().FirstOrDefaultAsync(FilterExpression<TSource, TId>(id));
         }
 
         /// <summary>
@@ -64,7 +67,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public async Task<TSource> Get(Expression<Func<TSource, bool>> expression)
         {
-            return await GetQueryable().FirstOrDefaultAsync(expression);
+            return await GetQueryable().AsNoTracking().FirstOrDefaultAsync(expression);
         }
 
         /// <summary>
@@ -75,7 +78,8 @@ namespace EfCoreRepository
         /// <returns></returns>
         public async Task<TSource> Update(Expression<Func<TSource, bool>> expression, TSource dto)
         {
-            var entity = await Get(expression);
+            // With tracking
+            var entity = await GetQueryable().FirstOrDefaultAsync(expression);
 
             if (entity != null)
             {
@@ -84,6 +88,11 @@ namespace EfCoreRepository
                 if (!_sessionType.HasFlag(SessionType.Delayed))
                 {
                     await _dbContext.SaveChangesAsync();
+                }
+                else
+                {
+                    // Save changes when disposed
+                    _anyChanges = true;
                 }
 
                 return entity;
@@ -99,7 +108,8 @@ namespace EfCoreRepository
         /// <returns></returns>
         public async Task<TSource> Delete(Expression<Func<TSource, bool>> expression)
         {
-            var entity = await Get(expression);
+            // With tracking
+            var entity = await GetQueryable().FirstOrDefaultAsync(expression);
 
             if (entity != null)
             {
@@ -108,6 +118,11 @@ namespace EfCoreRepository
                 if (!_sessionType.HasFlag(SessionType.Delayed))
                 {
                     await _dbContext.SaveChangesAsync();
+                }
+                else
+                {
+                    // Save changes when disposed
+                    _anyChanges = true;
                 }
 
                 return entity;
@@ -123,7 +138,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public async Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, bool>> filter)
         {
-            return await GetQueryable().Where(filter).ToListAsync();
+            return await GetQueryable().AsNoTracking().Where(filter).ToListAsync();
         }
 
         /// <summary>
@@ -134,7 +149,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public async Task<IEnumerable<TSource>> GetAll<TId>(params TId[] ids) where TId : struct
         {
-            return await GetQueryable().Where(FilterExpression<TSource, TId>(ids)).ToListAsync();
+            return await GetQueryable().AsNoTracking().Where(FilterExpression<TSource, TId>(ids)).ToListAsync();
         }
 
         /// <summary>
@@ -150,6 +165,11 @@ namespace EfCoreRepository
             {
                 await _dbContext.SaveChangesAsync();
             }
+            else
+            {
+                // Save changes when disposed
+                _anyChanges = true;
+            }
 
             return instances;
         }
@@ -161,7 +181,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public async Task<int> Count(Expression<Func<TSource, bool>> expression)
         {
-            return await _dbSet.CountAsync(expression);
+            return await _dbSet.AsNoTracking().CountAsync(expression);
         }
 
         /// <summary>
@@ -170,7 +190,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public async Task<int> Count()
         {
-            return await _dbSet.CountAsync();
+            return await _dbSet.AsNoTracking().CountAsync();
         }
 
         /// <summary>
@@ -185,6 +205,11 @@ namespace EfCoreRepository
             if (!_sessionType.HasFlag(SessionType.Delayed))
             {
                 await _dbContext.SaveChangesAsync();
+            }
+            else
+            {
+                // Save changes when disposed
+                _anyChanges = true;
             }
 
             return instance;
@@ -216,7 +241,7 @@ namespace EfCoreRepository
         /// </summary>
         public void Dispose()
         {
-            if (_sessionType.HasFlag(SessionType.Delayed))
+            if (_anyChanges && _sessionType.HasFlag(SessionType.Delayed))
             {
                 _dbContext.SaveChanges();
             }
@@ -228,7 +253,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public ValueTask DisposeAsync()
         {
-            if (_sessionType.HasFlag(SessionType.Delayed))
+            if (_anyChanges && _sessionType.HasFlag(SessionType.Delayed))
             {
                 return new ValueTask(_dbContext.SaveChangesAsync());
             }
