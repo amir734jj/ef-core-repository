@@ -57,7 +57,7 @@ var serviceProvider = services
 IEfRepository repo = ... // DI inject IEfRepository
 
 // Get IBasicCrud instance
-IBasicCrud<DummyModel> = repo.For<DummyModel>(dbContext);
+IBasicCrud<DummyModel> = repo.For<DummyModel>();
 ```
 
 - Available methods in `IBasicCrud`
