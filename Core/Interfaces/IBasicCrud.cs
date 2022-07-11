@@ -40,6 +40,8 @@ namespace EfCoreRepository.Interfaces
 
         public Task<TSource> Update<TId>(TId id, TSource dto) where TId : struct;
 
+        public Task<TSource> Update<TId>(TId id, Action<TSource> updater) where TId : struct;
+
         #endregion
 
         #region IdUnAware
@@ -47,7 +49,9 @@ namespace EfCoreRepository.Interfaces
         public Task<TSource> Get(Expression<Func<TSource, bool>> expression);
 
         public  Task<TSource> Update(Expression<Func<TSource, bool>> expression, TSource dto);
-        
+
+        public Task<TSource> Update(Expression<Func<TSource, bool>> expression, Action<TSource> updater);
+
         public Task<TSource> Delete(Expression<Func<TSource, bool>> expression);
         
         #endregion

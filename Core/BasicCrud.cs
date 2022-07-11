@@ -237,6 +237,52 @@ namespace EfCoreRepository
         }
 
         /// <summary>
+        /// Updates entity given the filter expression and function that modifies the entity
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <param name="updater"></param>
+        /// <returns></returns>
+        public async Task<TSource> Update(Expression<Func<TSource, bool>> expression, Action<TSource> updater)
+        {
+            // With tracking
+            var entity = await GetQueryable().FirstOrDefaultAsync(expression);
+
+            if (entity != null)
+            {
+                // Manual update
+                updater(entity);
+                
+                // Another pass through profile
+                _profile.Update(entity, entity);
+
+                if (!_sessionType.HasFlag(SessionType.Delayed))
+                {
+                    await _dbContext.SaveChangesAsync();
+                }
+                else
+                {
+                    // Save changes when disposed
+                    _anyChanges = true;
+                }
+
+                return entity;
+            }
+
+            return null;
+        }
+        
+        /// <summary>
+        /// Updates entity given the id and function that modifies the entity
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="updater"></param>
+        /// <returns></returns>
+        public virtual async Task<TSource> Update<TId>(TId id, Action<TSource> updater) where TId : struct
+        {
+            return await Update(FilterExpression<TSource, TId>(id), updater);
+        }
+
+        /// <summary>
         /// Invoke SaveChanges if session mode is active
         /// </summary>
         public void Dispose()

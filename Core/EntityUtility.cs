@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace EfCoreRepository
 {
     internal static class EntityUtility
     {
-        private static readonly IDictionary<Type, string> IdLookup = new Dictionary<Type, string>();
+        private static readonly IDictionary<Type, string> IdLookup = new ConcurrentDictionary<Type, string>();
 
         /// <summary>
         /// Common property names for ID
