@@ -196,6 +196,31 @@ namespace Core.Tests
             Assert.Equal(model, await _repository.For<DummyModel>().Get(model.Id));
         }
         
+        
+        [Fact]
+        public async Task Test__Update_Action()
+        {
+            // Arrange
+            var model = new DummyModel
+            {
+                Name = "Foo", Children = new List<Nested>
+                {
+                    new Nested()
+                }
+            };
+
+            await _repository.For<DummyModel>().Save(model);
+            
+            // Act
+            await _repository.For<DummyModel>().Update(model.Id, x =>
+            {
+                x.Name = "Bad";
+            });
+            
+            // Assert
+            Assert.Equal(model, await _repository.For<DummyModel>().Get(model.Id));
+        }
+        
         [Fact]
         public async Task Test__UpdateWhere()
         {
@@ -292,13 +317,14 @@ namespace Core.Tests
 
         public async Task DisposeAsync()
         {
-            await using var repo = _repository.For<DummyModel>().Delayed();
-            
-            var models = await repo.GetAll();
-            
-            foreach (var model in models)
+            using (var repo = _repository.For<DummyModel>().Delayed())
             {
-                await repo.Delete(model.Id);
+                var models = await repo.GetAll();
+            
+                foreach (var model in models)
+                {
+                    await repo.Delete(model.Id);
+                }
             }
         }
     }

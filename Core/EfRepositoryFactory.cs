@@ -84,7 +84,7 @@ namespace EfCoreRepository
 
         private static Type GetProfileGenericType(Type t)
         {
-            if (t.BaseType is { IsGenericType: true } && t.BaseType.GetGenericTypeDefinition() == typeof(EntityProfile<>))
+            if (t.BaseType != null && t.BaseType.IsGenericType && t.BaseType.GetGenericTypeDefinition() == typeof(EntityProfile<>))
             {
                 return t.BaseType;
             }

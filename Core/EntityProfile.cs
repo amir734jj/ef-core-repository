@@ -17,8 +17,9 @@ namespace EfCoreRepository
         /// Intercept the IQueryable to include
         /// </summary>
         /// <returns></returns>
-        public abstract IQueryable<TSource> Include<TQueryable>(TQueryable queryable) where TQueryable : IQueryable<TSource>;
-        
+        public abstract IQueryable<TSource> Include<TQueryable>(TQueryable queryable)
+            where TQueryable : IQueryable<TSource>;
+
         /// <summary>
         /// Utility that applies addition/deletion to the list
         /// </summary>
@@ -27,25 +28,26 @@ namespace EfCoreRepository
         /// <param name="idSelector"></param>
         /// <typeparam name="TProperty"></typeparam>
         /// <typeparam name="TId"></typeparam>
-        protected void ModifyList<TProperty, TId>(IList<TProperty> entity, IList<TProperty> dto, Func<TProperty, TId> idSelector)
+        protected void ModifyList<TProperty, TId>(IList<TProperty> entity, IList<TProperty> dto,
+            Func<TProperty, TId> idSelector)
             where TProperty : class
-            where TId: struct
+            where TId : struct
         {
-            entity ??= new List<TProperty>();
-            dto ??= new List<TProperty>();
-            
+            entity = entity ?? new List<TProperty>();
+            dto = dto ?? new List<TProperty>();
+
             // Apply addition
             foreach (var dtoPropValListItem in dto.Where(dtoPropValListItem =>
-                !entity.Any(entityPropValListItem =>
-                    Equals(idSelector(entityPropValListItem), idSelector(dtoPropValListItem)))).ToList())
+                         !entity.Any(entityPropValListItem =>
+                             Equals(idSelector(entityPropValListItem), idSelector(dtoPropValListItem)))).ToList())
             {
                 entity.Add(dtoPropValListItem);
             }
 
             // Apply deletion
             foreach (var entityPropValListItem in entity.Where(entityPropValListItem =>
-                !dto.Any(dtoPropValListItem =>
-                    Equals(idSelector(entityPropValListItem), idSelector(dtoPropValListItem)))).ToList())
+                         !dto.Any(dtoPropValListItem =>
+                             Equals(idSelector(entityPropValListItem), idSelector(dtoPropValListItem)))).ToList())
             {
                 entity.Remove(entityPropValListItem);
             }
