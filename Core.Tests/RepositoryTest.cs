@@ -7,6 +7,7 @@ using EfCoreRepository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace Core.Tests
@@ -44,8 +45,8 @@ namespace Core.Tests
             var result = await _repository.For<DummyModel>().Save(model);
             
             // Assert
-            Assert.Equal(model, result);
-            Assert.Equal(model, await _repository.For<DummyModel>().Get(model.Id));
+            Assert.True(Equals(model, result));
+            Assert.True(Equals(model, await _repository.For<DummyModel>().Get(model.Id)));
         }
         
         [Fact]
@@ -72,8 +73,8 @@ namespace Core.Tests
             var result = await _repository.For<DummyModel>().Save(model1, model2);
             
             // Assert
-            Assert.Equal(new List<DummyModel> { model1, model2}, result);
-            Assert.Equal(new List<DummyModel> { model1, model2},  await _repository.For<DummyModel>().GetAll(model1.Id, model2.Id));
+            Assert.True(Equals(new List<DummyModel> { model1, model2}, result));
+            Assert.True(Equals(new List<DummyModel> { model1, model2},  await _repository.For<DummyModel>().GetAll(model1.Id, model2.Id)));
         }
         
         [Fact]
@@ -90,9 +91,9 @@ namespace Core.Tests
 
             // Act
             await _repository.For<DummyModel>().Save(model);
-            
+
             // Assert
-            Assert.Equal(model, await _repository.For<DummyModel>().Get(model.Id));
+            Assert.True(Equals(model, await _repository.For<DummyModel>().Get(model.Id)));
         }
         
         [Fact]
@@ -111,7 +112,7 @@ namespace Core.Tests
             await _repository.For<DummyModel>().Save(model);
             
             // Assert
-            Assert.Equal(model, await _repository.For<DummyModel>().Get(x => x.Id == model.Id));
+            Assert.True(Equals(model, await _repository.For<DummyModel>().Get(x => x.Id == model.Id)));
         }
         
         [Fact]
@@ -131,7 +132,7 @@ namespace Core.Tests
             var result = await _repository.For<DummyModel>().GetAll();
             
             // Assert
-            Assert.Equal(new List<DummyModel> { model }, result);
+            Assert.True(Equals(new List<DummyModel> { model }, result));
         }
         
         [Fact]
@@ -151,7 +152,7 @@ namespace Core.Tests
             var result = await _repository.For<DummyModel>().GetAll(model.Id);
             
             // Assert
-            Assert.Equal(new List<DummyModel> { model }, result);
+            Assert.True(Equals(new List<DummyModel> { model }, result));
         }
         
         [Fact]
@@ -171,7 +172,7 @@ namespace Core.Tests
             var result = await _repository.For<DummyModel>().GetAll(x => x.Id == model.Id);
             
             // Assert
-            Assert.Equal(new List<DummyModel> { model}, result);
+            Assert.True(Equals(new List<DummyModel> { model}, result));
         }
 
         [Fact]
@@ -193,7 +194,7 @@ namespace Core.Tests
             await _repository.For<DummyModel>().Update(model.Id, model);
             
             // Assert
-            Assert.Equal(model, await _repository.For<DummyModel>().Get(model.Id));
+            Assert.True(Equals(model, await _repository.For<DummyModel>().Get(model.Id)));
         }
         
         
@@ -218,7 +219,7 @@ namespace Core.Tests
             });
             
             // Assert
-            Assert.Equal(model, await _repository.For<DummyModel>().Get(model.Id));
+            Assert.True(Equals(model, await _repository.For<DummyModel>().Get(model.Id)));
         }
         
         [Fact]
@@ -240,7 +241,7 @@ namespace Core.Tests
             await _repository.For<DummyModel>().Update(x => x.Id == model.Id, model);
             
             // Assert
-            Assert.Equal(model, await _repository.For<DummyModel>().Get(x => x.Id == 1));
+            Assert.True(Equals(model, await _repository.For<DummyModel>().Get(x => x.Id == 1)));
         }
         
         [Fact]
@@ -285,7 +286,7 @@ namespace Core.Tests
             Assert.Empty(await _repository.For<DummyModel>().GetAll());
         }
         
-        [Fact(Skip = "Not sure how to test light weight session")]
+        [Fact]
         public async Task Test__LightSession()
         {
             // Arrange
@@ -326,6 +327,18 @@ namespace Core.Tests
                     await repo.Delete(model.Id);
                 }
             }
+        }
+
+        private static bool Equals<T>(T expected, T actual)
+        {
+            var jsonSetting = new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+            var expectedJson = JsonConvert.SerializeObject(expected, jsonSetting);
+            var actualJson = JsonConvert.SerializeObject(actual, jsonSetting);
+
+            return expectedJson == actualJson;
         }
     }
 }
