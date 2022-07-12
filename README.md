@@ -27,7 +27,7 @@ public class DummyModel
 ```c#
 public class DummyModelProfile : EntityProfile<DummyModel> 
 {
-    public void Update(DummyModel entity, DummyModel dto)
+    public override void Update(DummyModel entity, DummyModel dto)
     {
         entity.Name = dto.Name;
 
@@ -37,7 +37,7 @@ public class DummyModelProfile : EntityProfile<DummyModel>
     }
 
     // Intercept IQueryable to include related entities
-    public IQueryable<DummyModel> Include<TQueryable>(TQueryable queryable) where TQueryable : IQueryable<DummyModel>
+    public override IQueryable<DummyModel> Include<TQueryable>(TQueryable queryable) where TQueryable : IQueryable<DummyModel>
     {
         return queryable.Include(x => x.Children);
     }
@@ -86,8 +86,14 @@ Task<IEnumerable<TSource>> Save(param TSource[]);
 // Update entity by Id
 Task<TSource> Update<TId>(TId, TSource);
 
+// Update entity manually
+Task<TSource> Update<TId>(TId, Action<TSource>);
+
 // Update entity by filter expression
 Task<TSource> Update(Expression<Func<TSource, bool>>, TSource);
+
+// Update entity manually by filter expression
+Task<TSource> Update(Expression<Func<TSource, bool>>, Action<TSource>);
 
 // Delete entity by Id
 Task<TSource> Delete<TId>(TId);
