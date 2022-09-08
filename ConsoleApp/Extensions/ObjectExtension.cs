@@ -6,7 +6,12 @@ namespace ConsoleApp.Extensions
     {
         public static T DeepClone<T>(this T source) where T: new()
         {
-            return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source));
+            var settings = new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+            
+            return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source, settings), settings);
         }
     }
 }

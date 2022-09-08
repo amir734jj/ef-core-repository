@@ -83,7 +83,7 @@ namespace EfCoreRepository
 
             if (entity != null)
             {
-                _profile.Update(entity, dto);
+                _profile.UpdateInternal(entity, dto);
 
                 if (!_sessionType.HasFlag(SessionType.Delayed))
                 {
@@ -253,7 +253,7 @@ namespace EfCoreRepository
                 updater(entity);
                 
                 // Another pass through profile
-                _profile.Update(entity, entity);
+                _profile.UpdateInternal(entity, entity);
 
                 if (!_sessionType.HasFlag(SessionType.Delayed))
                 {
