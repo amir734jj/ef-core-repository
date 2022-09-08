@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using EfCoreRepository.Extensions;
 
 namespace EfCoreRepository
 {
@@ -81,23 +82,6 @@ namespace EfCoreRepository
             new Dictionary<PropertyInfo, Action<TSource, TSource>>();
 
         /// <summary>
-        /// Utility function that returns true if property type if of IList
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        private static bool IsGenericList(Type type)
-        {
-            if (!type.IsGenericType)
-                return false;
-            var genericArguments = type.GetGenericArguments();
-            if (genericArguments.Length != 1)
-                return false;
-
-            var listType = typeof (IList<>).MakeGenericType(genericArguments);
-            return listType.IsAssignableFrom(type);
-        }
-        
-        /// <summary>
         /// Internal utility function that creates map function given property info and access expression
         /// </summary>
         /// <param name="propertyInfo"></param>
@@ -109,10 +93,10 @@ namespace EfCoreRepository
             var param1AccessExpr = Expression.Invoke(accessor, param1Expr);
             var param2AccessExpr = Expression.Invoke(accessor, param2Expr);
             
-            if (IsGenericList(propertyInfo.PropertyType))
+            if (propertyInfo.PropertyType.IsGenericList())
             {
                 var genericArgType = propertyInfo.PropertyType.GetGenericArguments()[0];
-                var idPropertyInfo = genericArgType.GetProperties().First(x => x.GetCustomAttribute<KeyAttribute>() != null);
+                var idPropertyInfo = genericArgType.GetProperties().First(x => x.GetCustomAttribute<KeyAttribute>() != null && x.PropertyType.IsValueType);
                 var genericMethod = this.GetType().GetMethod(nameof(ModifyList), BindingFlags.Instance | BindingFlags.NonPublic)
                     ?.MakeGenericMethod(genericArgType, idPropertyInfo.PropertyType);
 
