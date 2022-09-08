@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -96,8 +95,8 @@ namespace EfCoreRepository
             if (propertyInfo.PropertyType.IsGenericList())
             {
                 var genericArgType = propertyInfo.PropertyType.GetGenericArguments()[0];
-                var idPropertyInfo = genericArgType.GetProperties().First(x => x.GetCustomAttribute<KeyAttribute>() != null && x.PropertyType.IsValueType);
-                var genericMethod = this.GetType().GetMethod(nameof(ModifyList), BindingFlags.Instance | BindingFlags.NonPublic)
+                var idPropertyInfo = genericArgType.GetProperty(EntityUtility.FindIdPropertyInternal(genericArgType))!;
+                var genericMethod = GetType().GetMethod(nameof(ModifyList), BindingFlags.Instance | BindingFlags.NonPublic)
                     ?.MakeGenericMethod(genericArgType, idPropertyInfo.PropertyType);
 
                 var genericParamExpr = Expression.Parameter(genericArgType);

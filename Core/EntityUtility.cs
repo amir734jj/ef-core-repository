@@ -21,13 +21,10 @@ namespace EfCoreRepository
         /// <summary>
         /// Finds ID property of a class
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public static string FindIdProperty<T>() where T : class
+        public static string FindIdPropertyInternal(Type type)
         {
-            var type = typeof(T);
-
             if (IdLookup.ContainsKey(type))
             {
                 return IdLookup[type];
@@ -50,6 +47,17 @@ namespace EfCoreRepository
             IdLookup[type] = keyProperty.Name;
 
             return keyProperty.Name;
+        }
+        
+        /// <summary>
+        /// Finds ID property of a class
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public static string FindIdProperty<T>() where T : class
+        {
+            return FindIdPropertyInternal(typeof(T));
         }
 
         /// <summary>
