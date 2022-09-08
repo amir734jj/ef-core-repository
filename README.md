@@ -12,7 +12,7 @@ Using repository pattern with entity framework enforces a consistent convention 
 
 #### Basic setup
 
-- Entity should have Id property. Using `[Key]` is optional if Id property does not follow common naming convention.
+- Entity should have Id property. Using `[Key]` is optional **IF** Id property does not follow common naming convention (i.e. `id` or `_id`, case insensitive)
 ```c#
 public class DummyModel
 {
@@ -34,6 +34,28 @@ public class DummyModelProfile : EntityProfile<DummyModel>
         // ModifyList will try to add/delete entities based on Id based on whether they
         // appear in dto.Children or not 
         ModifyList(entity.Children, dto.Children, x => x.Id);
+    }
+
+    // Intercept IQueryable to include related entities
+    public override IQueryable<DummyModel> Include<TQueryable>(TQueryable queryable) where TQueryable : IQueryable<DummyModel>
+    {
+        return queryable.Include(x => x.Children);
+    }
+}
+```
+
+- OR used auto mapper functionality to map properties. Be careful when using auto mapper. I recommend using manual mapper for more control.
+
+```c#
+public class DummyModelProfile : EntityProfile<DummyModel> 
+{
+    public DummyModelProfile()
+    {
+        // Map indivisually
+        Map(x => x.Name);
+        Map(x => x.Children);
+        // OR
+        MapAll();
     }
 
     // Intercept IQueryable to include related entities
@@ -113,4 +135,4 @@ IBasicCrud<TSource, TId> Light();
 Notes:
 
 - "Id" has a type constraint of `: struct`, which means it accepts all primitive types including `GUID` and `String`.
-- Including all associated entities will lead to "god object" which is *anti-pattern*. I recommend using [this library](https://github.com/VahidN/EFCoreSecondLevelCacheInterceptor) as L2 cache
+- Including all associated entities will lead to "god object" which is *anti-pattern*. However, you can use `LightWeight` session to not include all dependent properties.
