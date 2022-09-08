@@ -44,7 +44,7 @@ public class DummyModelProfile : EntityProfile<DummyModel>
 }
 ```
 
-- OR used auto mapper functionality to map properties. Be careful when using auto mapper. I recommend using manual mapper for more control.
+- OR use an auto mapper functionality to map properties. Be careful when using auto mapper. I recommend using manual mapper for more control.
 
 ```c#
 public class DummyModelProfile : EntityProfile<DummyModel> 
