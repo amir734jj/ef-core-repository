@@ -1,0 +1,26 @@
+#Stages
+stages:
+  - test
+  - publish
+
+#Global variables
+variables:
+  APIKEY: $APIKEY
+
+#Jobs
+test:
+  image: mcr.microsoft.com/dotnet/sdk:6.0
+  stage: ci
+  allow_failure: false
+  script:
+    - dotnet build && dotnet test
+
+publish:
+  image: mcr.microsoft.com/dotnet/sdk:6.0
+  only: 
+    - master
+  stage: ci
+  allow_failure: false
+  script:
+    - dotnet pack
+    - find Core -type f -name '*.nupkg' | xargs -I {} sh -c "dotnet nuget push {} --api-key $APIKEY --source https://api.nuget.org/v3/index.json"
