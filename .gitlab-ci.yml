@@ -10,16 +10,16 @@ variables:
 #Jobs
 test:
   image: mcr.microsoft.com/dotnet/sdk:6.0
-  stage: ci
+  stage: test
   allow_failure: false
   script:
     - dotnet build && dotnet test
 
 publish:
   image: mcr.microsoft.com/dotnet/sdk:6.0
+  stage: publish
   only: 
     - master
-  stage: ci
   allow_failure: false
   script:
     - dotnet pack
