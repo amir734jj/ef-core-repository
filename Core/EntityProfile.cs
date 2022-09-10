@@ -137,6 +137,7 @@ namespace EfCoreRepository
         {
             foreach (var propertyInfo in typeof(TSource).GetProperties(BindingFlags.Instance | BindingFlags.Public)
                          .Where(x => x.CanRead && x.CanWrite)
+                         .Where(x => !x.Name.Equals(EntityUtility.FindIdPropertyInternal(typeof(TSource))))
                          .Except(ignored.Select(x => (PropertyInfo)(x.Body as MemberExpression)!.Member)))
             {
                 var paramExpr = Expression.Parameter(typeof(TSource));
