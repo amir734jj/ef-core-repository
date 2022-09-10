@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using EfCoreRepository.Interfaces;
@@ -13,19 +14,18 @@ namespace EfCoreRepository
     {
         private readonly DbContext _dbContext;
         
-        private readonly List<EntityProfileAttributed> _profiles;
+        private readonly IDictionary<Type, object> _profiles;
 
-        public EfRepository(List<EntityProfileAttributed> profiles, DbContext dbContext)
+        public EfRepository(IEnumerable<EntityProfileAttributed> profiles, DbContext dbContext)
         {
             _dbContext = dbContext;
-            _profiles = profiles;
+            _profiles = new ConcurrentDictionary<Type, object>(profiles.GroupBy(x => x.SourceType)
+                .ToDictionary(x => x.Key, x => x.First().Profile));
         }
 
         public IBasicCrud<TSource> For<TSource>() where TSource: class
         {
-            var profile = _profiles.FirstOrDefault(x => x.SourceType == typeof(TSource));
-
-            if (profile == null)
+            if (!_profiles.TryGetValue(typeof(TSource), out var profile))
             {
                 throw new Exception($"Failed to find profile for {typeof(TSource).Name}>");
             }
@@ -37,7 +37,7 @@ namespace EfCoreRepository
                 throw new Exception("Missing Key attribute on entity");
             }
 
-            return new BasicCrud<TSource>((EntityProfile<TSource>) profile.Profile, _dbContext, Generic);
+            return new BasicCrud<TSource>((EntityProfile<TSource>) profile, _dbContext, Generic);
         }
     }
 }
