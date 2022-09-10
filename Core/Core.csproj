@@ -6,9 +6,9 @@
         <Description>EntityFramework.Core repository pattern</Description>
         <RepositoryUrl>https://github.com/amir734jj/ef-core-repository</RepositoryUrl>
         <PackageProjectUrl>https://github.com/amir734jj/ef-core-repository</PackageProjectUrl>
-        <AssemblyVersion>3.0.3</AssemblyVersion>
-        <PackageReleaseNotes>Used a built in function to find the ID.</PackageReleaseNotes>
-        <Version>3.0.3</Version>
+        <AssemblyVersion>3.0.4</AssemblyVersion>
+        <PackageReleaseNotes>In MapAll, ignore certain property or properties.</PackageReleaseNotes>
+        <Version>3.0.4</Version>
         <RootNamespace>EfCoreRepository</RootNamespace>
         <AssemblyName>SimpleEfCoreRepository</AssemblyName>
         <PackageReleaseNotes>Added auto mapping functionality.</PackageReleaseNotes>
