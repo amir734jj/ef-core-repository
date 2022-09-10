@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -9,9 +10,9 @@ namespace EfCoreRepository
 {
     public abstract class EntityProfile<TSource> where TSource : class
     {
-        private readonly Dictionary<PropertyInfo, Action<TSource, TSource>> _updates =
-            new Dictionary<PropertyInfo, Action<TSource, TSource>>();
-        
+        private readonly IDictionary<PropertyInfo, Action<TSource, TSource>> _updates =
+            new ConcurrentDictionary<PropertyInfo, Action<TSource, TSource>>();
+
         /// <summary>
         /// Updated entity given dto
         /// </summary>
@@ -34,7 +35,6 @@ namespace EfCoreRepository
         /// <param name="dto"></param>
         protected virtual void Update(TSource entity, TSource dto)
         {
-            
         }
 
         /// <summary>
@@ -91,20 +91,22 @@ namespace EfCoreRepository
             var param2Expr = Expression.Parameter(typeof(TSource));
             var param1AccessExpr = Expression.Invoke(accessor, param1Expr);
             var param2AccessExpr = Expression.Invoke(accessor, param2Expr);
-            
+
             if (propertyInfo.PropertyType.IsGenericList())
             {
                 var genericArgType = propertyInfo.PropertyType.GetGenericArguments()[0];
                 var idPropertyInfo = genericArgType.GetProperty(EntityUtility.FindIdPropertyInternal(genericArgType))!;
-                var genericMethod = GetType().GetMethod(nameof(ModifyList), BindingFlags.Instance | BindingFlags.NonPublic)
+                var genericMethod = GetType()
+                    .GetMethod(nameof(ModifyList), BindingFlags.Instance | BindingFlags.NonPublic)
                     ?.MakeGenericMethod(genericArgType, idPropertyInfo.PropertyType);
 
                 var genericParamExpr = Expression.Parameter(genericArgType);
                 var genericBodyExpr = Expression.MakeMemberAccess(genericParamExpr, idPropertyInfo);
                 var memberAccessExpr = Expression.Lambda(genericBodyExpr, genericParamExpr);
 
-                var lambdaExpr = Expression.Call(Expression.Constant(this), genericMethod!, param1AccessExpr, param2AccessExpr, Expression.Constant(memberAccessExpr.Compile()));
-                
+                var lambdaExpr = Expression.Call(Expression.Constant(this), genericMethod!, param1AccessExpr,
+                    param2AccessExpr, Expression.Constant(memberAccessExpr.Compile()));
+
                 var wrapperLambdaExpr = Expression.Lambda<Action<TSource, TSource>>(lambdaExpr, param1Expr, param2Expr);
                 _updates.Add(propertyInfo, wrapperLambdaExpr.Compile());
             }
@@ -116,7 +118,7 @@ namespace EfCoreRepository
                 _updates.Add(propertyInfo, lambdaExpr.Compile());
             }
         }
-        
+
         /// <summary>
         /// Utility function to map one property at a time
         /// </summary>
@@ -126,7 +128,7 @@ namespace EfCoreRepository
         {
             MapUntyped((PropertyInfo)(accessor.Body as MemberExpression)!.Member, accessor);
         }
-        
+
         /// <summary>
         /// Utility function to map all properties automatically
         /// <param name="ignored">Ignored properties</param>
@@ -140,7 +142,7 @@ namespace EfCoreRepository
                 var paramExpr = Expression.Parameter(typeof(TSource));
                 var bodyExpr = Expression.MakeMemberAccess(paramExpr, propertyInfo);
                 var memberAccessorExpr = Expression.Lambda(bodyExpr, paramExpr);
-                
+
                 MapUntyped(propertyInfo, memberAccessorExpr);
             }
         }
