@@ -9,7 +9,7 @@ namespace Core.Tests.Profiles
     {
         public DummyModelProfile()
         {
-            MapAll();
+            MapAll(x => x.Children);
         }
 
         public override IQueryable<DummyModel> Include<TQueryable>(TQueryable queryable)

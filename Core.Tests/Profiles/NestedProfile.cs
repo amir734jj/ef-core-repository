@@ -7,7 +7,7 @@ namespace Core.Tests.Profiles
     {
         public NestedProfile()
         {
-            MapAll();
+            MapAll(x => x.ParentRef);
         }
     }
 }

@@ -9,6 +9,9 @@ namespace EfCoreRepository
 {
     public abstract class EntityProfile<TSource> where TSource : class
     {
+        private readonly Dictionary<PropertyInfo, Action<TSource, TSource>> _updates =
+            new Dictionary<PropertyInfo, Action<TSource, TSource>>();
+        
         /// <summary>
         /// Updated entity given dto
         /// </summary>
@@ -77,9 +80,6 @@ namespace EfCoreRepository
             }
         }
 
-        private readonly Dictionary<PropertyInfo, Action<TSource, TSource>> _updates =
-            new Dictionary<PropertyInfo, Action<TSource, TSource>>();
-
         /// <summary>
         /// Internal utility function that creates map function given property info and access expression
         /// </summary>
@@ -129,10 +129,13 @@ namespace EfCoreRepository
         
         /// <summary>
         /// Utility function to map all properties automatically
+        /// <param name="ignored">Ignored properties</param>
         /// </summary>
-        protected void MapAll()
+        protected void MapAll(params Expression<Func<TSource, object>>[] ignored)
         {
-            foreach (var propertyInfo in typeof(TSource).GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(x => x.CanRead && x.CanWrite))
+            foreach (var propertyInfo in typeof(TSource).GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                         .Where(x => x.CanRead && x.CanWrite)
+                         .Except(ignored.Select(x => (PropertyInfo)(x.Body as MemberExpression)!.Member)))
             {
                 var paramExpr = Expression.Parameter(typeof(TSource));
                 var bodyExpr = Expression.MakeMemberAccess(paramExpr, propertyInfo);
