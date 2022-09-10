@@ -12,7 +12,7 @@ namespace EfCoreRepository
     {
         private readonly IDictionary<PropertyInfo, Action<TSource, TSource>> _updates =
             new ConcurrentDictionary<PropertyInfo, Action<TSource, TSource>>();
-
+        
         /// <summary>
         /// Updated entity given dto
         /// </summary>
@@ -126,7 +126,7 @@ namespace EfCoreRepository
         /// <typeparam name="TProperty"></typeparam>
         protected void Map<TProperty>(Expression<Func<TSource, TProperty>> accessor)
         {
-            MapUntyped((PropertyInfo)(accessor.Body as MemberExpression)!.Member, accessor);
+            MapUntyped(PropertyInfoByLinqExpressionVisitor.Instance.GetPropertyInfo(accessor), accessor);
         }
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace EfCoreRepository
             foreach (var propertyInfo in typeof(TSource).GetProperties(BindingFlags.Instance | BindingFlags.Public)
                          .Where(x => x.CanRead && x.CanWrite)
                          .Where(x => !x.Name.Equals(EntityUtility.FindIdPropertyInternal(typeof(TSource))))
-                         .Except(ignored.Select(x => (PropertyInfo)(x.Body as MemberExpression)!.Member)))
+                         .Except(ignored.Select(x => PropertyInfoByLinqExpressionVisitor.Instance.GetPropertyInfo(x))))
             {
                 var paramExpr = Expression.Parameter(typeof(TSource));
                 var bodyExpr = Expression.MakeMemberAccess(paramExpr, propertyInfo);
