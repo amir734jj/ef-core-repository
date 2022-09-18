@@ -14,13 +14,13 @@ namespace EfCoreRepository
     {
         private readonly DbContext _dbContext;
         
-        private readonly IDictionary<Type, object> _profiles;
+        private readonly IDictionary<Type, EntityProfileAttributed> _profiles;
 
         public EfRepository(IEnumerable<EntityProfileAttributed> profiles, DbContext dbContext)
         {
             _dbContext = dbContext;
-            _profiles = new ConcurrentDictionary<Type, object>(profiles.GroupBy(x => x.SourceType)
-                .ToDictionary(x => x.Key, x => x.First().Profile));
+            _profiles = new ConcurrentDictionary<Type, EntityProfileAttributed>(profiles.GroupBy(x => x.EntityType)
+                .ToDictionary(x => x.Key, x => x.First()));
         }
 
         public IBasicCrud<TSource> For<TSource>() where TSource: class
@@ -34,10 +34,10 @@ namespace EfCoreRepository
 
             if (keyProperty == null)
             {
-                throw new Exception("Missing Key attribute on entity");
+                throw new Exception($"Missing Key attribute on entity {typeof(TSource).Name}");
             }
 
-            return new BasicCrud<TSource>((EntityProfile<TSource>) profile, _dbContext, Generic);
+            return new BasicCrud<TSource>(profile.EntityMapping, _dbContext, Generic);
         }
     }
 }

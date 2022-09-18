@@ -23,7 +23,7 @@ namespace EfCoreRepository
         /// </summary>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public static string FindIdPropertyInternal(Type type)
+        private static string FindIdPropertyInternal(Type type)
         {
             if (IdLookup.ContainsKey(type))
             {
@@ -41,12 +41,23 @@ namespace EfCoreRepository
 
             if (keyProperty == null)
             {
-                throw new Exception($"Missing KEY attribute on the class declaration for {type.Name}");
+                throw new Exception(
+                    $"Missing KEY attribute on the class declaration for nested entity: {type.Name}");
             }
 
             IdLookup[type] = keyProperty.Name;
 
             return keyProperty.Name;
+        }
+        
+        /// <summary>
+        /// Finds ID property of a class
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public static string FindIdProperty(Type type)
+        {
+           return FindIdPropertyInternal(type);
         }
         
         /// <summary>

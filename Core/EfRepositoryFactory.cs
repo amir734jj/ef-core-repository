@@ -6,6 +6,7 @@ using EfCoreRepository.Interfaces;
 using EfCoreRepository.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using static EfCoreRepository.EntityUtility;
 
 namespace EfCoreRepository
 {
@@ -13,24 +14,25 @@ namespace EfCoreRepository
     {
         private readonly IServiceCollection _serviceCollection;
         private readonly ServiceLifetime _serviceLifetime;
-        private readonly List<(Type SourceType, Type GenericType)> _profiles;
+        private readonly List<(Type ProfileType, Type EntityType)> _context;
 
         public EfRepositoryFactory(IServiceCollection serviceCollection, ServiceLifetime serviceLifetime)
         {
             _serviceCollection = serviceCollection;
             _serviceLifetime = serviceLifetime;
-            _profiles = new List<(Type SourceType, Type GenericType)>();
+            _context = new List<(Type ProfileType, Type EntityType)>();
         }
         
         public IEfRepositoryFactory Profile(params Assembly[] assemblies)
         {
-            _profiles.AddRange(assemblies
+            _context.AddRange(assemblies
                 .SelectMany(assembly => assembly.GetExportedTypes())
+                .Where(x => typeof(IEntityProfile).IsAssignableFrom(x))
                 .Select(type => (
-                    SourceType: type,
-                    GenericType: GetProfileGenericType(type)
+                    ProfileType: type,
+                    EntityType: GetProfileGenericType(type)
                 ))
-                .Where(x => x.GenericType != null));
+                .Where(x => x.EntityType != null));
 
             return this;
         }
@@ -41,7 +43,7 @@ namespace EfCoreRepository
         {
             var t = profile.GetType();
 
-            _profiles.Add((t, GetProfileGenericType(t)));
+            _context.Add((t, GetProfileGenericType(t)));
 
             return this;
         }
@@ -51,42 +53,70 @@ namespace EfCoreRepository
             where TEntity : class
         {
             var t = typeof(TProfile);
-            _profiles.Add((t, GetProfileGenericType(t)));
+            _context.Add((t, GetProfileGenericType(t)));
 
             return this;
         }
 
         public void Build()
         {
-            AddEfRepository(_profiles, _serviceLifetime);
+            AddEfRepository(_context, _serviceLifetime);
         }
 
-        private void AddEfRepository(IReadOnlyCollection<(Type SourceType, Type GenericType)> profiles, ServiceLifetime serviceLifetime)
+        private void AddEfRepository(IReadOnlyCollection<(Type ProfileType, Type EntityType)> context, ServiceLifetime serviceLifetime)
         {
+            var entityTypes = context.Select(x => x.EntityType).ToList();
+            var duplicateProfiles =  context.GroupBy(x => x.EntityType).Where(x => x.Count() > 1)
+                .Select(x => x.Key)
+                .ToList();
+            
+            // Check for duplicate profiles
+            if (duplicateProfiles.Any())
+            {
+                throw new Exception(
+                    $"Duplicate profile has been defined for entities: {string.Join(", ", duplicateProfiles.Select(x => x.Name))}");
+            }
+
+            var missingKeys = context.Where(x =>
+            {
+                try
+                {
+                    FindIdProperty(x.EntityType);
+
+                    return false;
+                }
+                catch (Exception)
+                {
+                    return true;
+                }
+            }).ToList();
+            
+            // Check for missing ID property in Entity
+            if (duplicateProfiles.Any())
+            {
+                throw new Exception($"Missing KEY attribute on the class declaration for entities: {string.Join(", ", missingKeys.Select(x => x.EntityType.Name))}");
+            }
+            
             // DbContext is registered by default as scoped
             // https://docs.microsoft.com/en-us/ef/core/miscellaneous/configuring-dbcontext#implicitly-sharing-dbcontext-instances-across-multiple-threads-via-dependency-injection
-            _serviceCollection.Add(ServiceDescriptor.Describe(typeof(IEfRepository), serviceProvider => new EfRepository(profiles.Select(tuple =>
+            _serviceCollection.Add(ServiceDescriptor.Describe(typeof(IEfRepository), serviceProvider => new EfRepository(context.Select(tuple =>
             {
-                var (sourceType, genericType) = tuple;
-
-                if (genericType == null)
-                {
-                    throw new Exception($"Profiles generic type is null for {sourceType.Name}");
-                }
+                var profile = (IEntityProfile)ActivatorUtilities.CreateInstance(serviceProvider, tuple.ProfileType);
 
                 return new EntityProfileAttributed
                 {
-                    SourceType = genericType.GetGenericArguments().First(),
-                    Profile = ActivatorUtilities.CreateInstance(serviceProvider, sourceType)
+                    EntityType = tuple.EntityType,
+                    Profile = profile,
+                    EntityMapping = profile.ToEntityMapping(entityTypes)
                 };
             }).ToList(), serviceProvider.GetService<TDbContext>()), serviceLifetime));
         }
 
         private static Type GetProfileGenericType(Type t)
         {
-            if (t.BaseType != null && t.BaseType.IsGenericType && t.BaseType.GetGenericTypeDefinition() == typeof(EntityProfile<>))
+            if (t.BaseType is { IsGenericType: true } && t.BaseType.GetGenericTypeDefinition() == typeof(EntityProfile<>))
             {
-                return t.BaseType;
+                return t.BaseType.GenericTypeArguments[0];
             }
 
             return null;

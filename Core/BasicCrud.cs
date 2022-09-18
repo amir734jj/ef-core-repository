@@ -12,7 +12,7 @@ namespace EfCoreRepository
 {
     internal class BasicCrud<TSource> : IBasicCrud<TSource> where TSource : class
     {
-        private readonly EntityProfile<TSource> _profile;
+        private readonly IEntityMapping _profile;
 
         private readonly DbContext _dbContext;
 
@@ -22,7 +22,7 @@ namespace EfCoreRepository
 
         private bool _anyChanges;
 
-        public BasicCrud(EntityProfile<TSource> profile, DbContext dbContext, SessionType sessionType)
+        public BasicCrud(IEntityMapping profile, DbContext dbContext, SessionType sessionType)
         {
             _profile = profile;
             _dbContext = dbContext;
@@ -38,7 +38,7 @@ namespace EfCoreRepository
                 return _dbSet;
             }
 
-            return _profile.Include(_dbSet);
+            return (IQueryable<TSource>)_profile.Include(_dbSet);
         }
 
         /// <summary>
@@ -58,6 +58,11 @@ namespace EfCoreRepository
         public async Task<TSource> Get<TId>(TId id) where TId : struct
         {
             return await GetQueryable().AsNoTracking().FirstOrDefaultAsync(FilterExpression<TSource, TId>(id));
+        }
+
+        public async Task<bool> All(Expression<Func<TSource, bool>> expression)
+        {
+            return await GetQueryable().AllAsync(expression);
         }
 
         /// <summary>
@@ -83,7 +88,7 @@ namespace EfCoreRepository
 
             if (entity != null)
             {
-                _profile.UpdateInternal(entity, dto);
+                _profile.Update(entity, dto);
 
                 if (!_sessionType.HasFlag(SessionType.Delayed))
                 {
@@ -253,7 +258,7 @@ namespace EfCoreRepository
                 updater(entity);
                 
                 // Another pass through profile
-                _profile.UpdateInternal(entity, entity);
+                _profile.Update(entity, entity);
 
                 if (!_sessionType.HasFlag(SessionType.Delayed))
                 {
@@ -277,9 +282,14 @@ namespace EfCoreRepository
         /// <param name="id"></param>
         /// <param name="updater"></param>
         /// <returns></returns>
-        public virtual async Task<TSource> Update<TId>(TId id, Action<TSource> updater) where TId : struct
+        public async Task<TSource> Update<TId>(TId id, Action<TSource> updater) where TId : struct
         {
             return await Update(FilterExpression<TSource, TId>(id), updater);
+        }
+
+        public async Task<bool> Any(Expression<Func<TSource, bool>> expression)
+        {
+            return await GetQueryable().AnyAsync(expression);
         }
 
         /// <summary>

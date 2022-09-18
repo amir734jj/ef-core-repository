@@ -93,6 +93,12 @@ Task<IEnumerable<TSource>> GetAll<TId>(param TId[]);
 // Get all entities given a filter expression
 Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, bool>>);
 
+// Boolean if there is any
+Task<bool> Any(Expression<Func<TSource, bool>>);
+
+// Boolean if there if for all
+Task<bool> All(Expression<Func<TSource, bool>>);
+
 // Get single entity by Id
 Task<TSource> Get<TId>(TId);
 

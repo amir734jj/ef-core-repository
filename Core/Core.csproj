@@ -6,9 +6,9 @@
         <Description>EntityFramework.Core repository pattern</Description>
         <RepositoryUrl>https://github.com/amir734jj/ef-core-repository</RepositoryUrl>
         <PackageProjectUrl>https://github.com/amir734jj/ef-core-repository</PackageProjectUrl>
-        <AssemblyVersion>3.0.6</AssemblyVersion>
-        <PackageReleaseNotes>Used expression tree visitor to find the property info.</PackageReleaseNotes>
-        <Version>3.0.6</Version>
+        <AssemblyVersion>3.0.7</AssemblyVersion>
+        <PackageReleaseNotes>Major internal restructing and added any/all methods.</PackageReleaseNotes>
+        <Version>3.0.7</Version>
         <RootNamespace>EfCoreRepository</RootNamespace>
         <AssemblyName>SimpleEfCoreRepository</AssemblyName>
     </PropertyGroup>

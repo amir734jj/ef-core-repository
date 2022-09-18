@@ -45,6 +45,10 @@ namespace EfCoreRepository.Interfaces
 
         #region IdUnAware
 
+        Task<bool> Any(Expression<Func<TSource, bool>> expression);
+        
+        Task<bool> All(Expression<Func<TSource, bool>> expression);
+        
         Task<TSource> Get(Expression<Func<TSource, bool>> expression);
 
         Task<TSource> Update(Expression<Func<TSource, bool>> expression, TSource dto);
