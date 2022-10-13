@@ -5,6 +5,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using EfCoreRepository.Abstracts;
 using EfCoreRepository.Interfaces;
+using InfoViaLinq;
+using InfoViaLinq.Interfaces;
 
 namespace EfCoreRepository
 {
@@ -12,6 +14,8 @@ namespace EfCoreRepository
         where TSource : class
     {
         private readonly IList<PropertyInfo> _properties = new List<PropertyInfo>();
+
+        private readonly IInfoViaLinq<TSource> _infoViaLinq = new InfoViaLinq<TSource>();
 
         /// <summary>
         /// Updated entity given dto
@@ -36,10 +40,9 @@ namespace EfCoreRepository
         /// Utility function to map one property at a time
         /// </summary>
         /// <param name="accessor"></param>
-        /// <typeparam name="TProperty"></typeparam>
-        protected void Map<TProperty>(Expression<Func<TSource, TProperty>> accessor)
+        protected void Map(Expression<Func<TSource, object>> accessor)
         {
-            _properties.Add(PropertyInfoByLinqExpressionVisitor.Instance.GetPropertyInfo(accessor));
+            _properties.Add(_infoViaLinq.PropLambda(accessor).Members().FirstOrDefault());
         }
 
         /// <summary>
@@ -50,7 +53,7 @@ namespace EfCoreRepository
         {
             foreach (var propertyInfo in typeof(TSource).GetProperties(BindingFlags.Instance | BindingFlags.Public)
                          .Where(x => x.CanRead && x.CanWrite)
-                         .Except(ignored.Select(x => PropertyInfoByLinqExpressionVisitor.Instance.GetPropertyInfo(x))))
+                         .Except(ignored.Select(x => _infoViaLinq.PropLambda(x).Members().FirstOrDefault())))
             {
                _properties.Add(propertyInfo);
             }
