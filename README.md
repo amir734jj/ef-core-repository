@@ -91,19 +91,16 @@ Task<IEnumerable<TSource>> GetAll();
 Task<IEnumerable<TSource>> GetAll<TId>(param TId[]);
 
 // Get all entities given a filter expression
-Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, bool>>);
+Task<IEnumerable<TSource>> GetAll(params Expression<Func<TSource, bool>>[]);
 
 // Boolean if there is any
-Task<bool> Any(Expression<Func<TSource, bool>>);
-
-// Boolean if there if for all
-Task<bool> All(Expression<Func<TSource, bool>>);
+Task<bool> Any(params Expression<Func<TSource, bool>>[]);
 
 // Get single entity by Id
 Task<TSource> Get<TId>(TId);
 
 // Get single entity given a filter expression
-Task<TSource> Get(Expression<Func<TSource, bool>>);
+Task<TSource> Get(params Expression<Func<TSource, bool>>[]);
 
 // Save entity
 Task<TSource> Save(TSource);
@@ -118,16 +115,16 @@ Task<TSource> Update<TId>(TId, TSource);
 Task<TSource> Update<TId>(TId, Action<TSource>);
 
 // Update entity by filter expression
-Task<TSource> Update(Expression<Func<TSource, bool>>, TSource);
+Task<TSource> Update(TSource, params Expression<Func<TSource, bool>>[]);
 
 // Update entity manually by filter expression
-Task<TSource> Update(Expression<Func<TSource, bool>>, Action<TSource>);
+Task<TSource> Update(Action<TSource>, params Expression<Func<TSource, bool>>[]);
 
 // Delete entity by Id
 Task<TSource> Delete<TId>(TId);
 
 // Delete entity given a filter expression
-Task<TSource> Delete(Expression<Func<TSource, bool>>);
+Task<TSource> Delete(params Expression<Func<TSource, bool>>[]);
 
 // This is useful if you want to defer SaveChanges in session mode
 // Changes are not automatically saved back to DbContext in session mode

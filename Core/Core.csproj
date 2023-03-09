@@ -6,9 +6,9 @@
         <Description>EntityFramework.Core repository pattern</Description>
         <RepositoryUrl>https://github.com/amir734jj/ef-core-repository</RepositoryUrl>
         <PackageProjectUrl>https://github.com/amir734jj/ef-core-repository</PackageProjectUrl>
-        <AssemblyVersion>3.0.8</AssemblyVersion>
-        <PackageReleaseNotes>Used a library to get property info via LINQ.</PackageReleaseNotes>
-        <Version>3.0.8</Version>
+        <AssemblyVersion>3.0.9</AssemblyVersion>
+        <PackageReleaseNotes>Allow multiple filter expressions.</PackageReleaseNotes>
+        <Version>3.0.9</Version>
         <RootNamespace>EfCoreRepository</RootNamespace>
         <AssemblyName>SimpleEfCoreRepository</AssemblyName>
     </PropertyGroup>

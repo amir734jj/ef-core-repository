@@ -25,16 +25,20 @@ namespace EfCoreRepository.Interfaces
         
         #region Basics
 
-        Task<TSource> Save(TSource instance);
-        
         Task<IEnumerable<TSource>> GetAll();
-
+        
+        Task<int> Count();
+        
+        Task<IEnumerable<TSource>> Save(TSource source, params TSource[] additionalSources);
+        
         #endregion
         
         #region IdAware
         
         Task<TSource> Get<TId>(TId id) where TId : struct;
-        
+
+        Task<IEnumerable<TSource>> GetAll<TId>(params TId[] ids) where TId : struct;
+
         Task<TSource> Delete<TId>(TId id) where TId : struct;
 
         Task<TSource> Update<TId>(TId id, TSource dto) where TId : struct;
@@ -45,31 +49,19 @@ namespace EfCoreRepository.Interfaces
 
         #region IdUnAware
 
-        Task<bool> Any(Expression<Func<TSource, bool>> expression);
-        
-        Task<bool> All(Expression<Func<TSource, bool>> expression);
-        
-        Task<TSource> Get(Expression<Func<TSource, bool>> expression);
+        Task<bool> Any(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs);
 
-        Task<TSource> Update(Expression<Func<TSource, bool>> expression, TSource dto);
+        Task<TSource> Get(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs);
 
-        Task<TSource> Update(Expression<Func<TSource, bool>> expression, Action<TSource> updater);
+        Task<TSource> Update(TSource dto, Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs);
 
-        Task<TSource> Delete(Expression<Func<TSource, bool>> expression);
-        
-        #endregion
+        Task<TSource> Update(Action<TSource> updater, Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs);
 
-        #region Misc
+        Task<TSource> Delete(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs);
 
-        Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, bool>> filter);
+        Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs);
 
-        Task<IEnumerable<TSource>> GetAll<TId>(params TId[] ids) where TId : struct;
-
-        Task<IEnumerable<TSource>> Save(params TSource[] instances);
-
-        Task<int> Count(Expression<Func<TSource, bool>> expression);
-        
-        Task<int> Count();
+        Task<int> Count(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs);
 
         #endregion
     }

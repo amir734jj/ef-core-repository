@@ -60,31 +60,28 @@ namespace EfCoreRepository
             return await GetQueryable().AsNoTracking().FirstOrDefaultAsync(FilterExpression<TSource, TId>(id));
         }
 
-        public async Task<bool> All(Expression<Func<TSource, bool>> expression)
-        {
-            return await GetQueryable().AllAsync(expression);
-        }
-
         /// <summary>
         /// Returns filters list of entities
         /// </summary>
-        /// <param name="expression"></param>
+        /// <param name="filterExpr"></param>
+        /// <param name="additionalFilterExprs"></param>
         /// <returns></returns>
-        public async Task<TSource> Get(Expression<Func<TSource, bool>> expression)
+        public async Task<TSource> Get(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
         {
-            return await GetQueryable().AsNoTracking().FirstOrDefaultAsync(expression);
+            return await ApplyFilters(GetQueryable(), new []{filterExpr}.Concat(additionalFilterExprs)).FirstOrDefaultAsync();
         }
 
         /// <summary>
         /// Update entity given filter expression and dto
         /// </summary>
-        /// <param name="expression"></param>
+        /// <param name="filterExpr"></param>
         /// <param name="dto"></param>
+        /// <param name="additionalFilterExprs"></param>
         /// <returns></returns>
-        public async Task<TSource> Update(Expression<Func<TSource, bool>> expression, TSource dto)
+        public async Task<TSource> Update(TSource dto, Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
         {
             // With tracking
-            var entity = await GetQueryable().FirstOrDefaultAsync(expression);
+            var entity = await ApplyFilters(GetQueryable(), new []{filterExpr}.Concat(additionalFilterExprs)).FirstOrDefaultAsync();
 
             if (entity != null)
             {
@@ -109,12 +106,13 @@ namespace EfCoreRepository
         /// <summary>
         /// Deletes entity given filter expression
         /// </summary>
-        /// <param name="expression"></param>
+        /// <param name="filterExpr"></param>
+        /// <param name="additionalFilterExprs"></param>
         /// <returns></returns>
-        public async Task<TSource> Delete(Expression<Func<TSource, bool>> expression)
+        public async Task<TSource> Delete(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
         {
             // With tracking
-            var entity = await GetQueryable().FirstOrDefaultAsync(expression);
+            var entity = await ApplyFilters(GetQueryable(), new []{filterExpr}.Concat(additionalFilterExprs)).FirstOrDefaultAsync();
 
             if (entity != null)
             {
@@ -139,11 +137,12 @@ namespace EfCoreRepository
         /// <summary>
         /// Get all entities given a filter expression
         /// </summary>
-        /// <param name="filter"></param>
+        /// <param name="filterExpr"></param>
+        /// <param name="additionalFilterExprs"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, bool>> filter)
+        public async Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
         {
-            return await GetQueryable().AsNoTracking().Where(filter).ToListAsync();
+            return await ApplyFilters(GetQueryable().AsNoTracking(), new []{filterExpr}.Concat(additionalFilterExprs)).ToListAsync();
         }
 
         /// <summary>
@@ -160,11 +159,14 @@ namespace EfCoreRepository
         /// <summary>
         /// Save many DTOs at the same time
         /// </summary>
-        /// <param name="instances"></param>
+        /// <param name="source"></param>
+        /// <param name="additionalSources"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<TSource>> Save(params TSource[] instances)
+        public async Task<IEnumerable<TSource>> Save(TSource source, params TSource[] additionalSources)
         {
-            await _dbSet.AddRangeAsync(instances);
+            var sources = new[] { source }.Concat(additionalSources).ToList();
+            
+            await _dbSet.AddRangeAsync(sources);
 
             if (!_sessionType.HasFlag(SessionType.Delayed))
             {
@@ -176,17 +178,18 @@ namespace EfCoreRepository
                 _anyChanges = true;
             }
 
-            return instances;
+            return sources;
         }
 
         /// <summary>
         /// Count entities that pass filter expression
         /// </summary>
-        /// <param name="expression"></param>
+        /// <param name="filterExpr"></param>
+        /// <param name="additionalFilterExprs"></param>
         /// <returns></returns>
-        public async Task<int> Count(Expression<Func<TSource, bool>> expression)
+        public async Task<int> Count(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
         {
-            return await _dbSet.AsNoTracking().CountAsync(expression);
+            return await ApplyFilters(_dbSet.AsNoTracking(), new []{filterExpr}.Concat(additionalFilterExprs)).CountAsync();
         }
 
         /// <summary>
@@ -238,19 +241,20 @@ namespace EfCoreRepository
         /// <returns></returns>
         public virtual async Task<TSource> Update<TId>(TId id, TSource dto) where TId : struct
         {
-            return await Update(FilterExpression<TSource, TId>(id), dto);
+            return await Update(dto, FilterExpression<TSource, TId>(id));
         }
 
         /// <summary>
         /// Updates entity given the filter expression and function that modifies the entity
         /// </summary>
-        /// <param name="expression"></param>
+        /// <param name="filterExpr"></param>
+        /// <param name="additionalFilterExprs"></param>
         /// <param name="updater"></param>
         /// <returns></returns>
-        public async Task<TSource> Update(Expression<Func<TSource, bool>> expression, Action<TSource> updater)
+        public async Task<TSource> Update(Action<TSource> updater, Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
         {
             // With tracking
-            var entity = await GetQueryable().FirstOrDefaultAsync(expression);
+            var entity = await ApplyFilters(GetQueryable(), new[] { filterExpr }.Concat(additionalFilterExprs)).FirstOrDefaultAsync();
 
             if (entity != null)
             {
@@ -284,12 +288,12 @@ namespace EfCoreRepository
         /// <returns></returns>
         public async Task<TSource> Update<TId>(TId id, Action<TSource> updater) where TId : struct
         {
-            return await Update(FilterExpression<TSource, TId>(id), updater);
+            return await Update(updater, FilterExpression<TSource, TId>(id));
         }
 
-        public async Task<bool> Any(Expression<Func<TSource, bool>> expression)
+        public async Task<bool> Any(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
         {
-            return await GetQueryable().AnyAsync(expression);
+            return await ApplyFilters(GetQueryable(), new[] { filterExpr }.Concat(additionalFilterExprs)).AnyAsync();
         }
 
         /// <summary>
@@ -325,6 +329,11 @@ namespace EfCoreRepository
         public IBasicCrud<TSource> Light()
         {
             return new BasicCrud<TSource>(_profile, _dbContext, _sessionType | SessionType.LightWeight);
+        }
+
+        private static IQueryable<T> ApplyFilters<T>(IQueryable<T> source, IEnumerable<Expression<Func<T, bool>>> filterExprs)
+        {
+            return filterExprs.Aggregate(source, (current, filterExpr) => current.Where(filterExpr));
         }
     }
 }

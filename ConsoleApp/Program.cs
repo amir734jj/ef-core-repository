@@ -30,10 +30,10 @@ namespace ConsoleApp
 
             var repository = serviceProvider.GetService<IEfRepository>();
             var dal = repository!.For<DummyModel>();
-            var entity = await dal.Save(new DummyModel {Name = "Foo", Children = new List<Nested> { new Nested()}});
+            var entities = await dal.Save(new DummyModel {Name = "Foo", Children = new List<Nested> { new Nested()}});
             var dto = (await dal.Get(1)).DeepClone();
             dto.Name = "Bar";
-            await dal.Update(entity.Id, dto);
+            await dal.Update(entities.First().Id, dto);
 
             var updatedEntity = await dal.Get(1);
             
