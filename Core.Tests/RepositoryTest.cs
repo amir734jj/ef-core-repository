@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -47,8 +48,8 @@ namespace Core.Tests
             
             // Assert
             Assert.NotEmpty(result);
-            Assert.True(Equals(model, result.First()));
-            Assert.True(Equals(model, await _repository.For<DummyModel>().Get(model.Id)));
+            AssertJsonEquals(model, result.First());
+            AssertJsonEquals(model, await _repository.For<DummyModel>().Get(model.Id));
         }
         
         [Fact]
@@ -75,8 +76,9 @@ namespace Core.Tests
             var result = (await _repository.For<DummyModel>().Save(model1, model2)).ToList();
             
             // Assert
-            Assert.True(Equals(new List<DummyModel> { model1, model2}, result));
-            Assert.True(Equals(new List<DummyModel> { model1, model2},  await _repository.For<DummyModel>().GetAll(model1.Id, model2.Id)));
+            AssertJsonEquals(new List<DummyModel> { model1, model2}, result);
+            AssertJsonEquals(new List<DummyModel> { model1, model2 }.OrderBy(x => x.Id),
+                (await _repository.For<DummyModel>().GetAll(model1.Id, model2.Id)).OrderBy(x => x.Id));
         }
         
         [Fact]
@@ -95,7 +97,7 @@ namespace Core.Tests
             await _repository.For<DummyModel>().Save(model);
 
             // Assert
-            Assert.True(Equals(model, await _repository.For<DummyModel>().Get(model.Id)));
+            AssertJsonEquals(model, await _repository.For<DummyModel>().Get(model.Id));
         }
         
         [Fact]
@@ -114,7 +116,7 @@ namespace Core.Tests
             await _repository.For<DummyModel>().Save(model);
             
             // Assert
-            Assert.True(Equals(model, await _repository.For<DummyModel>().Get(x => x.Id == model.Id)));
+            AssertJsonEquals(model, await _repository.For<DummyModel>().Get(x => x.Id == model.Id));
         }
         
         [Fact]
@@ -134,7 +136,7 @@ namespace Core.Tests
             var result = await _repository.For<DummyModel>().GetAll();
             
             // Assert
-            Assert.True(Equals(new List<DummyModel> { model }, result));
+            AssertJsonEquals(new List<DummyModel> { model }, result);
         }
         
         [Fact]
@@ -154,7 +156,7 @@ namespace Core.Tests
             var result = await _repository.For<DummyModel>().GetAll(model.Id);
             
             // Assert
-            Assert.True(Equals(new List<DummyModel> { model }, result));
+            AssertJsonEquals(new List<DummyModel> { model }, result);
         }
         
         [Fact]
@@ -174,7 +176,7 @@ namespace Core.Tests
             var result = await _repository.For<DummyModel>().GetAll(x => x.Id == model.Id);
             
             // Assert
-            Assert.True(Equals(new List<DummyModel> { model}, result));
+            AssertJsonEquals(new List<DummyModel> { model}, result);
         }
 
         [Fact]
@@ -196,7 +198,7 @@ namespace Core.Tests
             await _repository.For<DummyModel>().Update(model.Id, model);
             
             // Assert
-            Assert.True(Equals(model, await _repository.For<DummyModel>().Get(model.Id)));
+            AssertJsonEquals(model, await _repository.For<DummyModel>().Get(model.Id));
         }
         
         
@@ -221,7 +223,7 @@ namespace Core.Tests
             });
             
             // Assert
-            Assert.True(Equals(model, await _repository.For<DummyModel>().Get(model.Id)));
+            AssertJsonEquals(model, await _repository.For<DummyModel>().Get(model.Id));
         }
         
         [Fact]
@@ -243,7 +245,7 @@ namespace Core.Tests
             await _repository.For<DummyModel>().Update(model, x => x.Id == model.Id);
             
             // Assert
-            Assert.True(Equals(model, await _repository.For<DummyModel>().Get(x => x.Id == 1)));
+            AssertJsonEquals(model, await _repository.For<DummyModel>().Get(x => x.Id == 1));
         }
         
         [Fact]
@@ -343,18 +345,16 @@ namespace Core.Tests
 
         public async Task DisposeAsync()
         {
-            using (var repo = _repository.For<DummyModel>().Delayed())
-            {
-                var models = await repo.GetAll();
+            await using var repo = _repository.For<DummyModel>().Delayed();
+            var models = await repo.GetAll();
             
-                foreach (var model in models)
-                {
-                    await repo.Delete(model.Id);
-                }
+            foreach (var model in models)
+            {
+                await repo.Delete(model.Id);
             }
         }
 
-        private static bool Equals<T>(T expected, T actual)
+        private static void AssertJsonEquals<T>(T expected, T actual)
         {
             var jsonSetting = new JsonSerializerSettings
             {
@@ -363,7 +363,7 @@ namespace Core.Tests
             var expectedJson = JsonConvert.SerializeObject(expected, jsonSetting);
             var actualJson = JsonConvert.SerializeObject(actual, jsonSetting);
 
-            return expectedJson == actualJson;
+            Assert.Equal(expectedJson, actualJson);
         }
     }
 }
