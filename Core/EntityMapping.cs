@@ -15,11 +15,18 @@ namespace EfCoreRepository
         private readonly Action<TSource, TSource> _manualUpdate;
         private readonly Func<IQueryable<TSource>, IQueryable<TSource>> _include;
 
-        private readonly IDictionary<PropertyInfo, Action<TSource, TSource>> _updates =
-            new ConcurrentDictionary<PropertyInfo, Action<TSource, TSource>>();
+        private readonly IDictionary<PropertyInfo, Action<TSource, TSource>> _updates;
 
-        public EntityMapping(ICollection<Type> entityTypes, IEnumerable<PropertyInfo> autoMappingProperties,
-            Action<TSource, TSource> manualUpdate, Func<IQueryable<TSource>, IQueryable<TSource>> include)
+        private EntityMapping()
+        {
+            _updates = new ConcurrentDictionary<PropertyInfo, Action<TSource, TSource>>();
+        }
+
+        public EntityMapping(
+            ICollection<Type> entityTypes,
+            IEnumerable<PropertyInfo> autoMappingProperties,
+            Action<TSource, TSource> manualUpdate,
+            Func<IQueryable<TSource>, IQueryable<TSource>> include) : this()
         {
             _manualUpdate = manualUpdate;
             _include = include;
