@@ -84,9 +84,6 @@ IBasicCrud<DummyModel> = repo.For<DummyModel>();
 
 - Available methods in `IBasicCrud`
 ```c#
-// Get all entities without any filter
-Task<IEnumerable<TSource>> GetAll();
-
 // Get all entities given an array of Ids
 Task<IEnumerable<TSource>> GetAll<TId>(param TId[]);
 

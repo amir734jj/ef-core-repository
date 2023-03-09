@@ -42,15 +42,6 @@ namespace EfCoreRepository
         }
 
         /// <summary>
-        /// Returns all entities
-        /// </summary>
-        /// <returns></returns>
-        public virtual async Task<IEnumerable<TSource>> GetAll()
-        {
-            return await GetQueryable().AsNoTracking().ToListAsync();
-        }
-
-        /// <summary>
         /// Returns an entity given the id
         /// </summary>
         /// <param name="id"></param>
@@ -137,12 +128,11 @@ namespace EfCoreRepository
         /// <summary>
         /// Get all entities given a filter expression
         /// </summary>
-        /// <param name="filterExpr"></param>
         /// <param name="additionalFilterExprs"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
+        public async Task<IEnumerable<TSource>> GetAll(params Expression<Func<TSource, bool>>[] additionalFilterExprs)
         {
-            return await ApplyFilters(GetQueryable().AsNoTracking(), new []{filterExpr}.Concat(additionalFilterExprs)).ToListAsync();
+            return await ApplyFilters(GetQueryable().AsNoTracking(), additionalFilterExprs).ToListAsync();
         }
 
         /// <summary>

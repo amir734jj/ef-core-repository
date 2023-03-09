@@ -25,8 +25,6 @@ namespace EfCoreRepository.Interfaces
         
         #region Basics
 
-        Task<IEnumerable<TSource>> GetAll();
-        
         Task<int> Count();
         
         Task<IEnumerable<TSource>> Save(TSource source, params TSource[] additionalSources);
@@ -59,7 +57,7 @@ namespace EfCoreRepository.Interfaces
 
         Task<TSource> Delete(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs);
 
-        Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs);
+        Task<IEnumerable<TSource>> GetAll(params Expression<Func<TSource, bool>>[] additionalFilterExprs);
 
         Task<int> Count(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs);
 
