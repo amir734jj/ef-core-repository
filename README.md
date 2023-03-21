@@ -99,11 +99,8 @@ Task<TSource> Get<TId>(TId);
 // Get single entity given a filter expression
 Task<TSource> Get(params Expression<Func<TSource, bool>>[]);
 
-// Save entity
-Task<TSource> Save(TSource);
-
-// Save multiple entities
-Task<IEnumerable<TSource>> Save(param TSource[]);
+// Save one or more entities
+Task<IEnumerable<TSource>> Save(TSource[]);
 
 // Update entity by Id
 Task<TSource> Update<TId>(TId, TSource);
@@ -118,7 +115,7 @@ Task<TSource> Update(TSource, params Expression<Func<TSource, bool>>[]);
 Task<TSource> Update(Action<TSource>, params Expression<Func<TSource, bool>>[]);
 
 // Delete entity by Id
-Task<TSource> Delete<TId>(TId);
+Task<IEnumerable<TSource>> Delete<TId>(TId[]);
 
 // Delete entity given a filter expression
 Task<TSource> Delete(params Expression<Func<TSource, bool>>[]);

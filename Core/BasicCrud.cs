@@ -30,10 +30,12 @@ namespace EfCoreRepository
             _dbSet = dbContext.Set<TSource>();
         }
 
-        private IQueryable<TSource> GetQueryable()
+        private IQueryable<TSource> GetQueryable(SessionType? sessionType = null)
         {
+            sessionType ??= _sessionType;
+            
             // Do not include any referenced entities if session is lightweight
-            if (_sessionType.HasFlag(SessionType.LightWeight))
+            if (sessionType.Value.HasFlag(SessionType.LightWeight))
             {
                 return _dbSet;
             }
@@ -94,65 +96,22 @@ namespace EfCoreRepository
             return null;
         }
 
-        /// <summary>
-        /// Deletes entity given filter expression
-        /// </summary>
-        /// <param name="filterExpr"></param>
-        /// <param name="additionalFilterExprs"></param>
-        /// <returns></returns>
+        public async Task<TSource> Delete<TId>(TId id) where TId : struct
+        {
+            return (await DeleteMany(FilterExpression<TSource, TId>(id))).FirstOrDefault();
+        }
+
         public async Task<TSource> Delete(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
         {
-            // With tracking
-            var entity = await ApplyFilters(GetQueryable(), new []{filterExpr}.Concat(additionalFilterExprs)).FirstOrDefaultAsync();
-
-            if (entity != null)
-            {
-                _dbSet.Remove(entity);
-
-                if (!_sessionType.HasFlag(SessionType.Delayed))
-                {
-                    await _dbContext.SaveChangesAsync();
-                }
-                else
-                {
-                    // Save changes when disposed
-                    _anyChanges = true;
-                }
-
-                return entity;
-            }
-
-            return null;
+            return (await DeleteMany(filterExpr, additionalFilterExprs)).FirstOrDefault();
         }
 
-        /// <summary>
-        /// Get all entities given a filter expression
-        /// </summary>
-        /// <param name="additionalFilterExprs"></param>
-        /// <returns></returns>
-        public async Task<IEnumerable<TSource>> GetAll(params Expression<Func<TSource, bool>>[] additionalFilterExprs)
+        public async Task<TSource> Save(TSource source)
         {
-            return await ApplyFilters(GetQueryable().AsNoTracking(), additionalFilterExprs).ToListAsync();
+            return (await SaveMany(source)).FirstOrDefault();
         }
 
-        /// <summary>
-        /// Get all entities given Id array
-        /// </summary>
-        /// <param name="ids"></param>
-        /// <typeparam name="TId"></typeparam>
-        /// <returns></returns>
-        public async Task<IEnumerable<TSource>> GetAll<TId>(params TId[] ids) where TId : struct
-        {
-            return await GetQueryable().AsNoTracking().Where(FilterExpression<TSource, TId>(ids)).ToListAsync();
-        }
-
-        /// <summary>
-        /// Save many DTOs at the same time
-        /// </summary>
-        /// <param name="source"></param>
-        /// <param name="additionalSources"></param>
-        /// <returns></returns>
-        public async Task<IEnumerable<TSource>> Save(TSource source, params TSource[] additionalSources)
+        public async Task<IEnumerable<TSource>> SaveMany(TSource source, params TSource[] additionalSources)
         {
             var sources = new[] { source }.Concat(additionalSources).ToList();
             
@@ -171,6 +130,69 @@ namespace EfCoreRepository
             return sources;
         }
 
+        public async Task<IEnumerable<TSource>> DeleteMany<TId>(TId id, params TId[] additionalIds) where TId : struct
+        {
+            return await DeleteMany(FilterExpression<TSource, TId>(new[] { id }.Concat(additionalIds).ToArray()));
+        }
+
+        public async Task<IEnumerable<TSource>> DeleteMany(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
+        {
+            // With tracking
+            var entities = await ApplyFilters(GetQueryable(), new []{filterExpr}.Concat(additionalFilterExprs)).ToListAsync();
+
+            if (entities != null && entities.Any())
+            {
+                _dbSet.RemoveRange(entities);
+
+                if (!_sessionType.HasFlag(SessionType.Delayed))
+                {
+                    await _dbContext.SaveChangesAsync();
+                }
+                else
+                {
+                    // Save changes when disposed
+                    _anyChanges = true;
+                }
+
+                return entities;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Get all entities given a filter expression
+        /// </summary>
+        /// <param name="filterExpr"></param>
+        /// <param name="additionalFilterExprs"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
+        {
+            return await ApplyFilters(GetQueryable().AsNoTracking(), new []{filterExpr}.Concat(additionalFilterExprs)).ToListAsync();
+        }
+
+        /// <summary>
+        /// Get all entities given Id array
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="ids"></param>
+        /// <typeparam name="TId"></typeparam>
+        /// <returns></returns>
+        public async Task<IEnumerable<TSource>> GetAll<TId>(TId id, params TId[] ids) where TId : struct
+        {
+            return await GetAll(FilterExpression<TSource, TId>(new[] { id }.Concat(ids).ToArray()));
+        }
+
+        public async Task<IEnumerable<TSource>> GetAll()
+        {
+            return await GetQueryable().AsNoTracking().ToListAsync();
+        }
+
+        public async Task<int> Count()
+        {
+            return await GetQueryable().AsNoTracking().CountAsync();
+        }
+
         /// <summary>
         /// Count entities that pass filter expression
         /// </summary>
@@ -179,48 +201,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public async Task<int> Count(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
         {
-            return await ApplyFilters(_dbSet.AsNoTracking(), new []{filterExpr}.Concat(additionalFilterExprs)).CountAsync();
-        }
-
-        /// <summary>
-        /// Count of all entities
-        /// </summary>
-        /// <returns></returns>
-        public async Task<int> Count()
-        {
-            return await _dbSet.AsNoTracking().CountAsync();
-        }
-
-        /// <summary>
-        /// Saves an instance
-        /// </summary>
-        /// <param name="instance"></param>
-        /// <returns></returns>
-        public virtual async Task<TSource> Save(TSource instance)
-        {
-            await _dbSet.AddAsync(instance);
-
-            if (!_sessionType.HasFlag(SessionType.Delayed))
-            {
-                await _dbContext.SaveChangesAsync();
-            }
-            else
-            {
-                // Save changes when disposed
-                _anyChanges = true;
-            }
-
-            return instance;
-        }
-
-        /// <summary>
-        /// Deletes entity given the id
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public virtual async Task<TSource> Delete<TId>(TId id) where TId : struct
-        {
-            return await Delete(FilterExpression<TSource, TId>(id));
+            return await ApplyFilters(GetQueryable(SessionType.LightWeight), new[] { filterExpr }.Concat(additionalFilterExprs)).CountAsync();
         }
 
         /// <summary>
@@ -285,7 +266,7 @@ namespace EfCoreRepository
         {
             return await ApplyFilters(GetQueryable(), new[] { filterExpr }.Concat(additionalFilterExprs)).AnyAsync();
         }
-
+        
         /// <summary>
         /// Invoke SaveChanges if session mode is active
         /// </summary>

@@ -7,11 +7,18 @@ namespace Core.Tests
     {
         public DbSet<DummyModel> DummyModels { get; set; }
         
-        public DbSet<Nested> Nesteds { get; set; }
+        public DbSet<NestedModel> Nesteds { get; set; }
 
         public EntityDbContext(DbContextOptions<EntityDbContext> options): base(options)
         {
             Database.EnsureCreated();
+        }
+        
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(EntityDbContext).Assembly);
         }
     }
 }
