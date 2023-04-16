@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using EfCoreRepository.Interfaces;
 using EfCoreRepository.Models;
 using Microsoft.EntityFrameworkCore;
@@ -38,6 +39,11 @@ namespace EfCoreRepository
             }
 
             return new BasicCrud<TSource>(profile.EntityMapping, _dbContext, Generic);
+        }
+
+        object IEfRepository.For(Type type)
+        {
+            return GetType().GetMethod(nameof(For), BindingFlags.Public | BindingFlags.Instance)!.MakeGenericMethod(type).Invoke(this, null);
         }
     }
 }

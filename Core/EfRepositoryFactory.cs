@@ -110,6 +110,17 @@ namespace EfCoreRepository
                     EntityMapping = profile.ToEntityMapping(entityTypes)
                 };
             }).ToList(), serviceProvider.GetService<TDbContext>()), serviceLifetime));
+            
+            // Dependency inject IBasicCrud for each entity type
+            foreach (var (_, entityType) in context)
+            {
+                _serviceCollection.Add(ServiceDescriptor.Describe(typeof(IBasicCrud<>).MakeGenericType(entityType), serviceProvider =>
+                {
+                    var repository = serviceProvider.GetRequiredService<IEfRepository>();
+
+                    return repository.For(entityType);
+                }, serviceLifetime));
+            }
         }
 
         private static Type GetProfileGenericType(Type t)

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -28,8 +29,7 @@ namespace ConsoleApp
                     .Profile(Assembly.Load("Core.Tests")))
                 .BuildServiceProvider();
 
-            var repository = serviceProvider.GetService<IEfRepository>();
-            var dal = repository!.For<DummyModel>();
+            var dal = serviceProvider.GetService<IBasicCrud<DummyModel>>();
             var entities = await dal.Save(new DummyModel {Name = "foo", Children = new List<NestedModel> { new NestedModel()}});
             var dto = (await dal.Get(1)).DeepClone();
             dto.Name = "bar";
@@ -37,10 +37,10 @@ namespace ConsoleApp
 
             var updatedEntity = await dal.Get(1);
             
-            updatedEntity.Name.ShouldBe("Bar");
+            updatedEntity.Name.ShouldBe("bar");
             updatedEntity.Children.ShouldNotBeNull();
 
-            var children = await repository.For<NestedModel>().GetAll();
+            var children = await serviceProvider.GetService<IBasicCrud<NestedModel>>().GetAll();
             children.Count().ShouldNotBe(0);
         }
     }

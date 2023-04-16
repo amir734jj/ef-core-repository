@@ -1,3 +1,5 @@
+using System;
+
 namespace EfCoreRepository.Interfaces
 {
     public interface IEfRepository
@@ -8,5 +10,7 @@ namespace EfCoreRepository.Interfaces
         /// <typeparam name="TSource"></typeparam>
         /// <returns></returns>
         IBasicCrud<TSource> For<TSource>() where TSource : class;
+
+        internal object For(Type type);
     }
 }
