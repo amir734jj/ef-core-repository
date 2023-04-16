@@ -6,9 +6,9 @@
         <Description>EntityFramework.Core repository pattern</Description>
         <RepositoryUrl>https://github.com/amir734jj/ef-core-repository</RepositoryUrl>
         <PackageProjectUrl>https://github.com/amir734jj/ef-core-repository</PackageProjectUrl>
-        <AssemblyVersion>3.0.12</AssemblyVersion>
-        <PackageReleaseNotes>Directly dependency inject IBasicCrud without injection IEfRepository.</PackageReleaseNotes>
-        <Version>3.0.12</Version>
+        <AssemblyVersion>3.0.13</AssemblyVersion>
+        <PackageReleaseNotes>AsNoTracking() causes problems with cyclic entities.</PackageReleaseNotes>
+        <Version>3.0.13</Version>
         <RootNamespace>EfCoreRepository</RootNamespace>
         <AssemblyName>SimpleEfCoreRepository</AssemblyName>
     </PropertyGroup>
