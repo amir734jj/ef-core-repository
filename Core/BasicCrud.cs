@@ -50,7 +50,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public async Task<TSource> Get<TId>(TId id) where TId : struct
         {
-            return await GetQueryable().AsNoTracking().FirstOrDefaultAsync(FilterExpression<TSource, TId>(id));
+            return await GetQueryable().FirstOrDefaultAsync(FilterExpression<TSource, TId>(id));
         }
 
         /// <summary>
@@ -168,7 +168,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public async Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
         {
-            return await ApplyFilters(GetQueryable().AsNoTracking(), new []{filterExpr}.Concat(additionalFilterExprs)).ToListAsync();
+            return await ApplyFilters(GetQueryable(), new []{filterExpr}.Concat(additionalFilterExprs)).ToListAsync();
         }
 
         /// <summary>
@@ -185,12 +185,12 @@ namespace EfCoreRepository
 
         public async Task<IEnumerable<TSource>> GetAll()
         {
-            return await GetQueryable().AsNoTracking().ToListAsync();
+            return await GetQueryable().ToListAsync();
         }
 
         public async Task<int> Count()
         {
-            return await GetQueryable().AsNoTracking().CountAsync();
+            return await GetQueryable().CountAsync();
         }
 
         /// <summary>
