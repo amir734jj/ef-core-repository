@@ -103,7 +103,7 @@ namespace EfCoreRepository
 
         public async Task<TSource> Delete(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
         {
-            return (await DeleteMany(filterExpr, additionalFilterExprs)).FirstOrDefault();
+            return (await DeleteMany(new []{filterExpr}.Concat(additionalFilterExprs).ToArray())).FirstOrDefault();
         }
 
         public async Task<TSource> Save(TSource source)
@@ -111,10 +111,8 @@ namespace EfCoreRepository
             return (await SaveMany(source)).FirstOrDefault();
         }
 
-        public async Task<IEnumerable<TSource>> SaveMany(TSource source, params TSource[] additionalSources)
+        public async Task<IEnumerable<TSource>> SaveMany(params TSource[] sources)
         {
-            var sources = new[] { source }.Concat(additionalSources).ToList();
-            
             await _dbSet.AddRangeAsync(sources);
 
             if (!_sessionType.HasFlag(SessionType.Delayed))
@@ -130,15 +128,15 @@ namespace EfCoreRepository
             return sources;
         }
 
-        public async Task<IEnumerable<TSource>> DeleteMany<TId>(TId id, params TId[] additionalIds) where TId : struct
+        public async Task<IEnumerable<TSource>> DeleteMany<TId>(params TId[] additionalIds) where TId : struct
         {
-            return await DeleteMany(FilterExpression<TSource, TId>(new[] { id }.Concat(additionalIds).ToArray()));
+            return await DeleteMany(FilterExpression<TSource, TId>(additionalIds));
         }
 
-        public async Task<IEnumerable<TSource>> DeleteMany(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
+        public async Task<IEnumerable<TSource>> DeleteMany(params Expression<Func<TSource, bool>>[] filterExprs)
         {
             // With tracking
-            var entities = await ApplyFilters(GetQueryable(), new []{filterExpr}.Concat(additionalFilterExprs)).ToListAsync();
+            var entities = await ApplyFilters(GetQueryable(), filterExprs).ToListAsync();
 
             if (entities != null && entities.Any())
             {
@@ -163,24 +161,22 @@ namespace EfCoreRepository
         /// <summary>
         /// Get all entities given a filter expression
         /// </summary>
-        /// <param name="filterExpr"></param>
-        /// <param name="additionalFilterExprs"></param>
+        /// <param name="filterExprs"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
+        public async Task<IEnumerable<TSource>> GetAll(params Expression<Func<TSource, bool>>[] filterExprs)
         {
-            return await ApplyFilters(GetQueryable(), new []{filterExpr}.Concat(additionalFilterExprs)).ToListAsync();
+            return await ApplyFilters(GetQueryable(), filterExprs.ToArray()).ToListAsync();
         }
 
         /// <summary>
         /// Get all entities given Id array
         /// </summary>
-        /// <param name="id"></param>
         /// <param name="ids"></param>
         /// <typeparam name="TId"></typeparam>
         /// <returns></returns>
-        public async Task<IEnumerable<TSource>> GetAll<TId>(TId id, params TId[] ids) where TId : struct
+        public async Task<IEnumerable<TSource>> GetAll<TId>(params TId[] ids) where TId : struct
         {
-            return await GetAll(FilterExpression<TSource, TId>(new[] { id }.Concat(ids).ToArray()));
+            return await GetAll(FilterExpression<TSource, TId>(ids));
         }
 
         public async Task<IEnumerable<TSource>> GetAll()

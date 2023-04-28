@@ -12,6 +12,7 @@ namespace EfCoreRepository
 {
     internal class EntityMapping<TSource> : AbstractMappingUtility, IEntityMapping where TSource : class
     {
+        private readonly ICollection<Type> _entityTypes;
         private readonly Action<TSource, TSource> _manualUpdate;
         private readonly Func<IQueryable<TSource>, IQueryable<TSource>> _include;
 
@@ -28,6 +29,7 @@ namespace EfCoreRepository
             Action<TSource, TSource> manualUpdate,
             Func<IQueryable<TSource>, IQueryable<TSource>> include) : this()
         {
+            _entityTypes = entityTypes;
             _manualUpdate = manualUpdate;
             _include = include;
 
