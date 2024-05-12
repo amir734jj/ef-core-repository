@@ -20,7 +20,8 @@ namespace EfCoreRepository
         public EfRepository(IEnumerable<EntityProfileAttributed> profiles, DbContext dbContext)
         {
             _dbContext = dbContext;
-            _profiles = new ConcurrentDictionary<Type, EntityProfileAttributed>(profiles.GroupBy(x => x.EntityType)
+            _profiles = new ConcurrentDictionary<Type, EntityProfileAttributed>(
+                profiles.GroupBy(x => x.EntityType)
                 .ToDictionary(x => x.Key, x => x.First()));
         }
 
@@ -35,7 +36,7 @@ namespace EfCoreRepository
 
             if (keyProperty == null)
             {
-                throw new Exception($"Missing Key attribute on entity {typeof(TSource).Name}");
+                throw new Exception($"Missing primary key identifier in entity {typeof(TSource).Name}");
             }
 
             return new BasicCrud<TSource>(profile.EntityMapping, _dbContext, Generic);
