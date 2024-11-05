@@ -6,9 +6,9 @@
         <Description>EntityFramework.Core repository pattern</Description>
         <RepositoryUrl>https://github.com/amir734jj/ef-core-repository</RepositoryUrl>
         <PackageProjectUrl>https://github.com/amir734jj/ef-core-repository</PackageProjectUrl>
-        <AssemblyVersion>3.0.14</AssemblyVersion>
-        <PackageReleaseNotes>Improved Many* CRUD operation parameters.</PackageReleaseNotes>
-        <Version>3.0.14</Version>
+        <AssemblyVersion>3.0.15</AssemblyVersion>
+        <PackageReleaseNotes>Added AsNoTracking option.</PackageReleaseNotes>
+        <Version>3.0.15</Version>
         <RootNamespace>EfCoreRepository</RootNamespace>
         <AssemblyName>SimpleEfCoreRepository</AssemblyName>
     </PropertyGroup>
