@@ -7,6 +7,7 @@ namespace EfCoreRepository.Models
     {
         Generic = 1,
         LightWeight = 2,
-        Delayed = 4
+        Delayed = 4,
+        NoTracking = 8,
     }
 }

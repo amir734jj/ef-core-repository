@@ -22,5 +22,11 @@ namespace EfCoreRepository.Interfaces
         /// </summary>
         /// <returns></returns>
         IBasicCrud<TSource> Light();
+
+        /// <summary>
+        /// It avoids tracking of entities for change, but also it doesn't load 2 level nested properties
+        /// </summary>
+        /// <returns></returns>
+        IBasicCrud<TSource> NoTracking();
     }
 }

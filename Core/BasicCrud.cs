@@ -40,7 +40,7 @@ namespace EfCoreRepository
                 return _dbSet;
             }
 
-            return (IQueryable<TSource>)_profile.Include(_dbSet);
+            return (IQueryable<TSource>)_profile.Include(sessionType.Value.HasFlag(SessionType.NoTracking) ? _dbSet.AsNoTracking() : _dbSet);
         }
 
         /// <summary>
@@ -262,7 +262,12 @@ namespace EfCoreRepository
         {
             return await ApplyFilters(GetQueryable(), new[] { filterExpr }.Concat(additionalFilterExprs)).AnyAsync();
         }
-        
+
+        public async Task<IEnumerable<TSource>> Take(int limit)
+        {
+            return await GetQueryable().Take(limit).ToListAsync();
+        }
+
         /// <summary>
         /// Invoke SaveChanges if session mode is active
         /// </summary>
@@ -296,6 +301,11 @@ namespace EfCoreRepository
         public IBasicCrud<TSource> Light()
         {
             return new BasicCrud<TSource>(_profile, _dbContext, _sessionType | SessionType.LightWeight);
+        }
+
+        public IBasicCrud<TSource> NoTracking()
+        {
+            return new BasicCrud<TSource>(_profile, _dbContext ,_sessionType | SessionType.NoTracking);
         }
 
         private static IQueryable<T> ApplyFilters<T>(IQueryable<T> source, IEnumerable<Expression<Func<T, bool>>> filterExprs)
