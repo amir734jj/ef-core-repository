@@ -9,14 +9,14 @@ variables:
 
 #Jobs
 test:
-  image: mcr.microsoft.com/dotnet/sdk:6.0
+  image: mcr.microsoft.com/dotnet/sdk:8.0
   stage: test
   allow_failure: false
   script:
     - dotnet build && dotnet test
 
 publish:
-  image: mcr.microsoft.com/dotnet/sdk:6.0
+  image: mcr.microsoft.com/dotnet/sdk:8.0
   stage: publish
   only: 
     - master
