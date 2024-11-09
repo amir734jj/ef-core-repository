@@ -22,5 +22,5 @@ publish:
     - master
   allow_failure: false
   script:
-    - dotnet build && dotnet pack
+    - dotnet restore && dotnet build && dotnet pack
     - find Core -type f -name '*.nupkg' | xargs -I {} sh -c "dotnet nuget push {} --api-key $APIKEY --source https://api.nuget.org/v3/index.json --skip-duplicate"
