@@ -45,7 +45,7 @@ namespace EfCoreRepository
             if (includes != null)
             {
                 // ReSharper disable once SuspiciousTypeConversion.Global
-                return includes.Aggregate(queryable, (current, expression) => (DbSet<TSource>)current.Include(expression));
+                return includes.Aggregate(queryable, (current, expression) => current.Include(expression));
             }
 
             return (IQueryable<TSource>)_profile.Include(queryable);
