@@ -13,7 +13,9 @@ namespace EfCoreRepository.Interfaces
 
         Task<IEnumerable<TSource>> DeleteMany(params Expression<Func<TSource, bool>>[] additionalFilterExprs);
 
-        Task<IEnumerable<TSource>> GetAll(params Expression<Func<TSource, bool>>[] additionalFilterExprs);
+        Task<IEnumerable<TSource>> GetAll(
+            Expression<Func<TSource, object>>[] includeExprs = default,
+            Expression<Func<TSource, bool>>[] filterExprs = default);
         
         Task<IEnumerable<TSource>> GetAll<TId>(params TId[] ids) where TId : struct;
     }

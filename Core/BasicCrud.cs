@@ -30,7 +30,7 @@ namespace EfCoreRepository
             _dbSet = dbContext.Set<TSource>();
         }
 
-        private IQueryable<TSource> GetQueryable(SessionType? sessionType = null)
+        private IQueryable<TSource> GetQueryable(SessionType? sessionType = null, IEnumerable<Expression<Func<TSource, object>>> includes = null)
         {
             sessionType ??= _sessionType;
             
@@ -40,7 +40,15 @@ namespace EfCoreRepository
                 return _dbSet;
             }
 
-            return (IQueryable<TSource>)_profile.Include(sessionType.Value.HasFlag(SessionType.NoTracking) ? _dbSet.AsNoTracking() : _dbSet);
+            var queryable = sessionType.Value.HasFlag(SessionType.NoTracking) ? _dbSet.AsNoTracking() : _dbSet;
+                
+            if (includes != null)
+            {
+                // ReSharper disable once SuspiciousTypeConversion.Global
+                return includes.Aggregate(queryable, (current, expression) => (DbSet<TSource>)current.Include(expression));
+            }
+
+            return (IQueryable<TSource>)_profile.Include(queryable);
         }
 
         /// <summary>
@@ -161,11 +169,13 @@ namespace EfCoreRepository
         /// <summary>
         /// Get all entities given a filter expression
         /// </summary>
+        /// <param name="includeExprs"></param>
         /// <param name="filterExprs"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<TSource>> GetAll(params Expression<Func<TSource, bool>>[] filterExprs)
+        // ReSharper disable once MethodOverloadWithOptionalParameter
+        public async Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, object>>[] includeExprs = default, Expression<Func<TSource, bool>>[] filterExprs = default)
         {
-            return await ApplyFilters(GetQueryable(), filterExprs.ToArray()).ToListAsync();
+            return await ApplyFilters(GetQueryable(includes: includeExprs), filterExprs?.ToArray() ?? Array.Empty<Expression<Func<TSource, bool>>>()).ToListAsync();
         }
 
         /// <summary>
@@ -176,7 +186,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public async Task<IEnumerable<TSource>> GetAll<TId>(params TId[] ids) where TId : struct
         {
-            return await GetAll(FilterExpression<TSource, TId>(ids));
+            return await GetAll(filterExprs: new []{ FilterExpression<TSource, TId>(ids) });
         }
 
         public async Task<IEnumerable<TSource>> GetAll()

@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Core.Tests.Abstracts;
 using Core.Tests.Extensions;
@@ -136,7 +138,10 @@ public class RepositoryGetTest : AbstractRepositoryTest
 
         // Act
         var result = await Repository.For<DummyModel>()
-            .GetAll(x => x.Name == model1.Name || x.Name == model2.Name);
+            .GetAll(filterExprs: new Expression<Func<DummyModel, bool>>[]
+            {
+                x => x.Name == model1.Name || x.Name == model2.Name
+            });
 
         // Assert
         result.Should()
@@ -168,7 +173,10 @@ public class RepositoryGetTest : AbstractRepositoryTest
 
         // Act
         var result = await Repository.For<DummyModel>()
-            .GetAll(x => x.Name == model1.Name || x.Name == model2.Name, x => x.Name != "baz");
+            .GetAll(filterExprs: new Expression<Func<DummyModel, bool>>[]
+            {
+                x => x.Name == model1.Name || x.Name == model2.Name, x => x.Name != "baz"
+            });
 
         // Assert
         result.Should()
