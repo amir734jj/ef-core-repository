@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Threading.Tasks;
 using EfCoreRepository.Interfaces;
 using EfCoreRepository.Models;
+using InfoViaLinq.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using InfoViaLinq;
 using static EfCoreRepository.EntityUtility;
 
 namespace EfCoreRepository
@@ -19,6 +23,8 @@ namespace EfCoreRepository
         private readonly SessionType _sessionType;
 
         private readonly DbSet<TSource> _dbSet;
+        
+        private readonly IInfoViaLinq<TSource> _infoViaLinq = new InfoViaLinq<TSource>();
 
         private bool _anyChanges;
 
@@ -41,11 +47,15 @@ namespace EfCoreRepository
             }
 
             var queryable = sessionType.Value.HasFlag(SessionType.NoTracking) ? _dbSet.AsNoTracking() : _dbSet;
-                
+
             if (includes != null)
             {
                 // ReSharper disable once SuspiciousTypeConversion.Global
-                return includes.Aggregate(queryable, (current, expression) => current.Include(expression));
+                return includes.Aggregate(queryable, (current, expression) => 
+                    current.Include(string.Join('.', _infoViaLinq
+                        .PropLambda(expression)
+                        .Members()
+                        .Select(x => x.Name))));
             }
 
             return (IQueryable<TSource>)_profile.Include(queryable);

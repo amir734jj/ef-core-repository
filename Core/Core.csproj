@@ -6,9 +6,9 @@
         <Description>EntityFramework.Core repository pattern</Description>
         <RepositoryUrl>https://github.com/amir734jj/ef-core-repository</RepositoryUrl>
         <PackageProjectUrl>https://github.com/amir734jj/ef-core-repository</PackageProjectUrl>
-        <AssemblyVersion>3.0.17</AssemblyVersion>
+        <AssemblyVersion>3.0.18</AssemblyVersion>
         <PackageReleaseNotes>Added include override.</PackageReleaseNotes>
-        <Version>3.0.17</Version>
+        <Version>3.0.18</Version>
         <RootNamespace>EfCoreRepository</RootNamespace>
         <AssemblyName>SimpleEfCoreRepository</AssemblyName>
     </PropertyGroup>

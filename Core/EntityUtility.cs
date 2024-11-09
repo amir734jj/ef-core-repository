@@ -25,9 +25,9 @@ namespace EfCoreRepository
         /// <exception cref="Exception"></exception>
         private static string FindIdPropertyInternal(Type type)
         {
-            if (IdLookup.ContainsKey(type))
+            if (IdLookup.TryGetValue(type, out var value))
             {
-                return IdLookup[type];
+                return value;
             }
 
             var properties = type
