@@ -1,15 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Threading.Tasks;
 using EfCoreRepository.Interfaces;
 using EfCoreRepository.Models;
-using InfoViaLinq.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using InfoViaLinq;
 using static EfCoreRepository.EntityUtility;
 
 namespace EfCoreRepository
@@ -23,8 +19,6 @@ namespace EfCoreRepository
         private readonly SessionType _sessionType;
 
         private readonly DbSet<TSource> _dbSet;
-        
-        private readonly IInfoViaLinq<TSource> _infoViaLinq = new InfoViaLinq<TSource>();
 
         private bool _anyChanges;
 
@@ -36,7 +30,7 @@ namespace EfCoreRepository
             _dbSet = dbContext.Set<TSource>();
         }
 
-        private IQueryable<TSource> GetQueryable(SessionType? sessionType = null, IEnumerable<Expression<Func<TSource, object>>> includes = null)
+        private IQueryable<TSource> GetQueryable(SessionType? sessionType = null, Func<IQueryable<TSource>, IQueryable<TSource>> includes = null)
         {
             sessionType ??= _sessionType;
             
@@ -51,11 +45,7 @@ namespace EfCoreRepository
             if (includes != null)
             {
                 // ReSharper disable once SuspiciousTypeConversion.Global
-                return includes.Aggregate(queryable, (current, expression) => 
-                    current.Include(string.Join('.', _infoViaLinq
-                        .PropLambda(expression)
-                        .Members()
-                        .Select(x => x.Name))));
+                return includes(queryable);
             }
 
             return (IQueryable<TSource>)_profile.Include(queryable);
@@ -179,11 +169,11 @@ namespace EfCoreRepository
         /// <summary>
         /// Get all entities given a filter expression
         /// </summary>
-        /// <param name="includeExprs"></param>
         /// <param name="filterExprs"></param>
+        /// <param name="includeExprs"></param>
         /// <returns></returns>
         // ReSharper disable once MethodOverloadWithOptionalParameter
-        public async Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, object>>[] includeExprs = default, Expression<Func<TSource, bool>>[] filterExprs = default)
+        public async Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, bool>>[] filterExprs = default, Func<IQueryable<TSource>, IQueryable<TSource>> includeExprs = default)
         {
             return await ApplyFilters(GetQueryable(includes: includeExprs), filterExprs?.ToArray() ?? Array.Empty<Expression<Func<TSource, bool>>>()).ToListAsync();
         }

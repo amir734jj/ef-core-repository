@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Core.Tests.Abstracts;
 using Core.Tests.Extensions;
@@ -16,7 +15,7 @@ public class RepositoryUpdateTest : AbstractRepositoryTest
         // Arrange
         var model = new DummyModel
         {
-            Name = "foo", Children = new List<NestedModel>()
+            Name = "foo", Children = []
         };
 
         var entity = await Repository.For<DummyModel>().Save(model);
@@ -41,7 +40,7 @@ public class RepositoryUpdateTest : AbstractRepositoryTest
         // Arrange
         var model = new DummyModel
         {
-            Name = "foo", Children = new List<NestedModel>()
+            Name = "foo", Children = []
         };
 
         var parentEntity = await Repository.For<DummyModel>().Save(model);
@@ -75,7 +74,7 @@ public class RepositoryUpdateTest : AbstractRepositoryTest
         // Arrange
         var model = new DummyModel
         {
-            Name = "foo", Children = new List<NestedModel>()
+            Name = "foo", Children = []
         };
 
         var parentEntity = await Repository.For<DummyModel>().Save(model);
@@ -111,7 +110,7 @@ public class RepositoryUpdateTest : AbstractRepositoryTest
         // Arrange
         var model = new DummyModel
         {
-            Name = "foo", Children = new List<NestedModel>()
+            Name = "foo", Children = []
         };
 
         var entity = await Repository.For<DummyModel>().Save(model);
@@ -138,7 +137,7 @@ public class RepositoryUpdateTest : AbstractRepositoryTest
         // Arrange
         var model = new DummyModel
         {
-            Name = "foo", Children = new List<NestedModel>()
+            Name = "foo", Children = []
         };
 
         var entity = await Repository.For<DummyModel>().Save(model);
@@ -163,7 +162,7 @@ public class RepositoryUpdateTest : AbstractRepositoryTest
         // Arrange
         var model = new DummyModel
         {
-            Name = "foo", Children = new List<NestedModel>()
+            Name = "foo", Children = []
         };
 
         var parentEntity = await Repository.For<DummyModel>().Save(model);
@@ -197,7 +196,7 @@ public class RepositoryUpdateTest : AbstractRepositoryTest
         // Arrange
         var model = new DummyModel
         {
-            Name = "foo", Children = new List<NestedModel>()
+            Name = "foo", Children = []
         };
 
         var parentEntity = await Repository.For<DummyModel>().Save(model);

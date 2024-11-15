@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Core.Tests.Abstracts;
 using Core.Tests.Models;
@@ -15,7 +14,7 @@ public class RepositoryUtilsTest : AbstractRepositoryTest
         // Arrange
         var model = new DummyModel
         {
-            Name = "foo", Children = new List<NestedModel>()
+            Name = "foo", Children = []
         };
 
         var entity = await Repository.For<DummyModel>().Save(model);
@@ -38,7 +37,7 @@ public class RepositoryUtilsTest : AbstractRepositoryTest
         // Arrange
         var model = new DummyModel
         {
-            Name = "foo", Children = new List<NestedModel>()
+            Name = "foo", Children = []
         };
 
         var entity = await Repository.For<DummyModel>().Save(model);
@@ -61,7 +60,7 @@ public class RepositoryUtilsTest : AbstractRepositoryTest
         // Arrange
         var model = new DummyModel
         {
-            Name = "foo", Children = new List<NestedModel>()
+            Name = "foo", Children = []
         };
 
         var entity = await Repository.For<DummyModel>().Save(model);
@@ -84,7 +83,7 @@ public class RepositoryUtilsTest : AbstractRepositoryTest
         // Arrange
         var model = new DummyModel
         {
-            Name = "foo", Children = new List<NestedModel>()
+            Name = "foo", Children = []
         };
 
         var entity = await Repository.For<DummyModel>().Save(model);

@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Core.Tests.Abstracts;
 using Core.Tests.Extensions;
@@ -19,7 +16,7 @@ public class RepositoryGetTest : AbstractRepositoryTest
         // Arrange
         var model = new DummyModel
         {
-            Name = "foo", Children = new List<NestedModel>()
+            Name = "foo", Children = []
         };
 
         var entity = await Repository.For<DummyModel>().Save(model);
@@ -44,7 +41,7 @@ public class RepositoryGetTest : AbstractRepositoryTest
         // Arrange
         var model = new DummyModel
         {
-            Name = "foo", Children = new List<NestedModel>()
+            Name = "foo", Children = []
         };
 
         var entity = await Repository.For<DummyModel>().Save(model);
@@ -69,7 +66,7 @@ public class RepositoryGetTest : AbstractRepositoryTest
         // Arrange
         var model = new DummyModel
         {
-            Name = "foo", Children = new List<NestedModel>()
+            Name = "foo", Children = []
         };
 
         var entity = await Repository.For<DummyModel>().Save(model);
@@ -95,12 +92,12 @@ public class RepositoryGetTest : AbstractRepositoryTest
         // Arrange
         var model1 = new DummyModel
         {
-            Name = "foo", Children = new List<NestedModel>()
+            Name = "foo", Children = []
         };
 
         var model2 = new DummyModel
         {
-            Name = "bar", Children = new List<NestedModel>()
+            Name = "bar", Children = []
         };
 
         var entities = (await Repository.For<DummyModel>().SaveMany(model1, model2)).ToList();
@@ -126,22 +123,23 @@ public class RepositoryGetTest : AbstractRepositoryTest
         // Arrange
         var model1 = new DummyModel
         {
-            Name = "foo", Children = new List<NestedModel>()
+            Name = "foo", Children = []
         };
 
         var model2 = new DummyModel
         {
-            Name = "bar", Children = new List<NestedModel>()
+            Name = "bar", Children = []
         };
 
         var entities = (await Repository.For<DummyModel>().SaveMany(model1, model2)).ToList();
 
         // Act
         var result = await Repository.For<DummyModel>()
-            .GetAll(filterExprs: new Expression<Func<DummyModel, bool>>[]
-            {
+            .GetAll(
+                filterExprs:
+            [
                 x => x.Name == model1.Name || x.Name == model2.Name
-            });
+            ]);
 
         // Assert
         result.Should()
@@ -161,22 +159,22 @@ public class RepositoryGetTest : AbstractRepositoryTest
         // Arrange
         var model1 = new DummyModel
         {
-            Name = "foo", Children = new List<NestedModel>()
+            Name = "foo", Children = []
         };
 
         var model2 = new DummyModel
         {
-            Name = "bar", Children = new List<NestedModel>()
+            Name = "bar", Children = []
         };
 
         var entities = (await Repository.For<DummyModel>().SaveMany(model1, model2)).ToList();
 
         // Act
         var result = await Repository.For<DummyModel>()
-            .GetAll(filterExprs: new Expression<Func<DummyModel, bool>>[]
-            {
+            .GetAll(filterExprs:
+            [
                 x => x.Name == model1.Name || x.Name == model2.Name, x => x.Name != "baz"
-            });
+            ]);
 
         // Assert
         result.Should()
@@ -196,12 +194,12 @@ public class RepositoryGetTest : AbstractRepositoryTest
         // Arrange
         var model1 = new DummyModel
         {
-            Name = "foo", Children = new List<NestedModel>()
+            Name = "foo", Children = []
         };
 
         var model2 = new DummyModel
         {
-            Name = "bar", Children = new List<NestedModel>()
+            Name = "bar", Children = []
         };
 
         var entities = (await Repository.For<DummyModel>().SaveMany(model1, model2)).ToList();

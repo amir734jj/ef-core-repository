@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Core.Tests.Abstracts;
 using Core.Tests.Extensions;
@@ -16,7 +15,7 @@ public class RepositorySessionTest : AbstractRepositoryTest
         // Arrange
         var model = new DummyModel
         {
-            Name = "foo", Children = new List<NestedModel>()
+            Name = "foo", Children = []
         };
 
         var delayedRepository = Repository.For<DummyModel>().Delayed();

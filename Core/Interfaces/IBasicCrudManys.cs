@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
@@ -14,8 +15,8 @@ namespace EfCoreRepository.Interfaces
         Task<IEnumerable<TSource>> DeleteMany(params Expression<Func<TSource, bool>>[] additionalFilterExprs);
 
         Task<IEnumerable<TSource>> GetAll(
-            Expression<Func<TSource, object>>[] includeExprs = default,
-            Expression<Func<TSource, bool>>[] filterExprs = default);
+            Expression<Func<TSource, bool>>[] filterExprs = default,
+            Func<IQueryable<TSource>, IQueryable<TSource>> includeExprs = default);
         
         Task<IEnumerable<TSource>> GetAll<TId>(params TId[] ids) where TId : struct;
     }

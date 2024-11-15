@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Core.Tests.Abstracts;
@@ -16,7 +15,7 @@ public class RepositoryDeleteTest : AbstractRepositoryTest
         // Arrange
         var model = new DummyModel
         {
-            Name = "foo", Children = new List<NestedModel>()
+            Name = "foo", Children = []
         };
 
         var entity = await Repository.For<DummyModel>().Save(model);
@@ -40,7 +39,7 @@ public class RepositoryDeleteTest : AbstractRepositoryTest
         // Arrange
         var model = new DummyModel
         {
-            Name = "foo", Children = new List<NestedModel>()
+            Name = "foo", Children = []
         };
 
         var entity = await Repository.For<DummyModel>().Save(model);
@@ -64,12 +63,12 @@ public class RepositoryDeleteTest : AbstractRepositoryTest
         // Arrange
         var model1 = new DummyModel
         {
-            Name = "foo", Children = new List<NestedModel>()
+            Name = "foo", Children = []
         };
 
         var model2 = new DummyModel
         {
-            Name = "bar", Children = new List<NestedModel>()
+            Name = "bar", Children = []
         };
 
         var entities = (await Repository.For<DummyModel>().SaveMany(model1, model2)).ToList();
@@ -95,12 +94,12 @@ public class RepositoryDeleteTest : AbstractRepositoryTest
         // Arrange
         var model1 = new DummyModel
         {
-            Name = "foo", Children = new List<NestedModel>()
+            Name = "foo", Children = []
         };
 
         var model2 = new DummyModel
         {
-            Name = "bar", Children = new List<NestedModel>()
+            Name = "bar", Children = []
         };
 
         var entities = (await Repository.For<DummyModel>().SaveMany(model1, model2)).ToList();
