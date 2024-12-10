@@ -320,7 +320,13 @@ namespace EfCoreRepository
 
         private static IQueryable<T> ApplyFilters<T>(IQueryable<T> source, IEnumerable<Expression<Func<T, bool>>> filterExprs)
         {
-            return filterExprs.Aggregate(source, (current, filterExpr) => current.Where(filterExpr));
+            // ReSharper disable once LoopCanBeConvertedToQuery
+            foreach (var filterExpr in filterExprs)
+            {
+                source = source.Where(filterExpr);
+            }
+            
+            return source;
         }
     }
 }
