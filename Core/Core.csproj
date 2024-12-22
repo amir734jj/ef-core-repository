@@ -14,7 +14,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="InfoViaLinq" Version="3.0.4" />
+      <PackageReference Include="InfoViaLinq" Version="3.0.5" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.0" />
     </ItemGroup>
 
