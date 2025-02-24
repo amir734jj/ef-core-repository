@@ -13,16 +13,10 @@ namespace EfCoreRepository
     {
         private static readonly IDictionary<Type, string> IdLookup = new ConcurrentDictionary<Type, string>();
 
-        /// <summary>
-        /// Common property names for ID
-        /// </summary>
-        private static readonly string[] IdNames = {"_id", "id"};
+        // Common property names for ID
+        private static readonly string[] IdNames = ["_id", "id"];
 
-        /// <summary>
-        /// Finds ID property of a class
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="Exception"></exception>
+        // Finds ID property of a class
         private static string FindIdPropertyInternal(Type type)
         {
             if (IdLookup.TryGetValue(type, out var value))
@@ -50,34 +44,19 @@ namespace EfCoreRepository
             return keyProperty.Name;
         }
         
-        /// <summary>
-        /// Finds ID property of a class
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="Exception"></exception>
+        // Finds ID property of a class
         public static string FindIdProperty(Type type)
         {
            return FindIdPropertyInternal(type);
         }
         
-        /// <summary>
-        /// Finds ID property of a class
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        /// <exception cref="Exception"></exception>
+        // Finds ID property of a class
         public static string FindIdProperty<T>() where T : class
         {
             return FindIdPropertyInternal(typeof(T));
         }
 
-        /// <summary>
-        /// Creates a lambda expression of x => x.Id == id
-        /// </summary>
-        /// <param name="ids"></param>
-        /// <typeparam name="TId"></typeparam>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
+        // Creates a lambda expression of x => x.Id == id
         public static Expression<Func<T, bool>> FilterExpression<T, TId>(params TId[] ids)
             where T : class
             where TId : struct

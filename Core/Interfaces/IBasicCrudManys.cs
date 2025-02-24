@@ -8,10 +8,6 @@ namespace EfCoreRepository.Interfaces
 {
     public interface IBasicCrudMany<TSource> where TSource : class
     {
-        Task<IEnumerable<TSource>> UpdateMany<TId>((TId id, TSource dto)[] items) where TId : struct;
-        
-        Task<IEnumerable<TSource>> UpdateMany<TId>((TId id, Action<TSource> updater)[] items) where TId : struct;
-        
         Task<IEnumerable<TSource>> SaveMany(params TSource[] additionalSources);
 
         Task<IEnumerable<TSource>> DeleteMany<TId>(params TId[] additionalIds) where TId : struct;
@@ -19,8 +15,8 @@ namespace EfCoreRepository.Interfaces
         Task<IEnumerable<TSource>> DeleteMany(params Expression<Func<TSource, bool>>[] additionalFilterExprs);
 
         Task<IEnumerable<TSource>> GetAll(
-            Expression<Func<TSource, bool>>[] filterExprs = default,
-            Func<IQueryable<TSource>, IQueryable<TSource>> includeExprs = default);
+            Expression<Func<TSource, bool>>[] filterExprs = null,
+            Func<IQueryable<TSource>, IQueryable<TSource>> includeExprs = null);
         
         Task<IEnumerable<TSource>> GetAll<TId>(params TId[] ids) where TId : struct;
     }

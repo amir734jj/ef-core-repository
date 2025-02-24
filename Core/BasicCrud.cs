@@ -51,37 +51,16 @@ namespace EfCoreRepository
             return (IQueryable<TSource>)_profile.Include(queryable);
         }
 
-        /// <summary>
-        /// Returns an entity given the id
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
+        // Returns an entity given the id
         public async Task<TSource> Get<TId>(TId id) where TId : struct
         {
             return await GetQueryable().FirstOrDefaultAsync(FilterExpression<TSource, TId>(id));
         }
 
-        /// <summary>
-        /// Returns filters list of entities
-        /// </summary>
-        /// <param name="filterExpr"></param>
-        /// <param name="additionalFilterExprs"></param>
-        /// <returns></returns>
+        // Returns filters list of entities
         public async Task<TSource> Get(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
         {
             return await ApplyFilters(GetQueryable(), new []{filterExpr}.Concat(additionalFilterExprs)).FirstOrDefaultAsync();
-        }
-
-        /// <summary>
-        /// Update entity given filter expression and dto
-        /// </summary>
-        /// <param name="filterExpr"></param>
-        /// <param name="dto"></param>
-        /// <param name="additionalFilterExprs"></param>
-        /// <returns></returns>
-        public async Task<TSource> Update(TSource dto, Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
-        {
-            return (await UpdateInternal(new []{ (dto, filterExpr: new []{filterExpr}.Concat(additionalFilterExprs).ToArray() )})).FirstOrDefault();
         }
 
         public async Task<TSource> Delete<TId>(TId id) where TId : struct
@@ -99,14 +78,37 @@ namespace EfCoreRepository
             return (await SaveMany(source)).FirstOrDefault();
         }
 
-        public async Task<IEnumerable<TSource>> UpdateMany<TId>((TId id, TSource dto)[] items) where TId : struct
+        public async Task<IEnumerable<TSource>> BulkUpdate<TId>(TId[] ids, Action<TSource> updater) where TId : struct
         {
-            return await UpdateInternal(items.Select(x => (x.dto, filterExprs: new [] { FilterExpression<TSource, TId>(x.id) })).ToArray());
-        }
+            var result = new List<TSource>();
 
-        public async Task<IEnumerable<TSource>> UpdateMany<TId>((TId id, Action<TSource> updater)[] items) where TId : struct
-        {
-            return await UpdateInternal(items.Select(x => (x.updater, filterExprs: new [] { FilterExpression<TSource, TId>(x.id) })).ToArray());
+            var entities = await ApplyFilters(GetQueryable(), [FilterExpression<TSource, TId>(ids)]).ToListAsync();
+            
+            foreach (var entity in entities)
+            {
+                if (entity != null)
+                {
+                    // Manual update
+                    updater(entity);
+                
+                    // Another pass through profile
+                    _profile.Update(entity, entity);
+                }
+
+                result.Add(entity);
+            }
+
+            if (!_sessionType.HasFlag(SessionType.Delayed))
+            {
+                await _dbContext.SaveChangesAsync();
+            }
+            else
+            {
+                // Save changes when disposed
+                _anyChanges = true;
+            }
+
+            return result;
         }
 
         public async Task<IEnumerable<TSource>> SaveMany(params TSource[] sources)
@@ -156,32 +158,16 @@ namespace EfCoreRepository
             return null;
         }
 
-        /// <summary>
-        /// Get all entities given a filter expression
-        /// </summary>
-        /// <param name="filterExprs"></param>
-        /// <param name="includeExprs"></param>
-        /// <returns></returns>
-        // ReSharper disable once MethodOverloadWithOptionalParameter
-        public async Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, bool>>[] filterExprs = default, Func<IQueryable<TSource>, IQueryable<TSource>> includeExprs = default)
+        // Get all entities given a filter expression
+        public async Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, bool>>[] filterExprs = null, Func<IQueryable<TSource>, IQueryable<TSource>> includeExprs = null)
         {
-            return await ApplyFilters(GetQueryable(includes: includeExprs), filterExprs?.ToArray() ?? Array.Empty<Expression<Func<TSource, bool>>>()).ToListAsync();
+            return await ApplyFilters(GetQueryable(includes: includeExprs), filterExprs?.ToArray() ?? []).ToListAsync();
         }
 
-        /// <summary>
-        /// Get all entities given Id array
-        /// </summary>
-        /// <param name="ids"></param>
-        /// <typeparam name="TId"></typeparam>
-        /// <returns></returns>
+        // Get all entities given Id array
         public async Task<IEnumerable<TSource>> GetAll<TId>(params TId[] ids) where TId : struct
         {
-            return await GetAll(filterExprs: new []{ FilterExpression<TSource, TId>(ids) });
-        }
-
-        public async Task<IEnumerable<TSource>> GetAll()
-        {
-            return await GetQueryable().ToListAsync();
+            return await GetAll(filterExprs: [FilterExpression<TSource, TId>(ids)]);
         }
 
         public async Task<int> Count()
@@ -189,113 +175,22 @@ namespace EfCoreRepository
             return await GetQueryable().CountAsync();
         }
 
-        /// <summary>
-        /// Count entities that pass filter expression
-        /// </summary>
-        /// <param name="filterExpr"></param>
-        /// <param name="additionalFilterExprs"></param>
-        /// <returns></returns>
+        // Count entities that pass filter expression
         public async Task<int> Count(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
         {
             return await ApplyFilters(GetQueryable(SessionType.LightWeight), new[] { filterExpr }.Concat(additionalFilterExprs)).CountAsync();
         }
 
-        /// <summary>
-        /// Updates entity given the id and new instance
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="dto"></param>
-        /// <returns></returns>
+        // Updates entity given the id and new instance
         public virtual async Task<TSource> Update<TId>(TId id, TSource dto) where TId : struct
         {
-            return await Update(dto, FilterExpression<TSource, TId>(id));
+            return (await BulkUpdate([id], entity => _profile.Update(entity, dto))).FirstOrDefault();
         }
 
-        /// <summary>
-        /// Updates entity given the filter expression and function that modifies the entity
-        /// </summary>
-        /// <param name="filterExpr"></param>
-        /// <param name="additionalFilterExprs"></param>
-        /// <param name="updater"></param>
-        /// <returns></returns>
-        public async Task<TSource> Update(Action<TSource> updater, Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
-        {
-            return (await UpdateInternal(new []{ (updater, filterExprs: new []{ filterExpr}.Concat(additionalFilterExprs).ToArray()) })).FirstOrDefault();
-        }
-        
-        private async Task<IEnumerable<TSource>> UpdateInternal((Action<TSource> updater, Expression<Func<TSource, bool>>[] filterExprs)[] items)
-        {
-            var result = new List<TSource>();
-            
-            foreach (var (updater, filterExprs) in items)
-            {
-                // With tracking
-                var entity = await ApplyFilters(GetQueryable(), filterExprs).FirstOrDefaultAsync();
-
-                if (entity != null)
-                {
-                    // Manual update
-                    updater(entity);
-                
-                    // Another pass through profile
-                    _profile.Update(entity, entity);
-                }
-
-                result.Add(entity);
-            }
-
-            if (!_sessionType.HasFlag(SessionType.Delayed))
-            {
-                await _dbContext.SaveChangesAsync();
-            }
-            else
-            {
-                // Save changes when disposed
-                _anyChanges = true;
-            }
-
-            return result;
-        }
-        
-        private async Task<IEnumerable<TSource>> UpdateInternal((TSource dto, Expression<Func<TSource, bool>>[] filterExprs)[] items)
-        {
-            var result = new List<TSource>();
-            
-            foreach (var (dto, filterExprs) in items)
-            {
-                // With tracking
-                var entity = await ApplyFilters(GetQueryable(), filterExprs).FirstOrDefaultAsync();
-
-                if (entity != null)
-                {
-                    _profile.Update(entity, dto);
-                }
-
-                result.Add(entity);
-            }
-
-            if (!_sessionType.HasFlag(SessionType.Delayed))
-            {
-                await _dbContext.SaveChangesAsync();
-            }
-            else
-            {
-                // Save changes when disposed
-                _anyChanges = true;
-            }
-
-            return result;
-        }
-        
-        /// <summary>
-        /// Updates entity given the id and function that modifies the entity
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="updater"></param>
-        /// <returns></returns>
+        // Updates entity given the id and function that modifies the entity
         public async Task<TSource> Update<TId>(TId id, Action<TSource> updater) where TId : struct
         {
-            return await Update(updater, FilterExpression<TSource, TId>(id));
+            return (await BulkUpdate([id], updater)).FirstOrDefault();
         }
 
         public async Task<bool> Any(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
@@ -308,9 +203,7 @@ namespace EfCoreRepository
             return await GetQueryable().Take(limit).ToListAsync();
         }
 
-        /// <summary>
-        /// Invoke SaveChanges if session mode is active
-        /// </summary>
+        // Invoke SaveChanges if session mode is active
         public void Dispose()
         {
             if (_anyChanges && _sessionType.HasFlag(SessionType.Delayed))
@@ -319,10 +212,7 @@ namespace EfCoreRepository
             }
         }
 
-        /// <summary>
-        /// Invoke SaveChangesAsync if session mode is active
-        /// </summary>
-        /// <returns></returns>
+        // Invoke SaveChangesAsync if session mode is active
         public ValueTask DisposeAsync()
         {
             if (_anyChanges && _sessionType.HasFlag(SessionType.Delayed))

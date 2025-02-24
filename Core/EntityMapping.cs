@@ -65,11 +65,7 @@ namespace EfCoreRepository
             }
         }
 
-        /// <summary>
-        /// Internal utility function that creates map function given property info and access expression
-        /// </summary>
-        /// <param name="propertyInfo"></param>
-        /// <param name="accessor"></param>
+        // Internal utility function that creates map function given property info and access expression
         private void MapUntyped(PropertyInfo propertyInfo, Expression accessor)
         {
             var param1Expr = Expression.Parameter(typeof(TSource));

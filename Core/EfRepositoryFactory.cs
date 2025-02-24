@@ -10,19 +10,14 @@ using static EfCoreRepository.EntityUtility;
 
 namespace EfCoreRepository
 {
-    internal class EfRepositoryFactory<TDbContext> : IEfRepositoryFactory where TDbContext: DbContext
+    internal class EfRepositoryFactory<TDbContext>(
+        IServiceCollection serviceCollection,
+        ServiceLifetime serviceLifetime)
+        : IEfRepositoryFactory
+        where TDbContext : DbContext
     {
-        private readonly IServiceCollection _serviceCollection;
-        private readonly ServiceLifetime _serviceLifetime;
-        private readonly List<(Type ProfileType, Type EntityType)> _context;
+        private readonly List<(Type ProfileType, Type EntityType)> _context = [];
 
-        public EfRepositoryFactory(IServiceCollection serviceCollection, ServiceLifetime serviceLifetime)
-        {
-            _serviceCollection = serviceCollection;
-            _serviceLifetime = serviceLifetime;
-            _context = new List<(Type ProfileType, Type EntityType)>();
-        }
-        
         public IEfRepositoryFactory Profile(params Assembly[] assemblies)
         {
             _context.AddRange(assemblies
@@ -60,7 +55,7 @@ namespace EfCoreRepository
 
         public void Build()
         {
-            AddEfRepository(_context, _serviceLifetime);
+            AddEfRepository(_context, serviceLifetime);
         }
 
         private void AddEfRepository(IReadOnlyCollection<(Type ProfileType, Type EntityType)> context, ServiceLifetime serviceLifetime)
@@ -99,7 +94,7 @@ namespace EfCoreRepository
             
             // DbContext is registered by default as scoped
             // https://docs.microsoft.com/en-us/ef/core/miscellaneous/configuring-dbcontext#implicitly-sharing-dbcontext-instances-across-multiple-threads-via-dependency-injection
-            _serviceCollection.Add(ServiceDescriptor.Describe(typeof(IEfRepository), serviceProvider => new EfRepository(context.Select(tuple =>
+            serviceCollection.Add(ServiceDescriptor.Describe(typeof(IEfRepository), serviceProvider => new EfRepository(context.Select(tuple =>
             {
                 var profile = (IEntityProfile)ActivatorUtilities.CreateInstance(serviceProvider, tuple.ProfileType);
 
@@ -114,7 +109,7 @@ namespace EfCoreRepository
             // Dependency inject IBasicCrud for each entity type
             foreach (var (_, entityType) in context)
             {
-                _serviceCollection.Add(ServiceDescriptor.Describe(typeof(IBasicCrud<>).MakeGenericType(entityType), serviceProvider =>
+                serviceCollection.Add(ServiceDescriptor.Describe(typeof(IBasicCrud<>).MakeGenericType(entityType), serviceProvider =>
                 {
                     var repository = serviceProvider.GetRequiredService<IEfRepository>();
 

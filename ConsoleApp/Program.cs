@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using ConsoleApp.Extensions;
@@ -29,7 +28,7 @@ namespace ConsoleApp
                 .BuildServiceProvider();
 
             var dal = serviceProvider.GetService<IBasicCrud<DummyModel>>();
-            var entities = await dal.Save(new DummyModel {Name = "foo", Children = new List<NestedModel> { new NestedModel()}});
+            var entities = await dal.Save(new DummyModel {Name = "foo", Children = [new NestedModel()] });
             var dto = (await dal.Get(1)).DeepClone();
             dto.Name = "bar";
             await dal.Update(entities.Id, dto);

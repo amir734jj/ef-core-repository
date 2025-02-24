@@ -6,11 +6,12 @@
         <Description>EntityFramework.Core repository pattern</Description>
         <RepositoryUrl>https://github.com/amir734jj/ef-core-repository</RepositoryUrl>
         <PackageProjectUrl>https://github.com/amir734jj/ef-core-repository</PackageProjectUrl>
-        <AssemblyVersion>3.0.22</AssemblyVersion>
-        <PackageReleaseNotes>Added UpdateMany</PackageReleaseNotes>
-        <Version>3.0.22</Version>
+        <AssemblyVersion>3.1.0</AssemblyVersion>
+        <PackageReleaseNotes>Removed UpdateMany+Update with FiterExpr and introduced BulkUpdate</PackageReleaseNotes>
+        <Version>3.1.0</Version>
         <RootNamespace>EfCoreRepository</RootNamespace>
         <AssemblyName>SimpleEfCoreRepository</AssemblyName>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
