@@ -81,27 +81,7 @@ namespace EfCoreRepository
         /// <returns></returns>
         public async Task<TSource> Update(TSource dto, Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
         {
-            // With tracking
-            var entity = await ApplyFilters(GetQueryable(), new []{filterExpr}.Concat(additionalFilterExprs)).FirstOrDefaultAsync();
-
-            if (entity != null)
-            {
-                _profile.Update(entity, dto);
-
-                if (!_sessionType.HasFlag(SessionType.Delayed))
-                {
-                    await _dbContext.SaveChangesAsync();
-                }
-                else
-                {
-                    // Save changes when disposed
-                    _anyChanges = true;
-                }
-
-                return entity;
-            }
-
-            return null;
+            return (await UpdateInternal(new []{ (dto, filterExpr: new []{filterExpr}.Concat(additionalFilterExprs).ToArray() )})).FirstOrDefault();
         }
 
         public async Task<TSource> Delete<TId>(TId id) where TId : struct
@@ -117,6 +97,16 @@ namespace EfCoreRepository
         public async Task<TSource> Save(TSource source)
         {
             return (await SaveMany(source)).FirstOrDefault();
+        }
+
+        public async Task<IEnumerable<TSource>> UpdateMany<TId>((TId id, TSource dto)[] items) where TId : struct
+        {
+            return await UpdateInternal(items.Select(x => (x.dto, filterExprs: new [] { FilterExpression<TSource, TId>(x.id) })).ToArray());
+        }
+
+        public async Task<IEnumerable<TSource>> UpdateMany<TId>((TId id, Action<TSource> updater)[] items) where TId : struct
+        {
+            return await UpdateInternal(items.Select(x => (x.updater, filterExprs: new [] { FilterExpression<TSource, TId>(x.id) })).ToArray());
         }
 
         public async Task<IEnumerable<TSource>> SaveMany(params TSource[] sources)
@@ -230,31 +220,71 @@ namespace EfCoreRepository
         /// <returns></returns>
         public async Task<TSource> Update(Action<TSource> updater, Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
         {
-            // With tracking
-            var entity = await ApplyFilters(GetQueryable(), new[] { filterExpr }.Concat(additionalFilterExprs)).FirstOrDefaultAsync();
-
-            if (entity != null)
+            return (await UpdateInternal(new []{ (updater, filterExprs: new []{ filterExpr}.Concat(additionalFilterExprs).ToArray()) })).FirstOrDefault();
+        }
+        
+        private async Task<IEnumerable<TSource>> UpdateInternal((Action<TSource> updater, Expression<Func<TSource, bool>>[] filterExprs)[] items)
+        {
+            var result = new List<TSource>();
+            
+            foreach (var (updater, filterExprs) in items)
             {
-                // Manual update
-                updater(entity);
+                // With tracking
+                var entity = await ApplyFilters(GetQueryable(), filterExprs).FirstOrDefaultAsync();
+
+                if (entity != null)
+                {
+                    // Manual update
+                    updater(entity);
                 
-                // Another pass through profile
-                _profile.Update(entity, entity);
-
-                if (!_sessionType.HasFlag(SessionType.Delayed))
-                {
-                    await _dbContext.SaveChangesAsync();
-                }
-                else
-                {
-                    // Save changes when disposed
-                    _anyChanges = true;
+                    // Another pass through profile
+                    _profile.Update(entity, entity);
                 }
 
-                return entity;
+                result.Add(entity);
             }
 
-            return null;
+            if (!_sessionType.HasFlag(SessionType.Delayed))
+            {
+                await _dbContext.SaveChangesAsync();
+            }
+            else
+            {
+                // Save changes when disposed
+                _anyChanges = true;
+            }
+
+            return result;
+        }
+        
+        private async Task<IEnumerable<TSource>> UpdateInternal((TSource dto, Expression<Func<TSource, bool>>[] filterExprs)[] items)
+        {
+            var result = new List<TSource>();
+            
+            foreach (var (dto, filterExprs) in items)
+            {
+                // With tracking
+                var entity = await ApplyFilters(GetQueryable(), filterExprs).FirstOrDefaultAsync();
+
+                if (entity != null)
+                {
+                    _profile.Update(entity, dto);
+                }
+
+                result.Add(entity);
+            }
+
+            if (!_sessionType.HasFlag(SessionType.Delayed))
+            {
+                await _dbContext.SaveChangesAsync();
+            }
+            else
+            {
+                // Save changes when disposed
+                _anyChanges = true;
+            }
+
+            return result;
         }
         
         /// <summary>
