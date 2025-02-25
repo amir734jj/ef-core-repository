@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using EfCoreRepository.Extensions;
 using EfCoreRepository.Interfaces;
 using EfCoreRepository.Models;
 using Microsoft.EntityFrameworkCore;
@@ -78,24 +79,27 @@ namespace EfCoreRepository
             return (await SaveMany(source)).FirstOrDefault();
         }
 
-        public async Task<IEnumerable<TSource>> BulkUpdate<TId>(TId[] ids, Action<TSource> updater) where TId : struct
+        public async Task<IEnumerable<TSource>> BulkUpdate<TId>(TId[] ids, Action<TSource> updater, int batchSize = 50) where TId : struct
         {
             var result = new List<TSource>();
 
-            var entities = await ApplyFilters(GetQueryable(), [FilterExpression<TSource, TId>(ids)]).ToListAsync();
-            
-            foreach (var entity in entities)
+            foreach (var idChunk in ids.ChunkBy(10))
             {
-                if (entity != null)
+                var entities = await ApplyFilters(GetQueryable(), [FilterExpression<TSource, TId>(idChunk.ToArray())]).ToListAsync();
+            
+                foreach (var entity in entities)
                 {
-                    // Manual update
-                    updater(entity);
+                    if (entity != null)
+                    {
+                        // Manual update
+                        updater(entity);
                 
-                    // Another pass through profile
-                    _profile.Update(entity, entity);
-                }
+                        // Another pass through profile
+                        _profile.Update(entity, entity);
+                    }
 
-                result.Add(entity);
+                    result.Add(entity);
+                }
             }
 
             if (!_sessionType.HasFlag(SessionType.Delayed))
