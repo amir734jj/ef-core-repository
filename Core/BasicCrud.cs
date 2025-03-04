@@ -83,7 +83,7 @@ namespace EfCoreRepository
         {
             var result = new List<TSource>();
 
-            foreach (var idChunk in ids.ChunkBy(10))
+            foreach (var idChunk in ids.ChunkBy(batchSize))
             {
                 var entities = await ApplyFilters(GetQueryable(), [FilterExpression<TSource, TId>(idChunk.ToArray())]).ToListAsync();
             
