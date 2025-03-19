@@ -159,7 +159,7 @@ namespace EfCoreRepository
                 return entities;
             }
 
-            return null;
+            return [];
         }
 
         // Get all entities given a filter expression
