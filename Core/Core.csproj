@@ -6,9 +6,9 @@
         <Description>EntityFramework.Core repository pattern</Description>
         <RepositoryUrl>https://github.com/amir734jj/ef-core-repository</RepositoryUrl>
         <PackageProjectUrl>https://github.com/amir734jj/ef-core-repository</PackageProjectUrl>
-        <AssemblyVersion>3.1.3</AssemblyVersion>
-        <PackageReleaseNotes>Delete null pointer exception when missing entity fixed</PackageReleaseNotes>
-        <Version>3.1.3</Version>
+        <AssemblyVersion>3.1.4</AssemblyVersion>
+        <PackageReleaseNotes>Delete many logic fixed</PackageReleaseNotes>
+        <Version>3.1.4</Version>
         <RootNamespace>EfCoreRepository</RootNamespace>
         <AssemblyName>SimpleEfCoreRepository</AssemblyName>
         <LangVersion>latest</LangVersion>

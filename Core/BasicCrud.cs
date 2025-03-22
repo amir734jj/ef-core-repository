@@ -134,6 +134,12 @@ namespace EfCoreRepository
 
         public async Task<IEnumerable<TSource>> DeleteMany<TId>(params TId[] additionalIds) where TId : struct
         {
+            // This is needed, otherwise delete many deletes everything
+            if (additionalIds.Length == 0)
+            {
+                return [];
+            }
+            
             return await DeleteMany(FilterExpression<TSource, TId>(additionalIds));
         }
 
