@@ -218,4 +218,66 @@ public class RepositoryGetTest : AbstractRepositoryTest
             .HaveCount(2).And
             .BeEquivalentToIgnoreCycles(entities);
     }
+
+    [Fact]
+    public async Task Test_GetAllOrderByMaxResult()
+    {
+        // Arrange
+        var model1 = new DummyModel
+        {
+            Name = "foo", Children = []
+        };
+
+        var model2 = new DummyModel
+        {
+            Name = "bar", Children = []
+        };
+
+        await Repository.For<DummyModel>().SaveMany(model1, model2);
+
+        // Act
+        var result = await Repository.For<DummyModel>().GetAll(orderBy: x => x.Name, maxResults: 1);
+
+        // Assert
+        result.Should()
+            .NotBeNull().And
+            .HaveCount(1).And
+            .BeEquivalentToIgnoreCycles([model2]);
+
+        (await Repository.For<DummyModel>().GetAll())
+            .Should()
+            .HaveCount(2).And
+            .BeEquivalentToIgnoreCycles([model1, model2]);
+    }
+
+    [Fact]
+    public async Task Test_GetAllOrderByDescMaxResult()
+    {
+        // Arrange
+        var model1 = new DummyModel
+        {
+            Name = "foo", Children = []
+        };
+
+        var model2 = new DummyModel
+        {
+            Name = "bar", Children = []
+        };
+
+        await Repository.For<DummyModel>().SaveMany(model1, model2);
+
+        // Act
+        var result = await Repository.For<DummyModel>().GetAll(orderByDesc: x => x.Name, maxResults: 1);
+
+        // Assert
+        result.Should()
+            .NotBeNull().And
+            .HaveCount(1).And
+            .BeEquivalentToIgnoreCycles([model1]);
+
+        (await Repository.For<DummyModel>().GetAll())
+            .Should()
+            .HaveCount(2).And
+            .BeEquivalentToIgnoreCycles([model1, model2]);
+    }
 }

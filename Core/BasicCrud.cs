@@ -169,9 +169,31 @@ namespace EfCoreRepository
         }
 
         // Get all entities given a filter expression
-        public async Task<IEnumerable<TSource>> GetAll(Expression<Func<TSource, bool>>[] filterExprs = null, Func<IQueryable<TSource>, IQueryable<TSource>> includeExprs = null)
+        public async Task<IEnumerable<TSource>> GetAll(
+            Expression<Func<TSource, bool>>[] filterExprs = null,
+            Func<IQueryable<TSource>, IQueryable<TSource>> includeExprs = null,
+            Expression<Func<TSource, object>> orderBy = null,
+            Expression<Func<TSource, object>> orderByDesc = null,
+            int? maxResults = null)
         {
-            return await ApplyFilters(GetQueryable(includes: includeExprs), filterExprs?.ToArray() ?? []).ToListAsync();
+            var queryable = ApplyFilters(GetQueryable(includes: includeExprs), filterExprs?.ToArray() ?? []);
+
+            if (orderBy != null)
+            {
+                queryable = queryable.OrderBy(orderBy);
+            }
+            
+            if (orderByDesc != null)
+            {
+                queryable = queryable.OrderByDescending(orderByDesc);
+            }
+
+            if (maxResults.HasValue)
+            {
+                queryable = queryable.Take(maxResults.Value);
+            }
+
+            return await queryable.ToListAsync();
         }
 
         // Get all entities given Id array
