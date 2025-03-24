@@ -199,7 +199,16 @@ namespace EfCoreRepository
             {
                 return (await queryable.Select(project)
                     .ToListAsync())
-                    .Select(x => Mapper.Map(x).ToANew<TSource>())
+                    .Select(x =>
+                    {
+                        // Nothing needs to be done, pass it through
+                        if (x is TSource typedSource)
+                        {
+                            return typedSource;
+                        }
+                        
+                        return Mapper.Map(x).ToANew<TSource>();
+                    })
                     .ToList();
             }
 
