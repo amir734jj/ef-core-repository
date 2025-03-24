@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using AgileObjects.AgileMapper;
 using EfCoreRepository.Extensions;
 using EfCoreRepository.Interfaces;
 using EfCoreRepository.Models;
@@ -174,6 +175,7 @@ namespace EfCoreRepository
             Func<IQueryable<TSource>, IQueryable<TSource>> includeExprs = null,
             Expression<Func<TSource, object>> orderBy = null,
             Expression<Func<TSource, object>> orderByDesc = null,
+            Expression<Func<TSource, object>> project = null,
             int? maxResults = null)
         {
             var queryable = ApplyFilters(GetQueryable(includes: includeExprs), filterExprs?.ToArray() ?? []);
@@ -191,6 +193,14 @@ namespace EfCoreRepository
             if (maxResults.HasValue)
             {
                 queryable = queryable.Take(maxResults.Value);
+            }
+
+            if (project != null)
+            {
+                return (await queryable.Select(project)
+                    .ToListAsync())
+                    .Select(x => Mapper.Map(x).ToANew<TSource>())
+                    .ToList();
             }
 
             return await queryable.ToListAsync();

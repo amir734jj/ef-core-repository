@@ -19,6 +19,7 @@ namespace EfCoreRepository.Interfaces
             Func<IQueryable<TSource>, IQueryable<TSource>> includeExprs = null,
             Expression<Func<TSource, object>> orderBy = null,
             Expression<Func<TSource, object>> orderByDesc = null,
+            Expression<Func<TSource, object>> project = null,
             int? maxResults = null);
         
         Task<IEnumerable<TSource>> GetAll<TId>(params TId[] ids) where TId : struct;
