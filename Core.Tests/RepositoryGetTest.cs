@@ -298,13 +298,13 @@ public class RepositoryGetTest : AbstractRepositoryTest
         await Repository.For<DummyModel>().SaveMany(model1, model2);
 
         // Act
-        var result = await Repository.For<DummyModel>().GetAll(orderBy: x => x.Name, project: x => new { x.Name }, maxResults: 1);
+        var result = await Repository.For<DummyModel>().GetAll(orderBy: x => x.Name, project: x => new { x.Id, x.Name }, maxResults: 1);
 
         // Assert
         result.Should()
             .NotBeNull().And
             .HaveCount(1).And
-            .BeEquivalentToIgnoreCycles([ new DummyModel { Name = "bar" }]);
+            .BeEquivalentToIgnoreCycles([ new DummyModel { Id = model2.Id, Name = "bar" }]);
 
         (await Repository.For<DummyModel>().GetAll())
             .Should()

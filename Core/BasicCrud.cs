@@ -206,8 +206,8 @@ namespace EfCoreRepository
                         {
                             return typedSource;
                         }
-                        
-                        return Mapper.Map(x).ToANew<TSource>();
+
+                        return Mapper.Map(x).ToANew<TSource>(opt => opt.MapEntityKeys());
                     })
                     .ToList();
             }
