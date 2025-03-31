@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.1</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Description>EntityFramework.Core repository pattern</Description>
         <RepositoryUrl>https://github.com/amir734jj/ef-core-repository</RepositoryUrl>
         <PackageProjectUrl>https://github.com/amir734jj/ef-core-repository</PackageProjectUrl>
-        <AssemblyVersion>3.1.8</AssemblyVersion>
-        <PackageReleaseNotes>Map entity keys as well during projection</PackageReleaseNotes>
-        <Version>3.1.8</Version>
+        <AssemblyVersion>3.1.10</AssemblyVersion>
+        <PackageReleaseNotes>upgrade minimum support of .net6 + as split query support</PackageReleaseNotes>
+        <Version>3.1.10</Version>
         <RootNamespace>EfCoreRepository</RootNamespace>
         <AssemblyName>SimpleEfCoreRepository</AssemblyName>
         <LangVersion>latest</LangVersion>
@@ -17,7 +17,8 @@
     <ItemGroup>
       <PackageReference Include="AgileObjects.AgileMapper" Version="1.8.1" />
       <PackageReference Include="InfoViaLinq" Version="3.0.5" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.36" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.36" />
     </ItemGroup>
 
 </Project>

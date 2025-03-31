@@ -9,5 +9,6 @@ namespace EfCoreRepository.Models
         LightWeight = 2,
         Delayed = 4,
         NoTracking = 8,
+        SplitQuery = 16,
     }
 }

@@ -36,14 +36,25 @@ namespace EfCoreRepository
         {
             sessionType ??= _sessionType;
             
+            IQueryable<TSource> queryable = _dbSet;
+
+            if (sessionType.Value.HasFlag(SessionType.SplitQuery))
+            {
+                queryable = _dbSet.AsSplitQuery();
+            }
+
+            if (sessionType.Value.HasFlag(SessionType.NoTracking))
+            {
+                queryable = _dbSet.AsNoTracking();
+            }
+            
             // Do not include any referenced entities if session is lightweight
             if (sessionType.Value.HasFlag(SessionType.LightWeight))
             {
-                return _dbSet;
+                return queryable;
             }
 
-            var queryable = sessionType.Value.HasFlag(SessionType.NoTracking) ? _dbSet.AsNoTracking() : _dbSet;
-
+            // custom includes if any
             if (includes != null)
             {
                 // ReSharper disable once SuspiciousTypeConversion.Global
@@ -287,6 +298,11 @@ namespace EfCoreRepository
         public IBasicCrud<TSource> NoTracking()
         {
             return new BasicCrud<TSource>(_profile, _dbContext ,_sessionType | SessionType.NoTracking);
+        }
+
+        public IBasicCrud<TSource> SplitQuery()
+        {
+            return new BasicCrud<TSource>(_profile, _dbContext ,_sessionType | SessionType.SplitQuery);
         }
 
         private static IQueryable<T> ApplyFilters<T>(IQueryable<T> source, IEnumerable<Expression<Func<T, bool>>> filterExprs)

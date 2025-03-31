@@ -19,5 +19,8 @@ namespace EfCoreRepository.Interfaces
 
         // It avoids tracking of entities for change, but also it doesn't load 2 level nested properties
         IBasicCrud<TSource> NoTracking();
+
+        // Uses split query instead of default single query
+        IBasicCrud<TSource> SplitQuery();
     }
 }
