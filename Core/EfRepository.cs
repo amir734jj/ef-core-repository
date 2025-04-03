@@ -25,7 +25,7 @@ namespace EfCoreRepository
                 .ToDictionary(x => x.Key, x => x.First()));
         }
 
-        public IBasicCrud<TSource> For<TSource>() where TSource: class
+        public IBasicCrud<TSource> For<TSource>() where TSource : class, new()
         {
             if (!_profiles.TryGetValue(typeof(TSource), out var profile))
             {
@@ -44,7 +44,13 @@ namespace EfCoreRepository
 
         object IEfRepository.For(Type type)
         {
-            return GetType().GetMethod(nameof(For), BindingFlags.Public | BindingFlags.Instance)!.MakeGenericMethod(type).Invoke(this, null);
+            // ensure T is class and has parameterless constructor
+            if (type.IsClass && type.GetConstructor(Type.EmptyTypes) != null)
+            {
+                return GetType().GetMethod(nameof(For), BindingFlags.Public | BindingFlags.Instance)!.MakeGenericMethod(type).Invoke(this, null);   
+            }
+            
+            return null;
         }
     }
 }

@@ -12,7 +12,7 @@ using static EfCoreRepository.EntityUtility;
 
 namespace EfCoreRepository
 {
-    internal class BasicCrud<TSource> : IBasicCrud<TSource> where TSource : class
+    internal class BasicCrud<TSource> : IBasicCrud<TSource> where TSource : class, new()
     {
         private readonly IEntityMapping _profile;
 
@@ -160,7 +160,7 @@ namespace EfCoreRepository
             // With tracking
             var entities = await ApplyFilters(GetQueryable(), filterExprs).ToListAsync();
 
-            if (entities != null && entities.Any())
+            if (entities.Any())
             {
                 _dbSet.RemoveRange(entities);
 
@@ -181,13 +181,13 @@ namespace EfCoreRepository
         }
 
         // Get all entities given a filter expression
-        public async Task<IEnumerable<TSource>> GetAll(
+        public async Task<IEnumerable<TProject>> GetAll<TProject>(
             Expression<Func<TSource, bool>>[] filterExprs = null,
             Func<IQueryable<TSource>, IQueryable<TSource>> includeExprs = null,
             Expression<Func<TSource, object>> orderBy = null,
             Expression<Func<TSource, object>> orderByDesc = null,
-            Expression<Func<TSource, object>> project = null,
-            int? maxResults = null)
+            Expression<Func<TSource, TProject>> project = null,
+            int? maxResults = null) where TProject : class, new()
         {
             var queryable = ApplyFilters(GetQueryable(includes: includeExprs), filterExprs?.ToArray() ?? []);
 
@@ -205,31 +205,25 @@ namespace EfCoreRepository
             {
                 queryable = queryable.Take(maxResults.Value);
             }
+            
+            IEnumerable<TProject> projectedResult;
 
             if (project != null)
             {
-                return (await queryable.Select(project)
-                    .ToListAsync())
-                    .Select(x =>
-                    {
-                        // Nothing needs to be done, pass it through
-                        if (x is TSource typedSource)
-                        {
-                            return typedSource;
-                        }
-
-                        return Mapper.Map(x).ToANew<TSource>(opt => opt.MapEntityKeys());
-                    })
-                    .ToList();
+                projectedResult = await queryable.Select(project).ToListAsync();
+            }
+            else
+            {
+                projectedResult =  Mapper.Map(await queryable.ToListAsync()).ToANew<List<TProject>>(opt => opt.MapEntityKeys());
             }
 
-            return await queryable.ToListAsync();
+            return projectedResult;
         }
 
         // Get all entities given Id array
         public async Task<IEnumerable<TSource>> GetAll<TId>(params TId[] ids) where TId : struct
         {
-            return await GetAll(filterExprs: [FilterExpression<TSource, TId>(ids)]);
+            return await this.GetAll(filterExprs: [FilterExpression<TSource, TId>(ids)]);
         }
 
         public async Task<int> Count()

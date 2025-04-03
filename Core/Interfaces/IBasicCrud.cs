@@ -9,7 +9,7 @@ namespace EfCoreRepository.Interfaces
         IBasicCrudMany<TSource>,
         IBasicCrudUtils<TSource>,
         IBasicCrudBulk<TSource>
-        where TSource : class
+        where TSource : class, new()
     {
         // For complex and multi-action where we want to defer the save until the dispose takes place
         IBasicCrud<TSource> Delayed();

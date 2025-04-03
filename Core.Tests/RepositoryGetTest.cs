@@ -4,6 +4,7 @@ using Core.Tests.Abstracts;
 using Core.Tests.Extensions;
 using Core.Tests.Models;
 using FluentAssertions;
+using EfCoreRepository.Extensions;
 using Xunit;
 
 namespace Core.Tests;
@@ -104,7 +105,7 @@ public class RepositoryGetTest : AbstractRepositoryTest
 
         // Act
         var result = await Repository.For<DummyModel>()
-            .GetAll(model1.Id, model2.Id);
+            .GetAll([model1.Id, model2.Id]);
 
         // Assert
         result.Should()
@@ -282,7 +283,7 @@ public class RepositoryGetTest : AbstractRepositoryTest
     }
 
     [Fact]
-    public async Task Test_GetAllProject()
+    public async Task Test_GetAllProjectTyped()
     {
         // Arrange
         var model1 = new DummyModel
@@ -298,13 +299,44 @@ public class RepositoryGetTest : AbstractRepositoryTest
         await Repository.For<DummyModel>().SaveMany(model1, model2);
 
         // Act
-        var result = await Repository.For<DummyModel>().GetAll(orderBy: x => x.Name, project: x => new { x.Id, x.Name }, maxResults: 1);
+        var result = await Repository.For<DummyModel>().GetAll<object>(orderBy: x => x.Name, project: x => new DummyModel { Id = x.Id, Name = x.Name }, maxResults: 1);
 
         // Assert
         result.Should()
             .NotBeNull().And
             .HaveCount(1).And
             .BeEquivalentToIgnoreCycles([ new DummyModel { Id = model2.Id, Name = "bar" }]);
+
+        (await Repository.For<DummyModel>().GetAll())
+            .Should()
+            .HaveCount(2).And
+            .BeEquivalentToIgnoreCycles([model1, model2]);
+    }
+
+    [Fact]
+    public async Task Test_GetAllProjectUnTyped()
+    {
+        // Arrange
+        var model1 = new DummyModel
+        {
+            Name = "foo", Children = []
+        };
+
+        var model2 = new DummyModel
+        {
+            Name = "bar", Children = []
+        };
+
+        await Repository.For<DummyModel>().SaveMany(model1, model2);
+
+        // Act
+        var result = await Repository.For<DummyModel>().GetAll<object>(orderBy: x => x.Name, project: x => new { x.Id, x.Name }, maxResults: 1);
+
+        // Assert
+        result.Should()
+            .NotBeNull().And
+            .HaveCount(1).And
+            .BeEquivalentToIgnoreCycles([ new { model2.Id, Name = "bar" }]);
 
         (await Repository.For<DummyModel>().GetAll())
             .Should()

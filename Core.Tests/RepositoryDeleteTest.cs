@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Core.Tests.Abstracts;
 using Core.Tests.Models;
+using EfCoreRepository.Extensions;
 using FluentAssertions;
 using Xunit;
 
@@ -27,6 +28,7 @@ public class RepositoryDeleteTest : AbstractRepositoryTest
         result.Should()
             .NotBeNull().And
             .Be(entity);
+        
 
         (await Repository.For<DummyModel>().GetAll())
             .Should()

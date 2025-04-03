@@ -4,6 +4,7 @@ using Core.Tests.Extensions;
 using Core.Tests.Models;
 using FluentAssertions;
 using Xunit;
+using EfCoreRepository.Extensions;
 
 namespace Core.Tests;
 
