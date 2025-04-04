@@ -193,19 +193,18 @@ namespace EfCoreRepository
             {
                 queryable = queryable.Take(maxResults.Value);
             }
-            
-            IEnumerable<TProject> projectedResult;
-
+    
             if (project != null)
             {
-                projectedResult = await queryable.Select(project).ToListAsync();
-            }
-            else
-            {
-                projectedResult =  Mapper.Map(await queryable.ToListAsync()).ToANew<List<TProject>>(opt => opt.MapEntityKeys());
+                return await queryable.Select(project).ToListAsync();
             }
 
-            return projectedResult;
+            if (typeof(TProject) == typeof(TSource))
+            {
+                return await queryable.Cast<TProject>().ToListAsync();
+            }
+
+            return (await queryable.ToListAsync()).Select(entity => Mapper.Map(entity).ToANew<TProject>(opt => opt.MapEntityKeys())).ToList();
         }
 
         // Get all entities given Id array
