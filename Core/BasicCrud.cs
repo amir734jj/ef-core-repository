@@ -12,29 +12,17 @@ using static EfCoreRepository.EntityUtility;
 
 namespace EfCoreRepository
 {
-    internal class BasicCrud<TSource> : IBasicCrud<TSource> where TSource : class, new()
+    internal sealed class BasicCrud<TSource>(IEntityMapping profile, DbContext dbContext, SessionType type)
+        : IBasicCrud<TSource>
+        where TSource : class, new()
     {
-        private readonly IEntityMapping _profile;
-
-        private readonly DbContext _dbContext;
-
-        private readonly SessionType _sessionType;
-
-        private readonly DbSet<TSource> _dbSet;
+        private readonly DbSet<TSource> _dbSet = dbContext.Set<TSource>();
 
         private bool _anyChanges;
 
-        public BasicCrud(IEntityMapping profile, DbContext dbContext, SessionType sessionType)
-        {
-            _profile = profile;
-            _dbContext = dbContext;
-            _sessionType = sessionType;
-            _dbSet = dbContext.Set<TSource>();
-        }
-
         private IQueryable<TSource> GetQueryable(SessionType? sessionType = null, Func<IQueryable<TSource>, IQueryable<TSource>> includes = null)
         {
-            sessionType ??= _sessionType;
+            sessionType ??= type;
             
             IQueryable<TSource> queryable = _dbSet;
 
@@ -61,7 +49,7 @@ namespace EfCoreRepository
                 return includes(queryable);
             }
 
-            return (IQueryable<TSource>)_profile.Include(queryable);
+            return (IQueryable<TSource>)profile.Include(queryable);
         }
 
         // Returns an entity given the id
@@ -107,16 +95,16 @@ namespace EfCoreRepository
                         updater(entity);
                 
                         // Another pass through profile
-                        _profile.Update(entity, entity);
+                        profile.Update(entity, entity);
                     }
 
                     result.Add(entity);
                 }
             }
 
-            if (!_sessionType.HasFlag(SessionType.Delayed))
+            if (!type.HasFlag(SessionType.Delayed))
             {
-                await _dbContext.SaveChangesAsync();
+                await dbContext.SaveChangesAsync();
             }
             else
             {
@@ -131,9 +119,9 @@ namespace EfCoreRepository
         {
             await _dbSet.AddRangeAsync(sources);
 
-            if (!_sessionType.HasFlag(SessionType.Delayed))
+            if (!type.HasFlag(SessionType.Delayed))
             {
-                await _dbContext.SaveChangesAsync();
+                await dbContext.SaveChangesAsync();
             }
             else
             {
@@ -164,9 +152,9 @@ namespace EfCoreRepository
             {
                 _dbSet.RemoveRange(entities);
 
-                if (!_sessionType.HasFlag(SessionType.Delayed))
+                if (!type.HasFlag(SessionType.Delayed))
                 {
-                    await _dbContext.SaveChangesAsync();
+                    await dbContext.SaveChangesAsync();
                 }
                 else
                 {
@@ -248,9 +236,9 @@ namespace EfCoreRepository
         }
 
         // Updates entity given the id and new instance
-        public virtual async Task<TSource> Update<TId>(TId id, TSource dto) where TId : struct
+        public async Task<TSource> Update<TId>(TId id, TSource dto) where TId : struct
         {
-            return (await BulkUpdate([id], entity => _profile.Update(entity, dto))).FirstOrDefault();
+            return (await BulkUpdate([id], entity => profile.Update(entity, dto))).FirstOrDefault();
         }
 
         // Updates entity given the id and function that modifies the entity
@@ -272,18 +260,18 @@ namespace EfCoreRepository
         // Invoke SaveChanges if session mode is active
         public void Dispose()
         {
-            if (_anyChanges && _sessionType.HasFlag(SessionType.Delayed))
+            if (_anyChanges && type.HasFlag(SessionType.Delayed))
             {
-                _dbContext.SaveChanges();
+                dbContext.SaveChanges();
             }
         }
 
         // Invoke SaveChangesAsync if session mode is active
         public ValueTask DisposeAsync()
         {
-            if (_anyChanges && _sessionType.HasFlag(SessionType.Delayed))
+            if (_anyChanges && type.HasFlag(SessionType.Delayed))
             {
-                return new ValueTask(_dbContext.SaveChangesAsync());
+                return new ValueTask(dbContext.SaveChangesAsync());
             }
 
             return new ValueTask(Task.CompletedTask);
@@ -291,22 +279,22 @@ namespace EfCoreRepository
         
         public IBasicCrud<TSource> Delayed()
         {
-            return new BasicCrud<TSource>(_profile, _dbContext ,_sessionType | SessionType.Delayed);
+            return new BasicCrud<TSource>(profile, dbContext ,type | SessionType.Delayed);
         }
 
         public IBasicCrud<TSource> Light()
         {
-            return new BasicCrud<TSource>(_profile, _dbContext, _sessionType | SessionType.LightWeight);
+            return new BasicCrud<TSource>(profile, dbContext, type | SessionType.LightWeight);
         }
 
         public IBasicCrud<TSource> NoTracking()
         {
-            return new BasicCrud<TSource>(_profile, _dbContext ,_sessionType | SessionType.NoTracking);
+            return new BasicCrud<TSource>(profile, dbContext ,type | SessionType.NoTracking);
         }
 
         public IBasicCrud<TSource> SplitQuery()
         {
-            return new BasicCrud<TSource>(_profile, _dbContext ,_sessionType | SessionType.SplitQuery);
+            return new BasicCrud<TSource>(profile, dbContext ,type | SessionType.SplitQuery);
         }
 
         private static IQueryable<T> ApplyFilters<T>(IQueryable<T> source, IEnumerable<Expression<Func<T, bool>>> filterExprs)

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Core.Tests.Models
 {
-    public class DummyModel
+    public sealed class DummyModel
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -12,6 +12,6 @@ namespace Core.Tests.Models
         
         public string Name { get; set; }
         
-        public virtual List<NestedModel> Children { get; set; }
+        public List<NestedModel> Children { get; set; }
     }
 }
