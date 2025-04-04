@@ -76,17 +76,17 @@ namespace EfCoreRepository
                 var genericArgType = propertyInfo.PropertyType.GetGenericArguments()[0];
                 var idPropertyInfo = genericArgType.GetProperty(EntityUtility.FindIdProperty(genericArgType) ??
                                                                 throw new Exception(
-                                                                    $"Missing KEY attribute on the class declaration for nested entity: {genericArgType.Name}"))
-                    !;
-                var genericMethod = GetType()
-                    .GetMethod(nameof(ModifyList), BindingFlags.Instance | BindingFlags.NonPublic)
-                    ?.MakeGenericMethod(genericArgType, idPropertyInfo.PropertyType);
+                                                                    $"Missing KEY attribute on the class declaration for nested entity: {genericArgType.Name}"))!;
+
+                var genericMethod = typeof(AbstractMappingUtility)
+                    .GetMethod(nameof(ModifyList), BindingFlags.Static | BindingFlags.NonPublic)
+                    ?.MakeGenericMethod(genericArgType, idPropertyInfo.PropertyType)!;
 
                 var genericParamExpr = Expression.Parameter(genericArgType);
                 var genericBodyExpr = Expression.MakeMemberAccess(genericParamExpr, idPropertyInfo);
                 var memberAccessExpr = Expression.Lambda(genericBodyExpr, genericParamExpr);
 
-                var lambdaExpr = Expression.Call(Expression.Constant(this), genericMethod!, param1AccessExpr,
+                var lambdaExpr = Expression.Call(genericMethod!, param1AccessExpr,
                     param2AccessExpr, Expression.Constant(memberAccessExpr.Compile()));
 
                 var wrapperLambdaExpr = Expression.Lambda<Action<TSource, TSource>>(lambdaExpr, param1Expr, param2Expr);
