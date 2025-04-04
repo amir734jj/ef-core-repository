@@ -20,7 +20,7 @@ public class RepositoryUtilsTest : AbstractRepositoryTest
         var entity = await Repository.For<DummyModel>().Save(model);
 
         // Act
-        var result = await Repository.For<DummyModel>().Count(x => x.Name == entity.Name);
+        var result = await Repository.For<DummyModel>().Count([x => x.Name == entity.Name]);
 
         // Assert
         result.Should()
@@ -43,7 +43,7 @@ public class RepositoryUtilsTest : AbstractRepositoryTest
         var entity = await Repository.For<DummyModel>().Save(model);
 
         // Act
-        var result = await Repository.For<DummyModel>().Count(x => x.Name == entity.Name, x => x.Name != "bar");
+        var result = await Repository.For<DummyModel>().Count([x => x.Name == entity.Name, x => x.Name != "bar"]);
 
         // Assert
         result.Should()
@@ -66,13 +66,13 @@ public class RepositoryUtilsTest : AbstractRepositoryTest
         var entity = await Repository.For<DummyModel>().Save(model);
 
         // Act
-        var result = await Repository.For<DummyModel>().Any(x => x.Name == entity.Name);
+        var result = await Repository.For<DummyModel>().Any([x => x.Name == entity.Name]);
 
         // Assert
         result.Should()
             .Be(true);
 
-        (await Repository.For<DummyModel>().Count(x => x.Name == entity.Name))
+        (await Repository.For<DummyModel>().Count([x => x.Name == entity.Name]))
             .Should()
             .Be(1);
     }
@@ -89,13 +89,13 @@ public class RepositoryUtilsTest : AbstractRepositoryTest
         var entity = await Repository.For<DummyModel>().Save(model);
 
         // Act
-        var result = await Repository.For<DummyModel>().Any(x => x.Name == entity.Name, x => x.Name != "bar");
+        var result = await Repository.For<DummyModel>().Any([x => x.Name == entity.Name, x => x.Name != "bar"]);
 
         // Assert
         result.Should()
             .Be(true);
 
-        (await Repository.For<DummyModel>().Count(x => x.Name == entity.Name))
+        (await Repository.For<DummyModel>().Count([x => x.Name == entity.Name]))
             .Should()
             .Be(1);
     }

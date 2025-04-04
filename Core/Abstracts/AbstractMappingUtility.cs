@@ -6,15 +6,8 @@ namespace EfCoreRepository.Abstracts
 {
     public abstract class AbstractMappingUtility
     {
-        /// <summary>
-        /// Utility that applies addition/deletion to the list
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <param name="dto"></param>
-        /// <param name="idSelector"></param>
-        /// <typeparam name="TProperty"></typeparam>
-        /// <typeparam name="TId"></typeparam>
-        protected void ModifyList<TProperty, TId>(IList<TProperty> entity, IList<TProperty> dto,
+        // Utility that applies addition/deletion to the list
+        protected static void ModifyList<TProperty, TId>(IList<TProperty> entity, IList<TProperty> dto,
             Func<TProperty, TId> idSelector)
             where TProperty : class
             where TId : struct

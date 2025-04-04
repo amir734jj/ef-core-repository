@@ -12,7 +12,6 @@ namespace EfCoreRepository
 {
     internal class EntityMapping<TSource> : AbstractMappingUtility, IEntityMapping where TSource : class
     {
-        private readonly ICollection<Type> _entityTypes;
         private readonly Action<TSource, TSource> _manualUpdate;
         private readonly Func<IQueryable<TSource>, IQueryable<TSource>> _include;
 
@@ -29,7 +28,6 @@ namespace EfCoreRepository
             Action<TSource, TSource> manualUpdate,
             Func<IQueryable<TSource>, IQueryable<TSource>> include) : this()
         {
-            _entityTypes = entityTypes;
             _manualUpdate = manualUpdate;
             _include = include;
 
@@ -96,7 +94,7 @@ namespace EfCoreRepository
             }
             else
             {
-                var bodyExpr = Expression.Call(param1Expr, propertyInfo.GetSetMethod(), param2AccessExpr);
+                var bodyExpr = Expression.Call(param1Expr, propertyInfo.GetSetMethod()!, param2AccessExpr);
 
                 var lambdaExpr = Expression.Lambda<Action<TSource, TSource>>(bodyExpr, param1Expr, param2Expr);
                 _updates.Add(propertyInfo, lambdaExpr.Compile());

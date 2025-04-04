@@ -48,7 +48,7 @@ public class RepositoryGetTest : AbstractRepositoryTest
         var entity = await Repository.For<DummyModel>().Save(model);
 
         // Act
-        var result = await Repository.For<DummyModel>().Get(x => x.Id == entity.Id);
+        var result = await Repository.For<DummyModel>().Get([x => x.Id == entity.Id]);
 
         // Assert
         result.Should()
@@ -74,7 +74,7 @@ public class RepositoryGetTest : AbstractRepositoryTest
 
         // Act
         var result = await Repository.For<DummyModel>()
-            .Get(x => x.Id == entity.Id, x => x.Name == model.Name, x => x.Name != "bar");
+            .Get([x => x.Id == entity.Id, x => x.Name == model.Name, x => x.Name != "bar"]);
 
         // Assert
         result.Should()
@@ -101,7 +101,7 @@ public class RepositoryGetTest : AbstractRepositoryTest
             Name = "bar", Children = []
         };
 
-        var entities = (await Repository.For<DummyModel>().SaveMany(model1, model2)).ToList();
+        var entities = (await Repository.For<DummyModel>().SaveMany([model1, model2])).ToList();
 
         // Act
         var result = await Repository.For<DummyModel>()
@@ -132,7 +132,7 @@ public class RepositoryGetTest : AbstractRepositoryTest
             Name = "bar", Children = []
         };
 
-        var entities = (await Repository.For<DummyModel>().SaveMany(model1, model2)).ToList();
+        var entities = (await Repository.For<DummyModel>().SaveMany([model1, model2])).ToList();
 
         // Act
         var result = await Repository.For<DummyModel>()
@@ -168,7 +168,7 @@ public class RepositoryGetTest : AbstractRepositoryTest
             Name = "bar", Children = []
         };
 
-        var entities = (await Repository.For<DummyModel>().SaveMany(model1, model2)).ToList();
+        var entities = (await Repository.For<DummyModel>().SaveMany([model1, model2])).ToList();
 
         // Act
         var result = await Repository.For<DummyModel>()
@@ -203,7 +203,7 @@ public class RepositoryGetTest : AbstractRepositoryTest
             Name = "bar", Children = []
         };
 
-        var entities = (await Repository.For<DummyModel>().SaveMany(model1, model2)).ToList();
+        var entities = (await Repository.For<DummyModel>().SaveMany([model1, model2])).ToList();
 
         // Act
         var result = await Repository.For<DummyModel>().GetAll();
@@ -234,7 +234,7 @@ public class RepositoryGetTest : AbstractRepositoryTest
             Name = "bar", Children = []
         };
 
-        await Repository.For<DummyModel>().SaveMany(model1, model2);
+        await Repository.For<DummyModel>().SaveMany([model1, model2]);
 
         // Act
         var result = await Repository.For<DummyModel>().GetAll(orderBy: x => x.Name, maxResults: 1);
@@ -265,7 +265,7 @@ public class RepositoryGetTest : AbstractRepositoryTest
             Name = "bar", Children = []
         };
 
-        await Repository.For<DummyModel>().SaveMany(model1, model2);
+        await Repository.For<DummyModel>().SaveMany([model1, model2]);
 
         // Act
         var result = await Repository.For<DummyModel>().GetAll(orderByDesc: x => x.Name, maxResults: 1);
@@ -296,7 +296,7 @@ public class RepositoryGetTest : AbstractRepositoryTest
             Name = "bar", Children = []
         };
 
-        await Repository.For<DummyModel>().SaveMany(model1, model2);
+        await Repository.For<DummyModel>().SaveMany([model1, model2]);
 
         // Act
         var result = await Repository.For<DummyModel>().GetAll<object>(orderBy: x => x.Name, project: x => new DummyModel { Id = x.Id, Name = x.Name }, maxResults: 1);
@@ -327,7 +327,7 @@ public class RepositoryGetTest : AbstractRepositoryTest
             Name = "bar", Children = []
         };
 
-        await Repository.For<DummyModel>().SaveMany(model1, model2);
+        await Repository.For<DummyModel>().SaveMany([model1, model2]);
 
         // Act
         var result = await Repository.For<DummyModel>().GetAll<object>(orderBy: x => x.Name, project: x => new { x.Id, x.Name }, maxResults: 1);

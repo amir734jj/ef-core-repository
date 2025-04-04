@@ -46,7 +46,7 @@ public class RepositorySaveTest : AbstractRepositoryTest
         };
 
         // Act
-        var result = (await Repository.For<DummyModel>().SaveMany(model1, model2)).ToList();
+        var result = (await Repository.For<DummyModel>().SaveMany([model1, model2])).ToList();
 
         // Assert
         result.Should()
@@ -60,11 +60,11 @@ public class RepositorySaveTest : AbstractRepositoryTest
         model1Result.Should()
             .NotBeNull().And
             .BeEquivalentToIgnoreCycles(model1).And
-            .BeEquivalentToIgnoreCycles(await Repository.For<DummyModel>().Get(x => x.Name == model1.Name));
+            .BeEquivalentToIgnoreCycles(await Repository.For<DummyModel>().Get([x => x.Name == model1.Name]));
 
         model2Result.Should()
             .NotBeNull().And
             .BeEquivalentToIgnoreCycles(model2).And
-            .BeEquivalentToIgnoreCycles(await Repository.For<DummyModel>().Get(x => x.Name == model2.Name));
+            .BeEquivalentToIgnoreCycles(await Repository.For<DummyModel>().Get([x => x.Name == model2.Name]));
     }
 }

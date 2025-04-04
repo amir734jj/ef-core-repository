@@ -8,7 +8,8 @@ namespace EfCoreRepository.Interfaces
         IBasicCrudSingles<TSource>,
         IBasicCrudMany<TSource>,
         IBasicCrudUtils<TSource>,
-        IBasicCrudBulk<TSource>
+        IBasicCrudBulk<TSource>,
+        IBasicCrudUnSafe<TSource>
         where TSource : class, new()
     {
         // For complex and multi-action where we want to defer the save until the dispose takes place

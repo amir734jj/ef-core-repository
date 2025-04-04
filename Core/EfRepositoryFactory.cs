@@ -55,10 +55,10 @@ namespace EfCoreRepository
 
         public void Build()
         {
-            AddEfRepository(_context, serviceLifetime);
+            AddEfRepository(_context);
         }
 
-        private void AddEfRepository(IReadOnlyCollection<(Type ProfileType, Type EntityType)> context, ServiceLifetime serviceLifetime)
+        private void AddEfRepository(IReadOnlyCollection<(Type ProfileType, Type EntityType)> context)
         {
             var entityTypes = context.Select(x => x.EntityType).ToList();
             var duplicateProfiles =  context.GroupBy(x => x.EntityType).Where(x => x.Count() > 1)

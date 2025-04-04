@@ -8,7 +8,7 @@ namespace EfCoreRepository.Interfaces
     {
         Task<TSource> Get<TId>(TId id) where TId : struct;
         
-        Task<TSource> Get(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs);
+        Task<TSource> Get(Expression<Func<TSource, bool>>[] filterExprs);
 
         Task<TSource> Update<TId>(TId id, TSource dto) where TId : struct;
 
@@ -16,7 +16,7 @@ namespace EfCoreRepository.Interfaces
 
         Task<TSource> Delete<TId>(TId id) where TId : struct;
 
-        Task<TSource> Delete(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs);
+        Task<TSource> Delete(Expression<Func<TSource, bool>>[] filterExprs);
         
         Task<TSource> Save(TSource source);
     }

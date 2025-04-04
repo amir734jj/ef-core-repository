@@ -71,24 +71,24 @@ namespace EfCoreRepository
         }
 
         // Returns filters list of entities
-        public async Task<TSource> Get(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
+        public async Task<TSource> Get(Expression<Func<TSource, bool>>[] filterExprs)
         {
-            return await ApplyFilters(GetQueryable(), new []{filterExpr}.Concat(additionalFilterExprs)).FirstOrDefaultAsync();
+            return await ApplyFilters(GetQueryable(), filterExprs).FirstOrDefaultAsync();
         }
 
         public async Task<TSource> Delete<TId>(TId id) where TId : struct
         {
-            return (await DeleteMany(FilterExpression<TSource, TId>(id))).FirstOrDefault();
+            return (await DeleteMany([FilterExpression<TSource, TId>(id)])).FirstOrDefault();
         }
 
-        public async Task<TSource> Delete(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
+        public async Task<TSource> Delete(Expression<Func<TSource, bool>>[] filterExprs)
         {
-            return (await DeleteMany(new []{filterExpr}.Concat(additionalFilterExprs).ToArray())).FirstOrDefault();
+            return (await DeleteMany(filterExprs)).FirstOrDefault();
         }
 
         public async Task<TSource> Save(TSource source)
         {
-            return (await SaveMany(source)).FirstOrDefault();
+            return (await SaveMany([source])).FirstOrDefault();
         }
 
         public async Task<IEnumerable<TSource>> BulkUpdate<TId>(TId[] ids, Action<TSource> updater, int batchSize = 50) where TId : struct
@@ -127,7 +127,7 @@ namespace EfCoreRepository
             return result;
         }
 
-        public async Task<IEnumerable<TSource>> SaveMany(params TSource[] sources)
+        public async Task<IEnumerable<TSource>> SaveMany(TSource[] sources)
         {
             await _dbSet.AddRangeAsync(sources);
 
@@ -152,10 +152,10 @@ namespace EfCoreRepository
                 return [];
             }
             
-            return await DeleteMany(FilterExpression<TSource, TId>(additionalIds));
+            return await DeleteMany([FilterExpression<TSource, TId>(additionalIds)]);
         }
 
-        public async Task<IEnumerable<TSource>> DeleteMany(params Expression<Func<TSource, bool>>[] filterExprs)
+        public async Task<IEnumerable<TSource>> DeleteMany(Expression<Func<TSource, bool>>[] filterExprs)
         {
             // With tracking
             var entities = await ApplyFilters(GetQueryable(), filterExprs).ToListAsync();
@@ -221,9 +221,19 @@ namespace EfCoreRepository
         }
 
         // Get all entities given Id array
-        public async Task<IEnumerable<TSource>> GetAll<TId>(params TId[] ids) where TId : struct
+        public async Task<IEnumerable<TSource>> GetAll<TId>(TId[] ids) where TId : struct
         {
             return await this.GetAll(filterExprs: [FilterExpression<TSource, TId>(ids)]);
+        }
+
+        public async Task<IEnumerable<TSource>> GetAll()
+        {
+            return await GetQueryable().ToListAsync();
+        }
+
+        public async Task<bool> Any()
+        {
+            return await Any([]);
         }
 
         public async Task<int> Count()
@@ -232,9 +242,9 @@ namespace EfCoreRepository
         }
 
         // Count entities that pass filter expression
-        public async Task<int> Count(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
+        public async Task<int> Count(Expression<Func<TSource, bool>>[] filterExprs)
         {
-            return await ApplyFilters(GetQueryable(SessionType.LightWeight), new[] { filterExpr }.Concat(additionalFilterExprs)).CountAsync();
+            return await ApplyFilters(GetQueryable(SessionType.LightWeight), filterExprs).CountAsync();
         }
 
         // Updates entity given the id and new instance
@@ -249,9 +259,9 @@ namespace EfCoreRepository
             return (await BulkUpdate([id], updater)).FirstOrDefault();
         }
 
-        public async Task<bool> Any(Expression<Func<TSource, bool>> filterExpr, params Expression<Func<TSource, bool>>[] additionalFilterExprs)
+        public async Task<bool> Any(Expression<Func<TSource, bool>>[] filterExprs)
         {
-            return await ApplyFilters(GetQueryable(), new[] { filterExpr }.Concat(additionalFilterExprs)).AnyAsync();
+            return await ApplyFilters(GetQueryable(), filterExprs).AnyAsync();
         }
 
         public async Task<IEnumerable<TSource>> Take(int limit)
