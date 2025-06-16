@@ -2,7 +2,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Core.Tests.Abstracts;
 using Core.Tests.Models;
-using EfCoreRepository.Extensions;
 using FluentAssertions;
 using Xunit;
 

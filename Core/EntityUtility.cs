@@ -1,17 +1,16 @@
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using EfCoreRepository.Extensions;
 
 namespace EfCoreRepository
 {
     internal static class EntityUtility
     {
-        private static readonly IDictionary<Type, string> IdLookup = new ConcurrentDictionary<Type, string>();
+        private static readonly ConditionalWeakTable<Type, string> IdLookup = new();
 
         // Common property names for ID
         private static readonly string[] IdNames = ["_id", "id"];
@@ -39,7 +38,7 @@ namespace EfCoreRepository
                     $"Missing KEY attribute on the class declaration for nested entity: {type.Name}");
             }
 
-            IdLookup[type] = keyProperty.Name;
+            IdLookup.Add(type, keyProperty.Name);
 
             return keyProperty.Name;
         }

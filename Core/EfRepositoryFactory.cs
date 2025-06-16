@@ -92,19 +92,33 @@ namespace EfCoreRepository
                 throw new Exception($"Missing KEY attribute on the class declaration for entities: {string.Join(", ", missingKeys.Select(x => x.EntityType.Name))}");
             }
             
+            serviceCollection.Add(
+                ServiceDescriptor.Describe(
+                    typeof(IEnumerable<EntityProfileAttributed>),
+                    serviceProvider =>
+                    {
+                        return context.Select(tuple =>
+                        {
+                            var profile = (IEntityProfile)ActivatorUtilities.CreateInstance(serviceProvider, tuple.ProfileType);
+                            return new EntityProfileAttributed
+                            {
+                                EntityType = tuple.EntityType,
+                                Profile = profile,
+                                EntityMapping = profile.ToEntityMapping(entityTypes)
+                            };
+                        }).ToList();
+                    },
+                    ServiceLifetime.Singleton));
+            
             // DbContext is registered by default as scoped
             // https://docs.microsoft.com/en-us/ef/core/miscellaneous/configuring-dbcontext#implicitly-sharing-dbcontext-instances-across-multiple-threads-via-dependency-injection
-            serviceCollection.Add(ServiceDescriptor.Describe(typeof(IEfRepository), serviceProvider => new EfRepository(context.Select(tuple =>
-            {
-                var profile = (IEntityProfile)ActivatorUtilities.CreateInstance(serviceProvider, tuple.ProfileType);
-
-                return new EntityProfileAttributed
-                {
-                    EntityType = tuple.EntityType,
-                    Profile = profile,
-                    EntityMapping = profile.ToEntityMapping(entityTypes)
-                };
-            }).ToList(), serviceProvider.GetService<TDbContext>()), serviceLifetime));
+            serviceCollection.Add(ServiceDescriptor.Describe(
+                typeof(IEfRepository),
+                serviceProvider =>
+                    new EfRepository(
+                        serviceProvider.GetRequiredService<IEnumerable<EntityProfileAttributed>>(),
+                        serviceProvider.GetRequiredService<TDbContext>()),
+                serviceLifetime));
             
             // Dependency inject IBasicCrud for each entity type
             foreach (var (_, entityType) in context)

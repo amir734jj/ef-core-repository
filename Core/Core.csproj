@@ -6,9 +6,9 @@
         <Description>EntityFramework.Core repository pattern</Description>
         <RepositoryUrl>https://github.com/amir734jj/ef-core-repository</RepositoryUrl>
         <PackageProjectUrl>https://github.com/amir734jj/ef-core-repository</PackageProjectUrl>
-        <AssemblyVersion>3.1.14</AssemblyVersion>
-        <PackageReleaseNotes>Simplify mapping logic</PackageReleaseNotes>
-        <Version>3.1.14</Version>
+        <AssemblyVersion>3.1.15</AssemblyVersion>
+        <PackageReleaseNotes>Fix duplicate analyzing of reflection data by making them singleton</PackageReleaseNotes>
+        <Version>3.1.15</Version>
         <RootNamespace>EfCoreRepository</RootNamespace>
         <AssemblyName>SimpleEfCoreRepository</AssemblyName>
         <LangVersion>latest</LangVersion>
