@@ -12,5 +12,7 @@ namespace EfCoreRepository.Interfaces
         Task<bool> Any(Expression<Func<TSource, bool>>[] filterExprs);
 
         Task<IEnumerable<TSource>> Take(int limit);
+
+        Task<bool> HasReferences(TSource source);
     }
 }

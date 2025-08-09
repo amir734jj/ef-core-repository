@@ -255,6 +255,49 @@ namespace EfCoreRepository
         {
             return await GetQueryable().Take(limit).ToListAsync();
         }
+        
+        // Checks whether entity has open references
+        public async Task<bool> HasReferences(TSource entity)
+        {
+            var entry = dbContext.Entry(entity);
+            var entityType = entry.Metadata;
+
+            foreach (var navigation in entityType.GetNavigations())
+            {
+                var navigationEntry = entry.Navigation(navigation.Name);
+
+                if (!navigation.IsCollection && !navigation.ForeignKey.IsOwnership && navigation.ForeignKey.PrincipalEntityType == entityType)
+                {
+                    // 1:1 or many:1 where current entity is the principal (has the other side referencing it)
+                    if (!navigationEntry.IsLoaded)
+                    {
+                        await navigationEntry.LoadAsync();
+                    }
+
+                    var value = navigationEntry.CurrentValue;
+                    if (value != null)
+                    {
+                        return true;
+                    }
+                }
+                else if (navigation.IsCollection)
+                {
+                    // Collection navigations (1:N)
+                    if (!navigationEntry.IsLoaded)
+                    {
+                        await navigationEntry.LoadAsync();
+                    }
+
+                    var collection = (IEnumerable<object>)navigationEntry.CurrentValue;
+                    if (collection?.Any() == true)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
 
         // Invoke SaveChanges if session mode is active
         public void Dispose()
