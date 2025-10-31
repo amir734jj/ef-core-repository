@@ -66,7 +66,7 @@ namespace EfCoreRepository
                 .ToList();
             
             // Check for duplicate profiles
-            if (duplicateProfiles.Any())
+            if (duplicateProfiles.Count != 0)
             {
                 throw new Exception(
                     $"Duplicate profile has been defined for entities: {string.Join(", ", duplicateProfiles.Select(x => x.Name))}");
@@ -87,7 +87,7 @@ namespace EfCoreRepository
             }).ToList();
             
             // Check for missing ID property in Entity
-            if (duplicateProfiles.Any())
+            if (duplicateProfiles.Count != 0)
             {
                 throw new Exception($"Missing KEY attribute on the class declaration for entities: {string.Join(", ", missingKeys.Select(x => x.EntityType.Name))}");
             }
