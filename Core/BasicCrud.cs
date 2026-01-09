@@ -66,12 +66,12 @@ namespace EfCoreRepository
 
         public async Task<TSource> Delete<TId>(TId id) where TId : struct
         {
-            return (await DeleteMany([FilterExpression<TSource, TId>(id)])).FirstOrDefault();
+            return (await DeleteInternal([FilterExpression<TSource, TId>(id)], single: true)).FirstOrDefault();
         }
 
         public async Task<TSource> Delete(Expression<Func<TSource, bool>>[] filterExprs)
         {
-            return (await DeleteMany(filterExprs)).FirstOrDefault();
+            return (await DeleteInternal(filterExprs, single: true)).FirstOrDefault();
         }
 
         public async Task<TSource> Save(TSource source)
@@ -145,10 +145,22 @@ namespace EfCoreRepository
 
         public async Task<IEnumerable<TSource>> DeleteMany(Expression<Func<TSource, bool>>[] filterExprs)
         {
-            // With tracking
-            var entities = await ApplyFilters(GetQueryable(), filterExprs).ToListAsync();
+            return await DeleteInternal(filterExprs, single: false);
+        }
 
-            if (entities.Any())
+        private async Task<IEnumerable<TSource>> DeleteInternal(Expression<Func<TSource, bool>>[] filterExprs, bool single)
+        {
+            // With tracking
+            var queryable = ApplyFilters(GetQueryable(), filterExprs);
+
+            if (single)
+            {
+                queryable = queryable.Take(1);
+            }
+            
+            var entities = await queryable.ToListAsync();
+
+            if (entities.Count > 0)
             {
                 _dbSet.RemoveRange(entities);
 
