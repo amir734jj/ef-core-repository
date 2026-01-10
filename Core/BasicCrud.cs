@@ -145,6 +145,11 @@ namespace EfCoreRepository
 
         public async Task<IEnumerable<TSource>> DeleteMany(Expression<Func<TSource, bool>>[] filterExprs)
         {
+            if (filterExprs.Length == 0)
+            {
+                return [];
+            }
+            
             return await DeleteInternal(filterExprs, single: false);
         }
 
