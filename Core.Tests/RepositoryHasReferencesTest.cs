@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Threading.Tasks;
 using Core.Tests.Abstracts;
 using Core.Tests.Models;
