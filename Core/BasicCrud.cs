@@ -8,6 +8,7 @@ using EfCoreRepository.Extensions;
 using EfCoreRepository.Interfaces;
 using EfCoreRepository.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using static EfCoreRepository.EntityUtility;
 
 namespace EfCoreRepository
@@ -272,6 +273,22 @@ namespace EfCoreRepository
         {
             return await GetQueryable().Take(limit).ToListAsync();
         }
+
+        /// <summary>
+        /// Checks if a navigation is a collection navigation.
+        /// EF Core 8 compatibility: IsCollection is on INavigation directly
+        /// </summary>
+        private static bool IsCollectionNavigation(IReadOnlyNavigationBase navigation)
+        {
+            return navigation switch
+            {
+                // Try INavigation first (regular navigation)
+                INavigation nav => nav.IsCollection,
+                // Try ISkipNavigation (many-to-many) - these are always collections
+                ISkipNavigation => true,
+                _ => false
+            };
+        }
         
         // Checks whether entity has open references
         public async Task<bool> HasReferences(TSource entity)
@@ -283,7 +300,7 @@ namespace EfCoreRepository
             {
                 var navigationEntry = entry.Navigation(navigation.Name);
 
-                if (!navigation.IsCollection && !navigation.ForeignKey.IsOwnership && navigation.ForeignKey.PrincipalEntityType == entityType)
+                if (!IsCollectionNavigation(navigation) && !navigation.ForeignKey.IsOwnership && navigation.ForeignKey.PrincipalEntityType == entityType)
                 {
                     // 1:1 or many:1 where current entity is the principal (has the other side referencing it)
                     if (!navigationEntry.IsLoaded)
@@ -297,7 +314,7 @@ namespace EfCoreRepository
                         return true;
                     }
                 }
-                else if (navigation.IsCollection)
+                else if (IsCollectionNavigation(navigation))
                 {
                     // Collection navigations (1:N)
                     if (!navigationEntry.IsLoaded)
