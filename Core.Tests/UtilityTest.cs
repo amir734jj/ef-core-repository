@@ -63,14 +63,15 @@ public class UtilityTest : AbstractRepositoryTest
     public void Test_ModifyList_NullParameters()
     {
         // Arrange
-        var testProfile = new Profiles.DummyModelProfile();
         IList<NestedModel> entityList = null;
         IList<NestedModel> dtoList = null;
 
         // Act - ModifyList should handle null lists
-        DummyModelProfile.TestModifyList(entityList!, dtoList, x => x.Id);
+        // ReSharper disable once ExpressionIsAlwaysNull
+        DummyModelProfile.TestModifyList(entityList, dtoList, x => x.Id);
 
         // Assert - Should not throw
+        // ReSharper disable once ExpressionIsAlwaysNull
         entityList.Should().BeNull();
     }
 
@@ -78,7 +79,6 @@ public class UtilityTest : AbstractRepositoryTest
     public void Test_ModifyList_Additions()
     {
         // Arrange
-        var testProfile = new Profiles.DummyModelProfile();
         var entityList = new List<NestedModel>
         {
             new() { Id = 1, ParentRefId = 1 }
@@ -101,7 +101,6 @@ public class UtilityTest : AbstractRepositoryTest
     public void Test_ModifyList_Deletions()
     {
         // Arrange
-        var testProfile = new Profiles.DummyModelProfile();
         var entityList = new List<NestedModel>
         {
             new() { Id = 1, ParentRefId = 1 },

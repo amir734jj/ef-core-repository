@@ -26,8 +26,31 @@ jobs:
       - name: Build
         run: dotnet build
 
-      - name: Test
-        run: dotnet test
+      - name: Test with Coverage
+        run: dotnet test --collect:"XPlat Code Coverage" --results-directory ./coverage
+
+      - name: Install ReportGenerator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: Generate Coverage Report
+        run: reportgenerator -reports:"./coverage/**/coverage.cobertura.xml" -targetdir:"./coverage/report" -reporttypes:"TextSummary"
+
+      - name: Check Coverage Threshold
+        run: |
+          # Extract line coverage percentage from the summary
+          COVERAGE=$(grep -oP 'Line coverage: \K[\d.]+' ./coverage/report/Summary.txt)
+          echo "Current coverage: $COVERAGE%"
+          
+          # Set minimum coverage threshold (currently set to 90%)
+          THRESHOLD=90
+          
+          # Compare coverage with threshold
+          if (( $(echo "$COVERAGE < $THRESHOLD" | bc -l) )); then
+            echo "❌ Coverage $COVERAGE% is below threshold $THRESHOLD%"
+            exit 1
+          else
+            echo "✅ Coverage $COVERAGE% meets threshold $THRESHOLD%"
+          fi
 
   publish:
     runs-on: ubuntu-latest
