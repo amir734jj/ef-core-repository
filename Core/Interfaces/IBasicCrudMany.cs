@@ -20,7 +20,7 @@ namespace EfCoreRepository.Interfaces
             Expression<Func<TSource, object>> orderBy = null,
             Expression<Func<TSource, object>> orderByDesc = null,
             Expression<Func<TSource, TProject>> project = null,
-            int? maxResults = null) where TProject : class, new();
+            int? maxResults = null) where TProject : class;
         
         Task<IEnumerable<TSource>> GetAll<TId>(TId[] ids) where TId : struct;
     }

@@ -193,7 +193,7 @@ namespace EfCoreRepository
             Expression<Func<TSource, object>> orderBy = null,
             Expression<Func<TSource, object>> orderByDesc = null,
             Expression<Func<TSource, TProject>> project = null,
-            int? maxResults = null) where TProject : class, new()
+            int? maxResults = null) where TProject : class
         {
             var queryable = ApplyFilters(GetQueryable(includes: includeExprs), filterExprs?.ToArray() ?? []);
 
