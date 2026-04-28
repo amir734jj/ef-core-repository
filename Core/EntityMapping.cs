@@ -74,6 +74,17 @@ namespace EfCoreRepository
             if (propertyInfo.PropertyType.IsGenericList())
             {
                 var genericArgType = propertyInfo.PropertyType.GetGenericArguments()[0];
+                
+                // For lists of simple/primitive types (e.g. List<string>, List<int>), 
+                // treat as a scalar property — just replace the whole list
+                if (genericArgType.IsTypeCompatibleForId())
+                {
+                    var scalarBodyExpr = Expression.Call(param1Expr, propertyInfo.GetSetMethod()!, param2AccessExpr);
+                    var scalarLambdaExpr = Expression.Lambda<Action<TSource, TSource>>(scalarBodyExpr, param1Expr, param2Expr);
+                    _updates.Add(propertyInfo, scalarLambdaExpr.Compile());
+                    return;
+                }
+
                 var idPropertyInfo = genericArgType.GetProperty(EntityUtility.FindIdProperty(genericArgType) ??
                                                                 throw new Exception(
                                                                     $"Missing KEY attribute on the class declaration for nested entity: {genericArgType.Name}"))!;
