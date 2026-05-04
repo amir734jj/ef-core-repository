@@ -84,7 +84,7 @@ IBasicCrud<DummyModel> = repo.For<DummyModel>();
 
 #### Factory pattern for parallel queries
 
-EF Core's `DbContext` is not thread-safe. If you need to run multiple queries in parallel (e.g. a dashboard endpoint), use `IDbContextFactory` integration. Each created `IBasicCrud<T>` gets its own `DbContext`.
+EF Core's `DbContext` is not thread-safe. If you need to run multiple queries in parallel, use `IDbContextFactory` integration. Each created `IBasicCrud<T>` gets its own `DbContext`.
 
 - Register using `AddDbContextFactory` + `AddEfRepositoryFactory`
 
