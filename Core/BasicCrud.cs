@@ -13,7 +13,7 @@ using static EfCoreRepository.EntityUtility;
 
 namespace EfCoreRepository
 {
-    internal sealed class BasicCrud<TSource>(IEntityMapping profile, DbContext dbContext, SessionType type)
+    internal sealed class BasicCrud<TSource>(IEntityMapping profile, DbContext dbContext, SessionType type, IAsyncDisposable ownedSession = null)
         : IBasicCrud<TSource>
         where TSource : class, new()
     {
@@ -340,17 +340,22 @@ namespace EfCoreRepository
             {
                 dbContext.SaveChanges();
             }
+
+            (ownedSession as IDisposable)?.Dispose();
         }
 
         // Invoke SaveChangesAsync if session mode is active
-        public ValueTask DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
             if (_anyChanges && type.HasFlag(SessionType.Delayed))
             {
-                return new ValueTask(dbContext.SaveChangesAsync());
+                await dbContext.SaveChangesAsync();
             }
 
-            return new ValueTask(Task.CompletedTask);
+            if (ownedSession != null)
+            {
+                await ownedSession.DisposeAsync();
+            }
         }
         
         public IBasicCrud<TSource> Delayed()

@@ -82,6 +82,61 @@ IEfRepository repo = ... // DI inject IEfRepository
 IBasicCrud<DummyModel> = repo.For<DummyModel>();
 ```
 
+#### Factory pattern for parallel queries
+
+EF Core's `DbContext` is not thread-safe. If you need to run multiple queries in parallel (e.g. a dashboard endpoint), use `IDbContextFactory` integration. Each created `IBasicCrud<T>` gets its own `DbContext`.
+
+- Register using `AddDbContextFactory` + `AddEfRepositoryFactory`
+
+```c#
+// This registers IDbContextFactory<EntityDbContext> as Singleton
+// and EntityDbContext as Scoped
+builder.Services.AddDbContextFactory<EntityDbContext>(options =>
+    options.UseNpgsql(connectionString));
+
+// This registers:
+//   - IEfRepository (scoped) for standard usage
+//   - IBasicCrud<T> (scoped) for standard usage  
+//   - IEfRepositoryCreator<T> (singleton) for parallel usage
+builder.Services.AddEfRepositoryFactory<EntityDbContext>(options =>
+    options.Profile(Assembly.GetExecutingAssembly()));
+```
+
+- Inject `IEfRepositoryCreator<T>` and create short-lived `IBasicCrud<T>` instances
+
+```c#
+public class DashboardService(
+    IEfRepositoryCreator<Order> orderCreator,
+    IEfRepositoryCreator<Log> logCreator)
+{
+    public async Task<DashboardDto> GetDashboard(int userId)
+    {
+        // Run queries in parallel — each gets its own DbContext
+        var ordersTask = GetOrdersAsync(userId);
+        var logsTask = GetLogsAsync();
+
+        await Task.WhenAll(ordersTask, logsTask);
+
+        return new DashboardDto(await ordersTask, await logsTask);
+    }
+
+    private async Task<IEnumerable<Order>> GetOrdersAsync(int userId)
+    {
+        // Create a fresh IBasicCrud with its own DbContext
+        await using var orders = await orderCreator.CreateAsync();
+        return await orders.GetAll(filterExprs: [o => o.UserId == userId]);
+    }
+
+    private async Task<IEnumerable<Log>> GetLogsAsync()
+    {
+        await using var logs = await logCreator.CreateAsync();
+        return await logs.GetAll();
+    }
+}
+```
+
+> **Note:** The standard `IBasicCrud<T>` (scoped) and `IEfRepository` registrations still work alongside the factory. Use `IEfRepositoryCreator<T>` only when you need parallel query execution.
+
 - Available methods in `IBasicCrud`
 ```c#
 // Get all entities given an array of Ids

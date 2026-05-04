@@ -27,7 +27,7 @@ namespace ConsoleApp
                     .Profile(Assembly.Load("Core.Tests")))
                 .BuildServiceProvider();
 
-            var dal = serviceProvider.GetService<IBasicCrud<DummyModel>>();
+            var dal = await serviceProvider.GetService<IEfRepositoryCreator<DummyModel>>().CreateAsync();
             var entities = await dal.Save(new DummyModel {Name = "foo", Children = [new NestedModel()] });
             var dto = (await dal.Get(1)).DeepClone();
             dto.Name = "bar";

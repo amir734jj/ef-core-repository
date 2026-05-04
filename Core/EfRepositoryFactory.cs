@@ -18,6 +18,8 @@ namespace EfCoreRepository
     {
         private readonly List<(Type ProfileType, Type EntityType)> _context = [];
 
+        internal IReadOnlyList<Type> EntityTypes => _context.Select(x => x.EntityType).ToList();
+
         public IEfRepositoryFactory Profile(params Assembly[] assemblies)
         {
             _context.AddRange(assemblies

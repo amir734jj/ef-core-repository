@@ -26,7 +26,7 @@ public class RepositoryPrimitiveListTest : AbstractRepositoryTest
         // Assert
         result.Should().NotBeNull();
         result.Title.Should().Be("Test Item");
-        result.Tags.Should().BeEquivalentTo(["alpha", "beta", "gamma"]);
+        result.Tags.Should().BeEquivalentTo("alpha", "beta", "gamma");
     }
 
     [Fact]
@@ -66,7 +66,7 @@ public class RepositoryPrimitiveListTest : AbstractRepositoryTest
 
         // Assert
         var updated = (await dal.GetAll<TaggedModel>(filterExprs: [x => x.Id == model.Id])).First();
-        updated.Tags.Should().BeEquivalentTo(["three", "four", "five"]);
+        updated.Tags.Should().BeEquivalentTo("three", "four", "five");
     }
 
     [Fact]
