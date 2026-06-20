@@ -55,6 +55,16 @@ namespace EfCoreRepository
             return FindIdPropertyInternal(typeof(T));
         }
 
+        public static Expression<Func<T, object>> IdSelectorExpr<T>() where T : class
+        {
+            var parameter = Expression.Parameter(typeof(T));
+            var bodyExpr = Expression.PropertyOrField(parameter, FindIdProperty<T>());
+            var bodyExprUntyped = Expression.Convert(bodyExpr, typeof(object));
+            var idSelectorExpr = Expression.Lambda<Func<T, object>>(bodyExprUntyped, parameter);
+
+            return idSelectorExpr;
+        }
+
         // Creates a lambda expression of x => x.Id == id
         public static Expression<Func<T, bool>> FilterExpression<T, TId>(params TId[] ids)
             where T : class

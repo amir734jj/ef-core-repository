@@ -209,6 +209,12 @@ namespace EfCoreRepository
 
             if (maxResults.HasValue)
             {
+                // Suppress RowLimitingOperationWithoutOrderByWarning
+                if (orderBy == null && orderByDesc == null)
+                {
+                    queryable = queryable.OrderBy(IdSelectorExpr<TSource>());
+                }
+                
                 queryable = queryable.Take(maxResults.Value);
             }
     
