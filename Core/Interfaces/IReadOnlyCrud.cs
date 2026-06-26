@@ -18,12 +18,13 @@ namespace EfCoreRepository.Interfaces
     /// <summary>Returns the first entity matching the filters, or <c>null</c>.</summary>
     Task<TSource> Get(Expression<Func<TSource, bool>>[] filterExprs);
 
-    /// <summary>Queries, optionally filters/orders/limits, and projects to <typeparamref name="TProject"/>.</summary>
+    /// <summary>Queries, optionally filters/orders/skips/limits, and projects to <typeparamref name="TProject"/>.</summary>
     Task<IEnumerable<TProject>> GetAll<TProject>(
         Expression<Func<TSource, bool>>[] filterExprs = null,
         Func<IQueryable<TSource>, IQueryable<TSource>> includeExprs = null,
         Ordering<TSource> orderBy = null,
         Expression<Func<TSource, TProject>> project = null,
+        int? skip = null,
         int? maxResults = null,
         Expression<Func<TSource, object>> distinctBy = null) where TProject : class;
 

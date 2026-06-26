@@ -14,8 +14,9 @@ public static class BasicCurdExtension
         Expression<Func<TSource, bool>>[] filterExprs = null,
         Func<IQueryable<TSource>, IQueryable<TSource>> includeExprs = null,
         Ordering<TSource> orderBy = null,
+        int? skip = null,
         int? maxResults = null) where TSource : class, new()
     {
-        return await basicCrud.GetAll<TSource>(filterExprs, includeExprs, orderBy, project: null, maxResults);
+        return await basicCrud.GetAll<TSource>(filterExprs, includeExprs, orderBy, project: null, skip: skip, maxResults: maxResults);
     }
 }

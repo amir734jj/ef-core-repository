@@ -52,6 +52,7 @@ namespace EfCoreRepository
             Func<IQueryable<TSource>, IQueryable<TSource>> includeExprs = null,
             Ordering<TSource> orderBy = null,
             Expression<Func<TSource, TProject>> project = null,
+            int? skip = null,
             int? maxResults = null,
             Expression<Func<TSource, object>> distinctBy = null) where TProject : class
         {
@@ -81,16 +82,25 @@ namespace EfCoreRepository
                 queryable = ordered;
             }
 
-            if (maxResults.HasValue)
+            if (skip.HasValue || maxResults.HasValue)
             {
-                // Suppress RowLimitingOperationWithoutOrderByWarning when the entity has a key to
-                // stabilize on. A join projection or keyless view has none, so callers order those explicitly.
+                // Skip/Take must run over an ordered query to be stable. Suppress
+                // RowLimitingOperationWithoutOrderByWarning when the entity has a key to stabilize
+                // on. A join projection or keyless view has none, so callers order those explicitly.
                 if (orderBy is not { Keys.Count: > 0 } && TryFindIdProperty<TSource>() != null)
                 {
                     queryable = queryable.OrderBy(IdSelectorExpr<TSource>());
                 }
 
-                queryable = queryable.Take(maxResults.Value);
+                if (skip.HasValue)
+                {
+                    queryable = queryable.Skip(skip.Value);
+                }
+
+                if (maxResults.HasValue)
+                {
+                    queryable = queryable.Take(maxResults.Value);
+                }
             }
 
             if (project != null)

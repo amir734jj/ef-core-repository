@@ -6,9 +6,9 @@
         <Description>EntityFramework.Core repository pattern</Description>
         <RepositoryUrl>https://github.com/amir734jj/ef-core-repository</RepositoryUrl>
         <PackageProjectUrl>https://github.com/amir734jj/ef-core-repository</PackageProjectUrl>
-        <AssemblyVersion>3.10.1</AssemblyVersion>
-        <PackageReleaseNotes>Documentation updates for fluent Ordering, keyless default profiles, and the Update(filterExprs, updater) signature.</PackageReleaseNotes>
-        <Version>3.10.1</Version>
+        <AssemblyVersion>3.11.0</AssemblyVersion>
+        <PackageReleaseNotes>Add optional skip (offset) parameter to GetAll for database-side pagination alongside maxResults.</PackageReleaseNotes>
+        <Version>3.11.0</Version>
         <RootNamespace>EfCoreRepository</RootNamespace>
         <AssemblyName>SimpleEfCoreRepository</AssemblyName>
         <LangVersion>latest</LangVersion>
