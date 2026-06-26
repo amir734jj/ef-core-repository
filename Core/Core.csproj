@@ -6,9 +6,9 @@
         <Description>EntityFramework.Core repository pattern</Description>
         <RepositoryUrl>https://github.com/amir734jj/ef-core-repository</RepositoryUrl>
         <PackageProjectUrl>https://github.com/amir734jj/ef-core-repository</PackageProjectUrl>
-        <AssemblyVersion>3.4.0</AssemblyVersion>
-        <PackageReleaseNotes>Add optional distinctBy key selector to GetAll for distinct-by-key queries.</PackageReleaseNotes>
-        <Version>3.4.0</Version>
+        <AssemblyVersion>3.5.0</AssemblyVersion>
+        <PackageReleaseNotes>Add optional default profiles: DefaultProfiles() auto-registers a MapAll/no-include profile for every DbContext entity without an explicit profile.</PackageReleaseNotes>
+        <Version>3.5.0</Version>
         <RootNamespace>EfCoreRepository</RootNamespace>
         <AssemblyName>SimpleEfCoreRepository</AssemblyName>
         <LangVersion>latest</LangVersion>

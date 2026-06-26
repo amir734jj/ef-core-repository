@@ -18,6 +18,8 @@ namespace EfCoreRepository
     {
         private readonly List<(Type ProfileType, Type EntityType)> _context = [];
 
+        private bool _useDefaultProfiles;
+
         internal IReadOnlyList<Type> EntityTypes => _context.Select(x => x.EntityType).ToList();
 
         public IEfRepositoryFactory Profile(params Assembly[] assemblies)
@@ -30,6 +32,13 @@ namespace EfCoreRepository
                     EntityType: GetProfileGenericType(type)
                 ))
                 .Where(x => x.EntityType != null));
+
+            return this;
+        }
+
+        public IEfRepositoryFactory DefaultProfiles()
+        {
+            _useDefaultProfiles = true;
 
             return this;
         }
@@ -57,7 +66,53 @@ namespace EfCoreRepository
 
         public void Build()
         {
+            AddDefaultProfiles();
+
             AddEfRepository(_context);
+        }
+
+        // When enabled, registers a DefaultEntityProfile<T> (MapAll + no include) for every entity
+        // type exposed by the DbContext that has no explicit profile. Default profiles are a last
+        // resort, so an explicitly registered profile always wins.
+        private void AddDefaultProfiles()
+        {
+            if (!_useDefaultProfiles)
+            {
+                return;
+            }
+
+            var alreadyProfiled = _context.Select(x => x.EntityType).ToHashSet();
+
+            var defaults = DiscoverDbContextEntityTypes()
+                .Where(HasDiscoverableKey)
+                .Where(alreadyProfiled.Add) // also dedupes repeated DbSet types
+                .Select(entityType => (
+                    ProfileType: typeof(DefaultEntityProfile<>).MakeGenericType(entityType),
+                    EntityType: entityType));
+
+            _context.AddRange(defaults);
+        }
+
+        // Entity CLR types exposed as DbSet<T> properties on the context.
+        private static IEnumerable<Type> DiscoverDbContextEntityTypes()
+        {
+            return typeof(TDbContext).GetProperties()
+                .Where(p => p.PropertyType.IsGenericType
+                            && p.PropertyType.GetGenericTypeDefinition() == typeof(DbSet<>))
+                .Select(p => p.PropertyType.GetGenericArguments()[0]);
+        }
+
+        private static bool HasDiscoverableKey(Type type)
+        {
+            try
+            {
+                FindIdProperty(type);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private void AddEfRepository(IReadOnlyCollection<(Type ProfileType, Type EntityType)> context)

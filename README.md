@@ -74,6 +74,22 @@ var serviceProvider = services
         .Profile(Assembly.GetExecutingAssembly()));
 ```
 
+##### Optional profiles (`DefaultProfiles`)
+
+Writing an `EntityProfile<T>` per entity is optional. Call `DefaultProfiles()` and every entity type
+exposed by the `DbContext` (a `DbSet<T>` whose entity has a discoverable key) that has **no** explicit
+profile automatically gets a default one that **maps all properties** (`MapAll`) and adds **no eager
+includes**. Explicit profiles always win, so you can mix the two. This is especially handy for
+DB-first / scaffolded models where hand-writing profiles is tedious:
+
+```c#
+services.AddEfRepository<ScaffoldedDbContext>(options => options
+    .Profile(Assembly.GetExecutingAssembly())          // explicit profiles (optional)
+    .DefaultProfiles());                                // default MapAll + no-include for the rest
+```
+
+> Entities still need a discoverable key — either a `[Key]` attribute or a property named `id`/`_id`.
+
 - Use `IBasicCrud`
 ```c#
 IEfRepository repo = ... // DI inject IEfRepository
