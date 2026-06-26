@@ -73,7 +73,8 @@ namespace EfCoreRepository
 
         // When enabled, registers a DefaultEntityProfile<T> (MapAll + no include) for every entity
         // type exposed by the DbContext that has no explicit profile. Default profiles are a last
-        // resort, so an explicitly registered profile always wins.
+        // resort, so an explicitly registered profile always wins. Fails fast if any DbContext
+        // entity lacks a discoverable key, rather than silently skipping it and crashing at runtime.
         private void AddDefaultProfiles()
         {
             if (!_useDefaultProfiles)
@@ -81,10 +82,18 @@ namespace EfCoreRepository
                 return;
             }
 
+            var entityTypes = DiscoverDbContextEntityTypes().ToList();
+
+            var keyless = entityTypes.Where(t => !HasDiscoverableKey(t)).ToList();
+            if (keyless.Count != 0)
+            {
+                throw new Exception(
+                    $"Missing key identifier for DbContext entities: {string.Join(", ", keyless.Select(t => t.Name))}");
+            }
+
             var alreadyProfiled = _context.Select(x => x.EntityType).ToHashSet();
 
-            var defaults = DiscoverDbContextEntityTypes()
-                .Where(HasDiscoverableKey)
+            var defaults = entityTypes
                 .Where(alreadyProfiled.Add) // also dedupes repeated DbSet types
                 .Select(entityType => (
                     ProfileType: typeof(DefaultEntityProfile<>).MakeGenericType(entityType),
@@ -144,7 +153,7 @@ namespace EfCoreRepository
             }).ToList();
 
             // Check for missing ID property in Entity
-            if (duplicateProfiles.Count != 0)
+            if (missingKeys.Count != 0)
             {
                 throw new Exception($"Missing KEY attribute on the class declaration for entities: {string.Join(", ", missingKeys.Select(x => x.EntityType.Name))}");
             }

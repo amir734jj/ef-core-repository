@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
@@ -35,6 +36,17 @@ public class DefaultProfileTest
     {
         public DbSet<OrphanParent> Parents { get; set; }
         public DbSet<OrphanChild> Children { get; set; }
+    }
+
+    // No [Key] and no id/_id property: not a discoverable key.
+    private sealed class KeylessEntity
+    {
+        public string Name { get; set; }
+    }
+
+    private sealed class KeylessDbContext(DbContextOptions<KeylessDbContext> options) : DbContext(options)
+    {
+        public DbSet<KeylessEntity> Keyless { get; set; }
     }
 
     private static IEfRepository BuildRepository()
@@ -77,5 +89,17 @@ public class DefaultProfileTest
 
         rows.Should().ContainSingle();
         rows[0].Name.Should().Be("Parent");
+    }
+
+    [Fact]
+    public void DefaultProfiles_WithKeylessEntity_ThrowsAtRegistration()
+    {
+        // A DbContext entity with no discoverable key must fail fast at registration, not crash
+        // later when the repository is first used.
+        Action act = () => new ServiceCollection()
+            .AddDbContext<KeylessDbContext>(x => x.UseSqlite("DataSource=file:keylessdb?mode=memory&cache=shared"))
+            .AddEfRepository<KeylessDbContext>(options => options.DefaultProfiles());
+
+        act.Should().Throw<Exception>().WithMessage("*Missing key identifier*KeylessEntity*");
     }
 }
