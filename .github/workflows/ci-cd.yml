@@ -40,10 +40,10 @@ jobs:
           # Extract line coverage percentage from the summary
           COVERAGE=$(grep -oP 'Line coverage: \K[\d.]+' ./coverage/report/Summary.txt)
           echo "Current coverage: $COVERAGE%"
-          
+
           # Set minimum coverage threshold (currently set to 90%)
           THRESHOLD=90
-          
+
           # Compare coverage with threshold
           if (( $(echo "$COVERAGE < $THRESHOLD" | bc -l) )); then
             echo "❌ Coverage $COVERAGE% is below threshold $THRESHOLD%"

@@ -42,13 +42,13 @@ namespace EfCoreRepository
 
             return keyProperty.Name;
         }
-        
+
         // Finds ID property of a class
         public static string FindIdProperty(Type type)
         {
            return FindIdPropertyInternal(type);
         }
-        
+
         // Finds ID property of a class
         public static string FindIdProperty<T>() where T : class
         {

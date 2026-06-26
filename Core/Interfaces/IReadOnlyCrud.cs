@@ -11,7 +11,7 @@ namespace EfCoreRepository.Interfaces
     /// The read-only surface of the repository: querying, counting and projecting, with no
     /// insert/update/delete and no by-id access (which needs an entity key). A
     /// <see cref="Join{TInner,TKey}"/> returns this same read-only surface over the joined
-    /// pair, so join results are query-only by construction — there is nothing to guard against.
+    /// pair, so join results are query-only by construction - there is nothing to guard against.
     /// </summary>
     public interface IReadOnlyCrud<TSource> where TSource : class
     {
@@ -50,9 +50,16 @@ namespace EfCoreRepository.Interfaces
         /// and returns the result as a read-only surface over a <see cref="Joined{TOuter,TInner}"/>
         /// pair. Joins can be chained.
         /// </summary>
+        /// <param name="joinType">Which side(s) to drive the join from (inner, left, right, full outer).</param>
+        /// <param name="inclusivity">
+        /// Whether to keep matched rows (<see cref="JoinInclusivity.Inclusive"/>) or only the rows
+        /// that exist on a single side (<see cref="JoinInclusivity.Exclusive"/>). Exclusive has no
+        /// meaning for an inner join and is rejected for that combination.
+        /// </param>
         IReadOnlyCrud<Joined<TSource, TInner>> Join<TInner, TKey>(
             Expression<Func<TSource, TKey>> outerKey,
             Expression<Func<TInner, TKey>> innerKey,
-            JoinType joinType = JoinType.Inner) where TInner : class;
+            JoinType joinType = JoinType.Inner,
+            JoinInclusivity inclusivity = JoinInclusivity.Inclusive) where TInner : class;
     }
 }

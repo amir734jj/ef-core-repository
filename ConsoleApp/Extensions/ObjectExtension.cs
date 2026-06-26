@@ -10,7 +10,7 @@ namespace ConsoleApp.Extensions
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
-            
+
             return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source, settings), settings);
         }
     }

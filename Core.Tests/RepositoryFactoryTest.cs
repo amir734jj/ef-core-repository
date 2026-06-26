@@ -20,7 +20,7 @@ public class RepositoryFactoryTest
         services.AddDbContext<EntityDbContext>(x => x.UseSqlite("DataSource=:memory:"));
 
         // Act
-        services.AddEfRepository<EntityDbContext>(options => 
+        services.AddEfRepository<EntityDbContext>(options =>
             options.Profile(Assembly.GetExecutingAssembly()));
 
         var serviceProvider = services.BuildServiceProvider();
@@ -40,7 +40,7 @@ public class RepositoryFactoryTest
         services.AddDbContext<EntityDbContext>(x => x.UseSqlite("DataSource=:memory:"));
 
         // Act
-        services.AddEfRepository<EntityDbContext>(options => 
+        services.AddEfRepository<EntityDbContext>(options =>
             options.Profile<Profiles.DummyModelProfile, DummyModel>());
 
         var serviceProvider = services.BuildServiceProvider();
@@ -60,7 +60,7 @@ public class RepositoryFactoryTest
         services.AddDbContext<EntityDbContext>(x => x.UseSqlite("DataSource=:memory:"));
 
         // Act
-        services.AddEfRepository<EntityDbContext>(options => 
+        services.AddEfRepository<EntityDbContext>(options =>
         {
             options.Profile<Profiles.DummyModelProfile, DummyModel>();
             options.Profile<Profiles.NestedProfile, NestedModel>();
@@ -81,7 +81,7 @@ public class RepositoryFactoryTest
         // Arrange
         var services = new ServiceCollection();
         services.AddDbContext<EntityDbContext>(x => x.UseSqlite("DataSource=:memory:"));
-        services.AddEfRepository<EntityDbContext>(options => 
+        services.AddEfRepository<EntityDbContext>(options =>
             options.Profile(Assembly.GetExecutingAssembly()));
 
         var serviceProvider = services.BuildServiceProvider();
@@ -99,7 +99,7 @@ public class RepositoryFactoryTest
         // Arrange
         var services = new ServiceCollection();
         services.AddDbContext<EntityDbContext>(x => x.UseSqlite("DataSource=:memory:"));
-        services.AddEfRepository<EntityDbContext>(options => 
+        services.AddEfRepository<EntityDbContext>(options =>
             options.Profile<Profiles.DummyModelProfile, DummyModel>());
 
         var serviceProvider = services.BuildServiceProvider();

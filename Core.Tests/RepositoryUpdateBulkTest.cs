@@ -20,11 +20,11 @@ public class RepositoryUpdateBulkTest : AbstractRepositoryTest
         };
 
         var entity = await Repository.For<DummyModel>().Save(model);
-            
+
         // Act
         entity.Name = "bar";
         var updatedEntity = (await Repository.For<DummyModel>().BulkUpdate([entity.Id], x => x.Name = "bar")).FirstOrDefault();
-            
+
         // Assert
         updatedEntity.Should()
             .NotBeNull().And

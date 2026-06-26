@@ -16,7 +16,7 @@ namespace EfCoreRepository
     {
         private readonly DbContext _dbContext;
         private readonly bool _ownsContext;
-        
+
         private readonly IDictionary<Type, EntityProfileAttributed> _profiles;
 
         public EfRepository(IEnumerable<EntityProfileAttributed> profiles, DbContext dbContext, bool ownsContext = false)
@@ -55,9 +55,9 @@ namespace EfCoreRepository
             // ensure T is class and has parameterless constructor
             if (type.IsClass && type.GetConstructor(Type.EmptyTypes) != null)
             {
-                return GetType().GetMethod(nameof(For), BindingFlags.Public | BindingFlags.Instance)!.MakeGenericMethod(type).Invoke(this, null);   
+                return GetType().GetMethod(nameof(For), BindingFlags.Public | BindingFlags.Instance)!.MakeGenericMethod(type).Invoke(this, null);
             }
-            
+
             return null;
         }
 

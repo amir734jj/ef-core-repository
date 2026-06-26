@@ -25,14 +25,14 @@ public class DummyModel
 - Create profile which is used to update an entity given a DTO
 
 ```c#
-public class DummyModelProfile : EntityProfile<DummyModel> 
+public class DummyModelProfile : EntityProfile<DummyModel>
 {
     public override void Update(DummyModel entity, DummyModel dto)
     {
         entity.Name = dto.Name;
 
         // ModifyList will try to add/delete entities based on Id based on whether they
-        // appear in dto.Children or not 
+        // appear in dto.Children or not
         ModifyList(entity.Children, dto.Children, x => x.Id);
     }
 
@@ -47,7 +47,7 @@ public class DummyModelProfile : EntityProfile<DummyModel>
 - OR use an auto mapper functionality to map properties. Be careful when using auto mapper. I recommend using manual mapper for more control.
 
 ```c#
-public class DummyModelProfile : EntityProfile<DummyModel> 
+public class DummyModelProfile : EntityProfile<DummyModel>
 {
     public DummyModelProfile()
     {
@@ -96,7 +96,7 @@ builder.Services.AddDbContextFactory<EntityDbContext>(options =>
 
 // This registers:
 //   - IEfRepository (scoped) for standard usage
-//   - IBasicCrud<T> (scoped) for standard usage  
+//   - IBasicCrud<T> (scoped) for standard usage
 //   - IEfRepositoryCreator<T> (singleton) for parallel usage
 builder.Services.AddEfRepositoryFactory<EntityDbContext>(options =>
     options.Profile(Assembly.GetExecutingAssembly()));
@@ -111,7 +111,7 @@ public class DashboardService(
 {
     public async Task<DashboardDto> GetDashboard(int userId)
     {
-        // Run queries in parallel — each gets its own DbContext
+        // Run queries in parallel - each gets its own DbContext
         var ordersTask = GetOrdersAsync(userId);
         var logsTask = GetLogsAsync();
 
@@ -192,15 +192,15 @@ IReadOnlyCrud<Joined<TSource, TInner>> Join<TInner, TKey>(
 
 `IBasicCrud<T>` also exposes a read-only surface, `IReadOnlyCrud<T>`, covering the query operations
 (`Get`, `GetAll`, `Any`, `Count`, `Take`, `Join`). A consumer that only needs to read can depend on
-`IReadOnlyCrud<T>` instead of the full CRUD interface — and, importantly, it keeps **join results
+`IReadOnlyCrud<T>` instead of the full CRUD interface - and, importantly, it keeps **join results
 query-only by construction** (there is nothing to guard against because the type simply has no
 write methods).
 
 ##### Join
 
 `Join` lets you join two entity sets that have **no navigation property** between them. It returns an
-`IReadOnlyCrud<Joined<TOuter, TInner>>`, so the usual `GetAll`/`Get`/`Any`/`Count` surface — with
-`filterExprs` and `project` — applies directly to the joined rows. The underlying `IQueryable` is never
+`IReadOnlyCrud<Joined<TOuter, TInner>>`, so the usual `GetAll`/`Get`/`Any`/`Count` surface - with
+`filterExprs` and `project` - applies directly to the joined rows. The underlying `IQueryable` is never
 exposed.
 
 ```c#
@@ -230,7 +230,7 @@ unmatched side is `null`. `JoinType` supports:
 > **Note:** `FullOuter` is composed as a `UNION ALL` of the left join and the unmatched-right rows.
 > Most providers translate this to SQL; verify against your provider if you rely on it.
 
-Joins are chainable — the read-only result itself exposes `Join`, keyed off the `Joined<,>` pair:
+Joins are chainable - the read-only result itself exposes `Join`, keyed off the `Joined<,>` pair:
 
 ```c#
 var rows = await repo.For<Order>()

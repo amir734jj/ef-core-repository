@@ -60,7 +60,7 @@ public class RepositoryGetTest : AbstractRepositoryTest
             .ContainSingle().And
             .ContainEquivalentOfIgnoreCycles(entity);
     }
-    
+
     [Fact]
     public async Task Test_Get_ByMultipleExpr()
     {
@@ -153,7 +153,7 @@ public class RepositoryGetTest : AbstractRepositoryTest
             .HaveCount(2).And
             .BeEquivalentToIgnoreCycles(entities);
     }
-    
+
     [Fact]
     public async Task Test_GetAll_ByMultipleExpr()
     {
@@ -188,7 +188,7 @@ public class RepositoryGetTest : AbstractRepositoryTest
             .HaveCount(2).And
             .BeEquivalentToIgnoreCycles(entities);
     }
-    
+
     [Fact]
     public async Task Test_GetAll()
     {

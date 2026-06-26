@@ -17,7 +17,7 @@ public class RepositoryJoinTest : AbstractRepositoryTest
         var parent = await Repository.For<DummyModel>().Save(new DummyModel { Name = "Parent", Children = [] });
         var child = await Repository.For<NestedModel>().Save(new NestedModel { ParentRefId = parent.Id });
 
-        // Orphan child with no matching parent — must be excluded by the inner join.
+        // Orphan child with no matching parent - must be excluded by the inner join.
         await Repository.For<NestedModel>().Save(new NestedModel { ParentRefId = null });
 
         // Act
@@ -63,7 +63,7 @@ public class RepositoryJoinTest : AbstractRepositoryTest
         await Repository.For<NestedModel>().Save(new NestedModel { ParentRefId = parent.Id });
         await Repository.For<DummyModel>().Save(new DummyModel { Name = "Lonely", Children = [] });
 
-        // Act — omitting JoinType should behave as an inner join.
+        // Act - omitting JoinType should behave as an inner join.
         var rows = await Repository.For<DummyModel>()
             .Join<NestedModel, int?>(d => d.Id, n => n.ParentRefId)
             .GetAll(project: p => new { p.Outer.Name });
@@ -80,7 +80,7 @@ public class RepositoryJoinTest : AbstractRepositoryTest
         var parent = await Repository.For<DummyModel>().Save(new DummyModel { Name = "Parent", Children = [] });
         await Repository.For<NestedModel>().Save(new NestedModel { ParentRefId = parent.Id });
 
-        // Orphan child with no matching parent — a right join keeps it with a null outer.
+        // Orphan child with no matching parent - a right join keeps it with a null outer.
         await Repository.For<NestedModel>().Save(new NestedModel { ParentRefId = null });
 
         // Act
@@ -88,7 +88,7 @@ public class RepositoryJoinTest : AbstractRepositoryTest
             .Join<NestedModel, int?>(d => d.Id, n => n.ParentRefId, JoinType.Right)
             .GetAll(project: p => new { OuterName = p.Outer != null ? p.Outer.Name : null, ChildId = p.Inner.Id })).ToList();
 
-        // Assert — both children appear; the orphan has a null outer.
+        // Assert - both children appear; the orphan has a null outer.
         rows.Should().HaveCount(2);
         rows.Should().ContainSingle(r => r.OuterName == "Parent");
         rows.Should().ContainSingle(r => r.OuterName == null);
@@ -102,7 +102,7 @@ public class RepositoryJoinTest : AbstractRepositoryTest
         await Repository.For<DummyModel>().Save(new DummyModel { Name = "OuterOnly", Children = [] });
         await Repository.For<NestedModel>().Save(new NestedModel { ParentRefId = matched.Id });
 
-        // Orphan child — no matching parent.
+        // Orphan child - no matching parent.
         await Repository.For<NestedModel>().Save(new NestedModel { ParentRefId = null });
 
         // Act
@@ -114,7 +114,7 @@ public class RepositoryJoinTest : AbstractRepositoryTest
                 HasInner = p.Inner != null
             })).ToList();
 
-        // Assert — matched pair, outer-only row, and inner-only row are all present.
+        // Assert - matched pair, outer-only row, and inner-only row are all present.
         rows.Should().HaveCount(3);
         rows.Should().ContainSingle(r => r.OuterName == "Matched" && r.HasInner);
         rows.Should().ContainSingle(r => r.OuterName == "OuterOnly" && !r.HasInner);

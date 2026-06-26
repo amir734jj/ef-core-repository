@@ -8,9 +8,9 @@ namespace Core.Tests.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-        
+
         public DummyModel ParentRef { get; set; }
-        
+
         public int? ParentRefId { get; set; }
     }
 }

@@ -21,7 +21,7 @@ public class RepositorySessionTest : AbstractRepositoryTest
         var delayedRepository = Repository.For<DummyModel>().Delayed();
 
         var entity = await delayedRepository.Save(model);
-        
+
         // Act
         (await delayedRepository.GetAll())
             .Should()

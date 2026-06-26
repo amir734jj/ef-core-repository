@@ -9,7 +9,7 @@ namespace EfCoreRepository.Extensions
         {
             return t.IsPrimitive || t.IsValueType || t == typeof(string);
         }
-        
+
         /// <summary>
         /// Utility function that returns true if property type if of IList
         /// </summary>

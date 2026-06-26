@@ -119,7 +119,7 @@ public class RepositorySessionAdvancedTest : AbstractRepositoryTest
         // Arrange
         var model = new DummyModel { Name = "Sync", Children = [] };
         var repository = Repository.For<DummyModel>().Delayed();
-        
+
         // Act
         await repository.Save(model);
         repository.Dispose();

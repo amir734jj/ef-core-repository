@@ -19,11 +19,11 @@ public class RepositoryUpdateTest : AbstractRepositoryTest
         };
 
         var entity = await Repository.For<DummyModel>().Save(model);
-            
+
         // Act
         entity.Name = "bar";
         var updatedEntity = await Repository.For<DummyModel>().Update(entity.Id, model);
-            
+
         // Assert
         updatedEntity.Should()
             .NotBeNull().And
@@ -33,7 +33,7 @@ public class RepositoryUpdateTest : AbstractRepositoryTest
             .Should()
             .BeEquivalentToIgnoreCycles(updatedEntity);
     }
-    
+
     [Fact]
     public async Task Test_UpdateChildren_ById_Add()
     {
@@ -46,12 +46,12 @@ public class RepositoryUpdateTest : AbstractRepositoryTest
         var parentEntity = await Repository.For<DummyModel>().Save(model);
 
         var nested = new NestedModel();
-        
+
         var childEntity = await Repository.For<NestedModel>().Save(nested);
 
         // Act
         parentEntity.Children.Add(childEntity);
-        
+
         var updatedEntity = await Repository.For<DummyModel>().Update(parentEntity.Id, parentEntity);
 
         // Assert
@@ -67,7 +67,7 @@ public class RepositoryUpdateTest : AbstractRepositoryTest
             .HaveCount(1).And
             .ContainEquivalentOfIgnoreCycles(childEntity);
     }
-    
+
     [Fact]
     public async Task Test_UpdateChildren_ById_Remove()
     {
@@ -83,12 +83,12 @@ public class RepositoryUpdateTest : AbstractRepositoryTest
         {
             ParentRefId = parentEntity.Id
         };
-        
+
         var childEntity = await Repository.For<NestedModel>().Save(nested);
 
         // Act
         parentEntity.Children.Remove(childEntity);
-        
+
         var updatedEntity = await Repository.For<DummyModel>().Update(parentEntity.Id, parentEntity);
 
         // Assert
@@ -103,7 +103,7 @@ public class RepositoryUpdateTest : AbstractRepositoryTest
         updatedEntity.Children.Should()
             .BeEmpty();
     }
-    
+
     [Fact]
     public async Task Test_Update_Action()
     {
@@ -114,13 +114,13 @@ public class RepositoryUpdateTest : AbstractRepositoryTest
         };
 
         var entity = await Repository.For<DummyModel>().Save(model);
-            
+
         // Act
         var updatedEntity = await Repository.For<DummyModel>().Update(entity.Id, x =>
         {
             x.Name = "bar";
         });
-            
+
         // Assert
         updatedEntity.Should()
             .NotBeNull().And

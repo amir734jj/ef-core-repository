@@ -30,7 +30,7 @@ public class RepositoryUtilsTest : AbstractRepositoryTest
             .Should()
             .Be(1);
     }
-    
+
     [Fact]
     public async Task Test_Count_ByMultipleExpr()
     {

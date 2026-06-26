@@ -10,7 +10,7 @@ using InfoViaLinq.Interfaces;
 
 namespace EfCoreRepository
 {
-    public abstract class EntityProfile<TSource> : AbstractMappingUtility, IEntityProfile 
+    public abstract class EntityProfile<TSource> : AbstractMappingUtility, IEntityProfile
         where TSource : class
     {
         private readonly IList<PropertyInfo> _properties = new List<PropertyInfo>();

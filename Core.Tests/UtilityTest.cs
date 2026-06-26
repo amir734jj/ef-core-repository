@@ -47,7 +47,7 @@ public class UtilityTest : AbstractRepositoryTest
         var model1 = new DummyModel { Name = "Test1", Children = [] };
         var model2 = new DummyModel { Name = "Test2", Children = [] };
         var model3 = new DummyModel { Name = "Test3", Children = [] };
-        
+
         await Repository.For<DummyModel>().SaveMany([model1, model2, model3]);
 
         // Act - Get multiple by IDs

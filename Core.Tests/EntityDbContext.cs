@@ -8,7 +8,7 @@ namespace Core.Tests
     public sealed class EntityDbContext : DbContext
     {
         public DbSet<DummyModel> DummyModels { get; set; }
-        
+
         public DbSet<NestedModel> Nesteds { get; set; }
 
         public DbSet<TaggedModel> TaggedModels { get; set; }
@@ -17,11 +17,11 @@ namespace Core.Tests
         {
             Database.EnsureCreated();
         }
-        
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            
+
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(EntityDbContext).Assembly);
 
             modelBuilder.Entity<TaggedModel>(e =>

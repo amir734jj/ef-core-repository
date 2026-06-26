@@ -15,7 +15,7 @@ namespace EfCoreRepository.Interfaces
         Task<TSource> Delete<TId>(TId id) where TId : struct;
 
         Task<TSource> Delete(Expression<Func<TSource, bool>>[] filterExprs);
-        
+
         Task<TSource> Save(TSource source);
     }
 }

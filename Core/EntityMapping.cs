@@ -74,9 +74,9 @@ namespace EfCoreRepository
             if (propertyInfo.PropertyType.IsGenericList())
             {
                 var genericArgType = propertyInfo.PropertyType.GetGenericArguments()[0];
-                
-                // For lists of simple/primitive types (e.g. List<string>, List<int>), 
-                // treat as a scalar property — just replace the whole list
+
+                // For lists of simple/primitive types (e.g. List<string>, List<int>),
+                // treat as a scalar property - just replace the whole list
                 if (genericArgType.IsTypeCompatibleForId())
                 {
                     var scalarBodyExpr = Expression.Call(param1Expr, propertyInfo.GetSetMethod()!, param2AccessExpr);

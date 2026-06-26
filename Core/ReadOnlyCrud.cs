@@ -125,7 +125,8 @@ namespace EfCoreRepository
         public IReadOnlyCrud<Joined<TSource, TInner>> Join<TInner, TKey>(
             Expression<Func<TSource, TKey>> outerKey,
             Expression<Func<TInner, TKey>> innerKey,
-            JoinType joinType = JoinType.Inner) where TInner : class
+            JoinType joinType = JoinType.Inner,
+            JoinInclusivity inclusivity = JoinInclusivity.Inclusive) where TInner : class
         {
             // Join roots are read-only and projected, so use a no-tracking, no-eager-include
             // query on both sides to avoid building "god objects".
@@ -140,6 +141,11 @@ namespace EfCoreRepository
                 JoinType.FullOuter => FullOuterJoin(outer, inner, outerKey, innerKey),
                 _ => throw new ArgumentOutOfRangeException(nameof(joinType), joinType, "Unsupported join type.")
             };
+
+            if (inclusivity == JoinInclusivity.Exclusive)
+            {
+                joined = ExcludeMatched(joined, joinType);
+            }
 
             return new ReadOnlyCrud<Joined<TSource, TInner>>(DbContext, joined);
         }
@@ -187,6 +193,28 @@ namespace EfCoreRepository
         private static IQueryable<Joined<TRight, TLeft>> Swap<TLeft, TRight>(IQueryable<Joined<TLeft, TRight>> source)
         {
             return source.Select(p => new Joined<TRight, TLeft> { Outer = p.Inner, Inner = p.Outer });
+        }
+
+        // Narrows an inclusive join down to its exclusive region - the outer crescents of the Venn
+        // diagram, i.e. the rows that exist on only one side.
+        private static IQueryable<Joined<TLeft, TRight>> ExcludeMatched<TLeft, TRight>(
+            IQueryable<Joined<TLeft, TRight>> joined, JoinType joinType)
+        {
+            return joinType switch
+            {
+                // Left only (not B): outer rows that found no inner match.
+                JoinType.Left => joined.Where(p => p.Inner == null),
+                // Right only (not A): inner rows that found no outer match.
+                JoinType.Right => joined.Where(p => p.Outer == null),
+                // Symmetric difference (A XOR B): rows present on exactly one side.
+                JoinType.FullOuter => joined.Where(p => p.Outer == null || p.Inner == null),
+                // An inner join only contains matched rows, so its exclusive region is empty by
+                // definition - reject the combination rather than silently returning nothing.
+                JoinType.Inner => throw new ArgumentException(
+                    "An inner join has no exclusive variant; its exclusive region is always empty.",
+                    nameof(joinType)),
+                _ => throw new ArgumentOutOfRangeException(nameof(joinType), joinType, "Unsupported join type.")
+            };
         }
 
         protected static IQueryable<T> ApplyFilters<T>(IQueryable<T> source, IEnumerable<Expression<Func<T, bool>>> filterExprs)

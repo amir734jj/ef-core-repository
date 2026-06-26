@@ -56,7 +56,7 @@ public class RepositoryCreatorTest : AbstractRepositoryCreatorTest
         // Arrange
         var creator = CreatorFor<DummyModel>();
 
-        // Act — save with one session
+        // Act - save with one session
         int savedId;
         await using (var crud = await creator.CreateAsync())
         {
@@ -65,7 +65,7 @@ public class RepositoryCreatorTest : AbstractRepositoryCreatorTest
             savedId = result.Id;
         }
 
-        // Act — read with a separate session
+        // Act - read with a separate session
         await using (var crud = await creator.CreateAsync())
         {
             var fetched = await crud.Get(savedId);
@@ -79,11 +79,11 @@ public class RepositoryCreatorTest : AbstractRepositoryCreatorTest
     [Fact]
     public async Task Test_Creator_EachCreate_GetsIndependentSession()
     {
-        // Act — create two independent sessions
+        // Act - create two independent sessions
         await using var crud1 = await CreatorFor<DummyModel>().CreateAsync();
         await using var crud2 = await CreatorFor<DummyModel>().CreateAsync();
 
-        // Assert — they should be different instances
+        // Assert - they should be different instances
         crud1.Should().NotBeSameAs(crud2);
     }
 
@@ -101,7 +101,7 @@ public class RepositoryCreatorTest : AbstractRepositoryCreatorTest
             await crud.Save(new DummyModel { Name = "parallel-2", Children = [] });
         }
 
-        // Act — run queries in parallel (the core use case)
+        // Act - run queries in parallel (the core use case)
         var dummyTask = Task.Run(async () =>
         {
             await using var crud = await dummyCreator.CreateAsync();
@@ -116,7 +116,7 @@ public class RepositoryCreatorTest : AbstractRepositoryCreatorTest
 
         await Task.WhenAll(dummyTask, nestedTask);
 
-        // Assert — parallel execution should not throw
+        // Assert - parallel execution should not throw
         var dummies = await dummyTask;
         var nesteds = await nestedTask;
 
@@ -143,11 +143,11 @@ public class RepositoryCreatorTest : AbstractRepositoryCreatorTest
         // Arrange
         var creator = CreatorFor<DummyModel>();
 
-        // Act — create and dispose
+        // Act - create and dispose
         var crud = await creator.CreateAsync();
         await crud.DisposeAsync();
 
-        // Assert — using it after dispose should throw (DbContext is disposed)
+        // Assert - using it after dispose should throw (DbContext is disposed)
         var action = async () => await crud.GetAll();
         await action.Should().ThrowAsync<ObjectDisposedException>();
     }

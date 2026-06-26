@@ -66,7 +66,7 @@ namespace EfCoreRepository
             var duplicateProfiles =  context.GroupBy(x => x.EntityType).Where(x => x.Count() > 1)
                 .Select(x => x.Key)
                 .ToList();
-            
+
             // Check for duplicate profiles
             if (duplicateProfiles.Count != 0)
             {
@@ -87,13 +87,13 @@ namespace EfCoreRepository
                     return true;
                 }
             }).ToList();
-            
+
             // Check for missing ID property in Entity
             if (duplicateProfiles.Count != 0)
             {
                 throw new Exception($"Missing KEY attribute on the class declaration for entities: {string.Join(", ", missingKeys.Select(x => x.EntityType.Name))}");
             }
-            
+
             serviceCollection.Add(
                 ServiceDescriptor.Describe(
                     typeof(IEnumerable<EntityProfileAttributed>),
@@ -111,7 +111,7 @@ namespace EfCoreRepository
                         }).ToList();
                     },
                     ServiceLifetime.Singleton));
-            
+
             // DbContext is registered by default as scoped
             // https://docs.microsoft.com/en-us/ef/core/miscellaneous/configuring-dbcontext#implicitly-sharing-dbcontext-instances-across-multiple-threads-via-dependency-injection
             serviceCollection.Add(ServiceDescriptor.Describe(
@@ -121,7 +121,7 @@ namespace EfCoreRepository
                         serviceProvider.GetRequiredService<IEnumerable<EntityProfileAttributed>>(),
                         serviceProvider.GetRequiredService<TDbContext>()),
                 serviceLifetime));
-            
+
             // Dependency inject IBasicCrud for each entity type
             foreach (var (_, entityType) in context)
             {

@@ -12,7 +12,7 @@ using Xunit;
 namespace Core.Tests;
 
 /// <summary>
-/// Targets behavior branches that the broader suite did not exercise — read-only join carrier,
+/// Targets behavior branches that the broader suite did not exercise - read-only join carrier,
 /// the unsupported-join-type guard, split-query path, delayed update/delete, no-op deletes,
 /// and both sync/async disposal of a delayed session.
 /// </summary>

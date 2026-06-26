@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Core.Tests.Profiles
 {
-    public class DummyModelProfile : EntityProfile<DummyModel> 
+    public class DummyModelProfile : EntityProfile<DummyModel>
     {
         public DummyModelProfile()
         {

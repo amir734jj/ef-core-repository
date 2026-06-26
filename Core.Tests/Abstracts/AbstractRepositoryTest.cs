@@ -39,14 +39,14 @@ public class AbstractRepositoryTest : IAsyncLifetime
         var nestedRepository = Repository.For<NestedModel>();
 
         var nestedModels = await nestedRepository.GetAll<DummyModel>();
-        
+
         foreach (var nestedModel in nestedModels)
         {
             await nestedRepository.Delete(nestedModel.Id);
         }
-        
+
         var dummyModels = await dummyRepository.GetAll<DummyModel>();
-        
+
         foreach (var nestedModel in dummyModels)
         {
             await dummyRepository.Delete(nestedModel.Id);

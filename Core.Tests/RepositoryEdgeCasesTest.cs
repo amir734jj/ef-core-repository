@@ -218,7 +218,7 @@ public class RepositoryEdgeCasesTest : AbstractRepositoryTest
 
         // Assert
         deleted.Should().HaveCount(2);
-        
+
         var remaining = await Repository.For<DummyModel>().GetAll();
         remaining.Should().ContainSingle();
         remaining.First().Name.Should().Be("Keep");

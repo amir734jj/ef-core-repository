@@ -8,7 +8,7 @@ namespace EfCoreRepository.Models
         public Type EntityType { get; set; }
 
         public IEntityProfile Profile { get; set; }
-        
+
         public IEntityMapping EntityMapping { get; set; }
     }
 }

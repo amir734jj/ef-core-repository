@@ -133,7 +133,7 @@ public class RepositoryHasReferencesTest : AbstractRepositoryTest
 
         // Act - Delete the child and check if parent still has references
         await Repository.For<NestedModel>().Delete(savedChild.Id);
-        
+
         var parentEntity = await Repository.For<DummyModel>().Get(savedParent.Id);
         var hasReferences = await Repository.For<DummyModel>().HasReferences(parentEntity);
 

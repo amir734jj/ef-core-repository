@@ -13,7 +13,7 @@ namespace EfCoreRepository.Interfaces
         Task<IEnumerable<TSource>> DeleteMany<TId>(TId[] ids) where TId : struct;
 
         Task<IEnumerable<TSource>> DeleteMany(Expression<Func<TSource, bool>>[] filterExprs);
-        
+
         Task<IEnumerable<TSource>> GetAll<TId>(TId[] ids) where TId : struct;
     }
 }

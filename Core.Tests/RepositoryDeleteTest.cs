@@ -27,7 +27,7 @@ public class RepositoryDeleteTest : AbstractRepositoryTest
         result.Should()
             .NotBeNull().And
             .Be(entity);
-        
+
 
         (await Repository.For<DummyModel>().GetAll())
             .Should()

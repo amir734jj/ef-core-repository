@@ -14,9 +14,9 @@ namespace EfCoreRepository.Extensions
             var factory = new EfRepositoryFactory<TDbContext>(collection, serviceLifetime);
 
             options(factory);
-            
+
             factory.Build();
-            
+
             return collection;
         }
 
@@ -31,7 +31,7 @@ namespace EfCoreRepository.Extensions
             var factory = new EfRepositoryFactory<TDbContext>(collection, ServiceLifetime.Scoped);
 
             options(factory);
-            
+
             factory.Build();
 
             // Register IEfRepositoryCreator<T> for each entity type

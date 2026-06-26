@@ -34,7 +34,7 @@ namespace ConsoleApp
             await dal.Update(entities.Id, dto);
 
             var updatedEntity = await dal.Get(1);
-            
+
             updatedEntity.Name.ShouldBe("bar");
             updatedEntity.Children.ShouldNotBeNull();
 
