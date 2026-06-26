@@ -6,9 +6,9 @@
         <Description>EntityFramework.Core repository pattern</Description>
         <RepositoryUrl>https://github.com/amir734jj/ef-core-repository</RepositoryUrl>
         <PackageProjectUrl>https://github.com/amir734jj/ef-core-repository</PackageProjectUrl>
-        <AssemblyVersion>3.7.0</AssemblyVersion>
-        <PackageReleaseNotes>DefaultProfiles() now skips keyless entities (e.g. database views) instead of failing, and a primary key is no longer required to query/join an entity (keys are enforced lazily, only for by-id operations).</PackageReleaseNotes>
-        <Version>3.7.0</Version>
+        <AssemblyVersion>3.8.0</AssemblyVersion>
+        <PackageReleaseNotes>DefaultProfiles() now discovers non-public (e.g. internal) DbSet&lt;T&gt; properties, so scaffolded contexts that hide their sets work without explicit profiles.</PackageReleaseNotes>
+        <Version>3.8.0</Version>
         <RootNamespace>EfCoreRepository</RootNamespace>
         <AssemblyName>SimpleEfCoreRepository</AssemblyName>
         <LangVersion>latest</LangVersion>

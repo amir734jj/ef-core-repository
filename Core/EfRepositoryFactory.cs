@@ -95,10 +95,12 @@ namespace EfCoreRepository
             _context.AddRange(defaults);
         }
 
-        // Entity CLR types exposed as DbSet<T> properties on the context.
+        // Entity CLR types exposed as DbSet<T> properties on the context. Includes non-public
+        // (e.g. internal) DbSets so scaffolded contexts that hide their sets still work.
         private static IEnumerable<Type> DiscoverDbContextEntityTypes()
         {
-            return typeof(TDbContext).GetProperties()
+            return typeof(TDbContext)
+                .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
                 .Where(p => p.PropertyType.IsGenericType
                             && p.PropertyType.GetGenericTypeDefinition() == typeof(DbSet<>))
                 .Select(p => p.PropertyType.GetGenericArguments()[0]);

@@ -49,6 +49,14 @@ public class DefaultProfileTest
         public DbSet<KeylessEntity> Keyless { get; set; }
     }
 
+    // Mirrors a scaffolded context that exposes its sets as internal DbSet<T>.
+    private sealed class InternalDbSetContext(DbContextOptions<InternalDbSetContext> options) : DbContext(options)
+    {
+        internal DbSet<OrphanParent> Parents { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder) => modelBuilder.Entity<OrphanParent>();
+    }
+
     private static IEfRepository BuildRepository()
     {
         var provider = new ServiceCollection()
@@ -105,5 +113,22 @@ public class DefaultProfileTest
         // Registration succeeded; the keyless entity simply has no default profile.
         Action act = () => repo.For<KeylessEntity>();
         act.Should().Throw<Exception>().WithMessage("*Failed to find profile*KeylessEntity*");
+    }
+
+    [Fact]
+    public async Task DefaultProfiles_DiscoversInternalDbSets()
+    {
+        var provider = new ServiceCollection()
+            .AddDbContext<InternalDbSetContext>(x => x.UseSqlite("DataSource=file:internaldb?mode=memory&cache=shared"))
+            .AddEfRepository<InternalDbSetContext>(options => options.DefaultProfiles())
+            .BuildServiceProvider();
+
+        provider.GetRequiredService<InternalDbSetContext>().Database.EnsureCreated();
+        var repo = provider.GetRequiredService<IEfRepository>();
+
+        // The entity behind the internal DbSet got a default profile, so it is usable.
+        var saved = await repo.For<OrphanParent>().Save(new OrphanParent { Name = "internal-set" });
+
+        saved.Name.Should().Be("internal-set");
     }
 }
