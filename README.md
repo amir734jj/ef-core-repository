@@ -230,6 +230,28 @@ unmatched side is `null`. `JoinType` supports:
 > **Note:** `FullOuter` is composed as a `UNION ALL` of the left join and the unmatched-right rows.
 > Most providers translate this to SQL; verify against your provider if you rely on it.
 
+##### Exclusive joins
+
+`Join` also accepts a `JoinInclusivity` argument that composes with `JoinType`. The default,
+`Inclusive`, keeps every row the join produces. `Exclusive` keeps only the rows that exist on a
+**single side** - the outer crescents of the join Venn diagram:
+
+| `JoinType` + `JoinInclusivity.Exclusive` | Keeps | Set notation |
+| --- | --- | --- |
+| `Left` | outer rows with no inner match | `A AND NOT B` |
+| `Right` | inner rows with no outer match | `B AND NOT A` |
+| `FullOuter` | rows present on exactly one side | `A XOR B` |
+
+```c#
+// Orders that have no matching customer (left-only rows).
+var orphans = await repo.For<Order>()
+    .Join<Customer, int>(o => o.CustomerId, c => c.Id, JoinType.Left, JoinInclusivity.Exclusive)
+    .GetAll(project: pair => pair.Outer);
+```
+
+> **Note:** `Inner` has no exclusive region (its result is always matched on both sides), so
+> `JoinType.Inner` with `JoinInclusivity.Exclusive` throws an `ArgumentException`.
+
 Joins are chainable - the read-only result itself exposes `Join`, keyed off the `Joined<,>` pair:
 
 ```c#
