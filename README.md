@@ -217,6 +217,19 @@ var rows = await repo.For<Order>()
         });
 ```
 
+`GetAll` also accepts an optional `distinctBy` key selector. When supplied, the query keeps one row
+per distinct key (`GroupBy(key).Select(g => g.First())`); when `null` (the default) no distincting is
+applied:
+
+```c#
+// One order per customer name.
+var rows = await repo.For<Order>()
+    .GetAll(distinctBy: o => o.CustomerName);
+```
+
+> **Note:** `distinctBy` is composed as a `GroupBy`/`First` on the `IQueryable`. Whether it runs
+> server-side depends on your provider's translation support; verify if you rely on it.
+
 Each joined row is a `Joined<TOuter, TInner>` exposing `.Outer` and `.Inner`. For outer joins the
 unmatched side is `null`. `JoinType` supports:
 

@@ -53,9 +53,16 @@ namespace EfCoreRepository
             Expression<Func<TSource, object>> orderBy = null,
             Expression<Func<TSource, object>> orderByDesc = null,
             Expression<Func<TSource, TProject>> project = null,
-            int? maxResults = null) where TProject : class
+            int? maxResults = null,
+            Expression<Func<TSource, object>> distinctBy = null) where TProject : class
         {
             var queryable = ApplyFilters(GetQueryable(includes: includeExprs), filterExprs?.ToArray() ?? []);
+
+            if (distinctBy != null)
+            {
+                // Distinct by an arbitrary key: one row per group. No key selector means no distincting.
+                queryable = queryable.GroupBy(distinctBy).Select(g => g.First());
+            }
 
             if (orderBy != null)
             {
