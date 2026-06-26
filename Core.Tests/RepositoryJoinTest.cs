@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Core.Tests.Abstracts;
 using Core.Tests.Models;
+using EfCoreRepository;
 using EfCoreRepository.Models;
 using FluentAssertions;
 using Xunit;
@@ -25,7 +26,7 @@ public class RepositoryJoinTest : AbstractRepositoryTest
             .Join<NestedModel, int?>(d => d.Id, n => n.ParentRefId, JoinType.Inner)
             .GetAll(
                 filterExprs: [p => p.Outer.Name == "Parent"],
-                orderBy: p => p.Inner.Id,
+                orderBy: Ordering<Joined<DummyModel, NestedModel>>.Asc(p => p.Inner.Id),
                 project: p => new { p.Outer.Name, ChildId = p.Inner.Id })).ToList();
 
         // Assert
@@ -46,7 +47,7 @@ public class RepositoryJoinTest : AbstractRepositoryTest
         var rows = (await Repository.For<DummyModel>()
             .Join<NestedModel, int?>(d => d.Id, n => n.ParentRefId, JoinType.Left)
             .GetAll(
-                orderBy: p => p.Outer.Name,
+                orderBy: Ordering<Joined<DummyModel, NestedModel>>.Asc(p => p.Outer.Name),
                 project: p => new { p.Outer.Name, HasChild = p.Inner != null })).ToList();
 
         // Assert

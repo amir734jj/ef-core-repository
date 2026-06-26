@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Core.Tests.Abstracts;
 using Core.Tests.Models;
+using EfCoreRepository.Models;
 using FluentAssertions;
 using Xunit;
 
@@ -21,7 +22,7 @@ public class RepositoryAdvancedQueryTest : AbstractRepositoryTest
 
     // Act
     var result = (await Repository.For<DummyModel>().GetAll<DummyModel>(
-        orderBy: x => x.Name
+        orderBy: Ordering<DummyModel>.Asc(x => x.Name)
     )).ToList();
 
     // Assert
@@ -43,7 +44,7 @@ public class RepositoryAdvancedQueryTest : AbstractRepositoryTest
 
     // Act
     var result = (await Repository.For<DummyModel>().GetAll<DummyModel>(
-        orderByDesc: x => x.Name
+        orderBy: Ordering<DummyModel>.Desc(x => x.Name)
     )).ToList();
 
     // Assert
@@ -63,17 +64,39 @@ public class RepositoryAdvancedQueryTest : AbstractRepositoryTest
 
     await Repository.For<DummyModel>().SaveMany([a1, a2, b1]);
 
-    // Act
+    // Act - second key chains as THEN BY, preserving each key's direction.
     var result = (await Repository.For<DummyModel>().GetAll<DummyModel>(
-        orderBy: x => x.Name,
-        thenByDesc: x => x.Id
+        orderBy: Ordering<DummyModel>.Desc(x => x.Name).ThenDesc(x => x.Id)
+    )).ToList();
+
+    // Assert
+    result.Should().HaveCount(3);
+    result[0].Name.Should().Be("B");
+    result[1].Name.Should().Be("A");
+    result[2].Name.Should().Be("A");
+    result[1].Id.Should().BeGreaterThan(result[2].Id); // within "A", Id descending
+  }
+
+  [Fact]
+  public async Task Test_GetAll_WithThenBy()
+  {
+    // Arrange - two rows share the primary sort key so the secondary key decides their order.
+    var a1 = new DummyModel { Name = "A", Children = [] };
+    var a2 = new DummyModel { Name = "A", Children = [] };
+    var b1 = new DummyModel { Name = "B", Children = [] };
+
+    await Repository.For<DummyModel>().SaveMany([a1, a2, b1]);
+
+    // Act - second key chains as THEN BY, preserving each key's direction.
+    var result = (await Repository.For<DummyModel>().GetAll<DummyModel>(
+        orderBy: Ordering<DummyModel>.Asc(x => x.Name).ThenAsc(x => x.Id)
     )).ToList();
 
     // Assert
     result.Should().HaveCount(3);
     result[0].Name.Should().Be("A");
     result[1].Name.Should().Be("A");
-    result[0].Id.Should().BeGreaterThan(result[1].Id); // within "A", Id descending
+    result[0].Id.Should().BeLessThan(result[1].Id); // within "A", Id ascending
     result[2].Name.Should().Be("B");
   }
 
@@ -163,7 +186,7 @@ public class RepositoryAdvancedQueryTest : AbstractRepositoryTest
     // Act
     var result = (await Repository.For<DummyModel>().GetAll<DummyModel>(
         filterExprs: [x => x.Name.StartsWith("Test")],
-        orderByDesc: x => x.Name,
+        orderBy: Ordering<DummyModel>.Desc(x => x.Name),
         maxResults: 1
     )).ToList();
 

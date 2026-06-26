@@ -14,4 +14,14 @@ namespace EfCoreRepository
             MapAll();
         }
     }
+
+    /// <summary>
+    /// The default profile for a keyless entity (e.g. a database view). It maps nothing and adds no
+    /// includes, which is all that read/insert/filter-update need — and it avoids running
+    /// <c>MapAll</c> over a view's projection. Keyless entities cannot have their key excluded from
+    /// a map anyway, so there is nothing useful for <c>MapAll</c> to do here.
+    /// </summary>
+    internal sealed class EmptyEntityProfile<TEntity> : EntityProfile<TEntity> where TEntity : class
+    {
+    }
 }

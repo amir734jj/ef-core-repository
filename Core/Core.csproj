@@ -6,9 +6,9 @@
         <Description>EntityFramework.Core repository pattern</Description>
         <RepositoryUrl>https://github.com/amir734jj/ef-core-repository</RepositoryUrl>
         <PackageProjectUrl>https://github.com/amir734jj/ef-core-repository</PackageProjectUrl>
-        <AssemblyVersion>3.9.0</AssemblyVersion>
-        <PackageReleaseNotes>GetAll now accepts thenBy/thenByDesc for composite (secondary) ordering after orderBy/orderByDesc.</PackageReleaseNotes>
-        <Version>3.9.0</Version>
+        <AssemblyVersion>3.10.0</AssemblyVersion>
+        <PackageReleaseNotes>Add fluent Ordering&lt;T&gt; (Asc/Desc/ThenAsc/ThenDesc) for GetAll multi-key sorting; DefaultProfiles() registers keyless entities (e.g. views) with an empty profile so they are usable for reads/inserts/filter-updates; add Update(filterExprs, updater) for entities with a non-struct or absent key.</PackageReleaseNotes>
+        <Version>3.10.0</Version>
         <RootNamespace>EfCoreRepository</RootNamespace>
         <AssemblyName>SimpleEfCoreRepository</AssemblyName>
         <LangVersion>latest</LangVersion>

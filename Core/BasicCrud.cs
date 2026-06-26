@@ -213,6 +213,31 @@ namespace EfCoreRepository
             return (await BulkUpdate([id], updater)).FirstOrDefault();
         }
 
+        // Updates the first entity matching the filters - works for non-struct/no key entities.
+        public async Task<TSource> Update(Expression<Func<TSource, bool>>[] filterExprs, Action<TSource> updater)
+        {
+            var entity = await ApplyFilters(GetQueryable(), filterExprs).FirstOrDefaultAsync();
+
+            if (entity is null)
+            {
+                return null;
+            }
+
+            updater(entity);
+            profile.Update(entity, entity);
+
+            if (!type.HasFlag(SessionType.Delayed))
+            {
+                await DbContext.SaveChangesAsync();
+            }
+            else
+            {
+                _anyChanges = true;
+            }
+
+            return entity;
+        }
+
         /// <summary>
         /// Checks if a navigation is a collection navigation.
         /// EF Core 8 compatibility: IsCollection is on INavigation directly

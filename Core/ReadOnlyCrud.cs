@@ -50,13 +50,10 @@ namespace EfCoreRepository
         public async Task<IEnumerable<TProject>> GetAll<TProject>(
             Expression<Func<TSource, bool>>[] filterExprs = null,
             Func<IQueryable<TSource>, IQueryable<TSource>> includeExprs = null,
-            Expression<Func<TSource, object>> orderBy = null,
-            Expression<Func<TSource, object>> orderByDesc = null,
+            Ordering<TSource> orderBy = null,
             Expression<Func<TSource, TProject>> project = null,
             int? maxResults = null,
-            Expression<Func<TSource, object>> distinctBy = null,
-            Expression<Func<TSource, object>> thenBy = null,
-            Expression<Func<TSource, object>> thenByDesc = null) where TProject : class
+            Expression<Func<TSource, object>> distinctBy = null) where TProject : class
         {
             var queryable = ApplyFilters(GetQueryable(includes: includeExprs), filterExprs?.ToArray() ?? []);
 
@@ -66,21 +63,29 @@ namespace EfCoreRepository
                 queryable = queryable.GroupBy(distinctBy).Select(g => g.First());
             }
 
-            if (orderBy != null)
+            if (orderBy is { Keys.Count: > 0 })
             {
-                queryable = ApplyThenBy(queryable.OrderBy(orderBy), thenBy, thenByDesc);
-            }
+                // First key is ORDER BY; the rest chain as THEN BY, preserving direction per key.
+                var keys = orderBy.Keys;
+                var ordered = keys[0].Descending
+                    ? queryable.OrderByDescending(keys[0].KeySelector)
+                    : queryable.OrderBy(keys[0].KeySelector);
 
-            if (orderByDesc != null)
-            {
-                queryable = ApplyThenBy(queryable.OrderByDescending(orderByDesc), thenBy, thenByDesc);
+                for (var i = 1; i < keys.Count; i++)
+                {
+                    ordered = keys[i].Descending
+                        ? ordered.ThenByDescending(keys[i].KeySelector)
+                        : ordered.ThenBy(keys[i].KeySelector);
+                }
+
+                queryable = ordered;
             }
 
             if (maxResults.HasValue)
             {
                 // Suppress RowLimitingOperationWithoutOrderByWarning when the entity has a key to
                 // stabilize on. A join projection or keyless view has none, so callers order those explicitly.
-                if (orderBy == null && orderByDesc == null && TryFindIdProperty<TSource>() != null)
+                if (orderBy is not { Keys.Count: > 0 } && TryFindIdProperty<TSource>() != null)
                 {
                     queryable = queryable.OrderBy(IdSelectorExpr<TSource>());
                 }
@@ -235,25 +240,6 @@ namespace EfCoreRepository
             }
 
             return source;
-        }
-
-        // Applies optional secondary sort keys to an already-ordered query.
-        private static IQueryable<TSource> ApplyThenBy(
-            IOrderedQueryable<TSource> ordered,
-            Expression<Func<TSource, object>> thenBy,
-            Expression<Func<TSource, object>> thenByDesc)
-        {
-            if (thenBy != null)
-            {
-                ordered = ordered.ThenBy(thenBy);
-            }
-
-            if (thenByDesc != null)
-            {
-                ordered = ordered.ThenByDescending(thenByDesc);
-            }
-
-            return ordered;
         }
     }
 }

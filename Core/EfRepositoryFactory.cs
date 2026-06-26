@@ -71,11 +71,11 @@ namespace EfCoreRepository
             AddEfRepository(_context);
         }
 
-        // When enabled, registers a DefaultEntityProfile<T> (MapAll + no include) for every entity
-        // type exposed by the DbContext that has a discoverable key and no explicit profile. Default
-        // profiles are a last resort, so an explicitly registered profile always wins. Keyless
-        // entities (e.g. database views) are skipped rather than failing registration — query those
-        // with the raw DbContext, or register an explicit profile for read-only access.
+        // When enabled, registers a default profile for every entity type exposed by the DbContext
+        // that has no explicit profile. Keyed entities get a DefaultEntityProfile<T> (MapAll, so
+        // dto-based updates work); keyless entities (e.g. database views) get an EmptyEntityProfile<T>
+        // — usable for reads/inserts/filter-updates without running MapAll over their projections.
+        // Explicitly registered profiles always win.
         private void AddDefaultProfiles()
         {
             if (!_useDefaultProfiles)
@@ -86,10 +86,11 @@ namespace EfCoreRepository
             var alreadyProfiled = _context.Select(x => x.EntityType).ToHashSet();
 
             var defaults = DiscoverDbContextEntityTypes()
-                .Where(HasDiscoverableKey)  // skip keyless entities (e.g. database views)
                 .Where(alreadyProfiled.Add) // also dedupes repeated DbSet types
                 .Select(entityType => (
-                    ProfileType: typeof(DefaultEntityProfile<>).MakeGenericType(entityType),
+                    ProfileType: (HasDiscoverableKey(entityType)
+                        ? typeof(DefaultEntityProfile<>)
+                        : typeof(EmptyEntityProfile<>)).MakeGenericType(entityType),
                     EntityType: entityType));
 
             _context.AddRange(defaults);
@@ -135,6 +136,14 @@ namespace EfCoreRepository
 
             var missingKeys = context.Where(x =>
             {
+                // Entities registered with an empty (keyless) profile are intentionally key-less,
+                // e.g. database views. By-id operations enforce the key lazily at call time.
+                if (x.ProfileType.IsGenericType &&
+                    x.ProfileType.GetGenericTypeDefinition() == typeof(EmptyEntityProfile<>))
+                {
+                    return false;
+                }
+
                 try
                 {
                     FindIdProperty(x.EntityType);

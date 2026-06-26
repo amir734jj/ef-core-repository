@@ -183,7 +183,7 @@ Task<TSource> Update<TId>(TId, Action<TSource>);
 Task<TSource> Update(TSource, params Expression<Func<TSource, bool>>[]);
 
 // Update entity manually by filter expression
-Task<TSource> Update(Action<TSource>, params Expression<Func<TSource, bool>>[]);
+Task<TSource> Update(Expression<Func<TSource, bool>>[], Action<TSource>);
 
 // Delete entity by Id
 Task<IEnumerable<TSource>> Delete<TId>(TId[]);
@@ -225,8 +225,8 @@ var rows = await repo.For<Order>()
     .Join<Customer, int>(o => o.CustomerId, c => c.Id, JoinType.Inner)
     .GetAll(
         filterExprs: [pair => pair.Outer.Total > 100],
-        orderByDesc:  pair => pair.Outer.CreatedAt,
-        project:      pair => new OrderSummary
+        orderBy:     Ordering<Joined<Order, Customer>>.Desc(pair => pair.Outer.CreatedAt),
+        project:     pair => new OrderSummary
         {
             OrderId      = pair.Outer.Id,
             CustomerName = pair.Inner.Name,

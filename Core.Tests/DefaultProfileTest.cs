@@ -47,6 +47,8 @@ public class DefaultProfileTest
     private sealed class KeylessDbContext(DbContextOptions<KeylessDbContext> options) : DbContext(options)
     {
         public DbSet<KeylessEntity> Keyless { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder) => modelBuilder.Entity<KeylessEntity>().HasNoKey();
     }
 
     // Mirrors a scaffolded context that exposes its sets as internal DbSet<T>.
@@ -100,19 +102,35 @@ public class DefaultProfileTest
     }
 
     [Fact]
-    public void DefaultProfiles_WithKeylessEntity_SkipsItInsteadOfFailing()
+    public async Task DefaultProfiles_RegistersKeylessEntities()
     {
-        // A keyless entity (e.g. a database view) is skipped rather than failing registration.
+        // A keyless entity (e.g. a database view) gets an empty default profile and is queryable.
         var provider = new ServiceCollection()
             .AddDbContext<KeylessDbContext>(x => x.UseSqlite("DataSource=file:keylessdb?mode=memory&cache=shared"))
             .AddEfRepository<KeylessDbContext>(options => options.DefaultProfiles())
             .BuildServiceProvider();
 
+        provider.GetRequiredService<KeylessDbContext>().Database.EnsureCreated();
         var repo = provider.GetRequiredService<IEfRepository>();
 
-        // Registration succeeded; the keyless entity simply has no default profile.
-        Action act = () => repo.For<KeylessEntity>();
-        act.Should().Throw<Exception>().WithMessage("*Failed to find profile*KeylessEntity*");
+        var rows = await repo.For<KeylessEntity>().GetAll<KeylessEntity>();
+
+        rows.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task FilterUpdate_UpdatesFirstMatch()
+    {
+        var repo = BuildRepository();
+        var saved = await repo.For<OrphanParent>().Save(new OrphanParent { Name = "before" });
+
+        var updated = await repo.For<OrphanParent>().Update(
+            [e => e.Id == saved.Id],
+            e => e.Name = "after");
+
+        updated.Should().NotBeNull();
+        updated.Name.Should().Be("after");
+        (await repo.For<OrphanParent>().Get([e => e.Id == saved.Id])).Name.Should().Be("after");
     }
 
     [Fact]

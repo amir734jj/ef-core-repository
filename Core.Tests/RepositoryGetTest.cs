@@ -5,6 +5,7 @@ using Core.Tests.Extensions;
 using Core.Tests.Models;
 using FluentAssertions;
 using EfCoreRepository.Extensions;
+using EfCoreRepository.Models;
 using Xunit;
 
 namespace Core.Tests;
@@ -237,7 +238,7 @@ public class RepositoryGetTest : AbstractRepositoryTest
         await Repository.For<DummyModel>().SaveMany([model1, model2]);
 
         // Act
-        var result = await Repository.For<DummyModel>().GetAll(orderBy: x => x.Name, maxResults: 1);
+        var result = await Repository.For<DummyModel>().GetAll(orderBy: Ordering<DummyModel>.Asc(x => x.Name), maxResults: 1);
 
         // Assert
         result.Should()
@@ -268,7 +269,7 @@ public class RepositoryGetTest : AbstractRepositoryTest
         await Repository.For<DummyModel>().SaveMany([model1, model2]);
 
         // Act
-        var result = await Repository.For<DummyModel>().GetAll(orderByDesc: x => x.Name, maxResults: 1);
+        var result = await Repository.For<DummyModel>().GetAll(orderBy: Ordering<DummyModel>.Desc(x => x.Name), maxResults: 1);
 
         // Assert
         result.Should()
@@ -299,7 +300,7 @@ public class RepositoryGetTest : AbstractRepositoryTest
         await Repository.For<DummyModel>().SaveMany([model1, model2]);
 
         // Act
-        var result = await Repository.For<DummyModel>().GetAll<object>(orderBy: x => x.Name, project: x => new DummyModel { Id = x.Id, Name = x.Name }, maxResults: 1);
+        var result = await Repository.For<DummyModel>().GetAll<object>(orderBy: Ordering<DummyModel>.Asc(x => x.Name), project: x => new DummyModel { Id = x.Id, Name = x.Name }, maxResults: 1);
 
         // Assert
         result.Should()
@@ -330,7 +331,7 @@ public class RepositoryGetTest : AbstractRepositoryTest
         await Repository.For<DummyModel>().SaveMany([model1, model2]);
 
         // Act
-        var result = await Repository.For<DummyModel>().GetAll<object>(orderBy: x => x.Name, project: x => new { x.Id, x.Name }, maxResults: 1);
+        var result = await Repository.For<DummyModel>().GetAll<object>(orderBy: Ordering<DummyModel>.Asc(x => x.Name), project: x => new { x.Id, x.Name }, maxResults: 1);
 
         // Assert
         result.Should()

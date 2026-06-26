@@ -22,13 +22,10 @@ namespace EfCoreRepository.Interfaces
     Task<IEnumerable<TProject>> GetAll<TProject>(
         Expression<Func<TSource, bool>>[] filterExprs = null,
         Func<IQueryable<TSource>, IQueryable<TSource>> includeExprs = null,
-        Expression<Func<TSource, object>> orderBy = null,
-        Expression<Func<TSource, object>> orderByDesc = null,
+        Ordering<TSource> orderBy = null,
         Expression<Func<TSource, TProject>> project = null,
         int? maxResults = null,
-        Expression<Func<TSource, object>> distinctBy = null,
-        Expression<Func<TSource, object>> thenBy = null,
-        Expression<Func<TSource, object>> thenByDesc = null) where TProject : class;
+        Expression<Func<TSource, object>> distinctBy = null) where TProject : class;
 
     /// <summary>Returns all entities.</summary>
     Task<IEnumerable<TSource>> GetAll();

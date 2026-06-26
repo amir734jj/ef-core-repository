@@ -31,10 +31,10 @@ public class MockabilityTest
         dal.Setup(x => x.GetAll<DummyModel>(
                 It.IsAny<Expression<Func<DummyModel, bool>>[]>(),
                 It.IsAny<Func<IQueryable<DummyModel>, IQueryable<DummyModel>>>(),
-                It.IsAny<Expression<Func<DummyModel, object>>>(),
-                It.IsAny<Expression<Func<DummyModel, object>>>(),
+                It.IsAny<Ordering<DummyModel>>(),
                 It.IsAny<Expression<Func<DummyModel, DummyModel>>>(),
-                It.IsAny<int?>()))
+                It.IsAny<int?>(),
+                It.IsAny<Expression<Func<DummyModel, object>>>()))
             .ReturnsAsync([new DummyModel { Name = "Mocked" }]);
 
         var crud = dal.Object;
