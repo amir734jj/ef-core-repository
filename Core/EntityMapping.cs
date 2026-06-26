@@ -32,10 +32,12 @@ namespace EfCoreRepository
             _include = include;
 
             // Exclude:
-            // 1) Ids
+            // 1) Ids (when the entity has a discoverable key; keyless views have none)
             // 2) other entity types
+            var idProperty = EntityUtility.TryFindIdProperty(typeof(TSource));
+
             foreach (var propertyInfo in autoMappingProperties
-                         .Where(x => !x.Name.Equals(EntityUtility.FindIdProperty(typeof(TSource))))
+                         .Where(x => idProperty == null || !x.Name.Equals(idProperty))
                          .Where(x => !entityTypes.Contains(x.PropertyType)))
             {
                 var paramExpr = Expression.Parameter(typeof(TSource));

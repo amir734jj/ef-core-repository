@@ -40,13 +40,8 @@ namespace EfCoreRepository
                 throw new Exception($"Failed to find profile for {typeof(TSource).Name}>");
             }
 
-            var keyProperty = FindIdProperty<TSource>();
-
-            if (keyProperty == null)
-            {
-                throw new Exception($"Missing primary key identifier in entity {typeof(TSource).Name}");
-            }
-
+            // A key is only needed for by-id operations (enforced lazily). Keyless entities such as
+            // database views remain usable for read/query/join operations.
             return new BasicCrud<TSource>(profile.EntityMapping, _dbContext, Generic, ownedSession);
         }
 

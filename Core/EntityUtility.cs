@@ -55,6 +55,25 @@ namespace EfCoreRepository
             return FindIdPropertyInternal(typeof(T));
         }
 
+        // Non-throwing variant: returns null when the type has no discoverable key
+        // (e.g. a keyless database view).
+        public static string TryFindIdProperty(Type type)
+        {
+            try
+            {
+                return FindIdPropertyInternal(type);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public static string TryFindIdProperty<T>() where T : class
+        {
+            return TryFindIdProperty(typeof(T));
+        }
+
         public static Expression<Func<T, object>> IdSelectorExpr<T>() where T : class
         {
             var parameter = Expression.Parameter(typeof(T));

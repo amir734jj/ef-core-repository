@@ -77,8 +77,8 @@ namespace EfCoreRepository
             if (maxResults.HasValue)
             {
                 // Suppress RowLimitingOperationWithoutOrderByWarning when the entity has a key to
-                // stabilize on. A join projection has no key, so callers order those explicitly.
-                if (orderBy == null && orderByDesc == null && FindIdProperty<TSource>() != null)
+                // stabilize on. A join projection or keyless view has none, so callers order those explicitly.
+                if (orderBy == null && orderByDesc == null && TryFindIdProperty<TSource>() != null)
                 {
                     queryable = queryable.OrderBy(IdSelectorExpr<TSource>());
                 }

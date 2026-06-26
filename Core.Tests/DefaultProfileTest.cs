@@ -92,14 +92,18 @@ public class DefaultProfileTest
     }
 
     [Fact]
-    public void DefaultProfiles_WithKeylessEntity_ThrowsAtRegistration()
+    public void DefaultProfiles_WithKeylessEntity_SkipsItInsteadOfFailing()
     {
-        // A DbContext entity with no discoverable key must fail fast at registration, not crash
-        // later when the repository is first used.
-        Action act = () => new ServiceCollection()
+        // A keyless entity (e.g. a database view) is skipped rather than failing registration.
+        var provider = new ServiceCollection()
             .AddDbContext<KeylessDbContext>(x => x.UseSqlite("DataSource=file:keylessdb?mode=memory&cache=shared"))
-            .AddEfRepository<KeylessDbContext>(options => options.DefaultProfiles());
+            .AddEfRepository<KeylessDbContext>(options => options.DefaultProfiles())
+            .BuildServiceProvider();
 
-        act.Should().Throw<Exception>().WithMessage("*Missing key identifier*KeylessEntity*");
+        var repo = provider.GetRequiredService<IEfRepository>();
+
+        // Registration succeeded; the keyless entity simply has no default profile.
+        Action act = () => repo.For<KeylessEntity>();
+        act.Should().Throw<Exception>().WithMessage("*Failed to find profile*KeylessEntity*");
     }
 }
