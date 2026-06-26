@@ -54,7 +54,9 @@ namespace EfCoreRepository
             Expression<Func<TSource, object>> orderByDesc = null,
             Expression<Func<TSource, TProject>> project = null,
             int? maxResults = null,
-            Expression<Func<TSource, object>> distinctBy = null) where TProject : class
+            Expression<Func<TSource, object>> distinctBy = null,
+            Expression<Func<TSource, object>> thenBy = null,
+            Expression<Func<TSource, object>> thenByDesc = null) where TProject : class
         {
             var queryable = ApplyFilters(GetQueryable(includes: includeExprs), filterExprs?.ToArray() ?? []);
 
@@ -66,12 +68,12 @@ namespace EfCoreRepository
 
             if (orderBy != null)
             {
-                queryable = queryable.OrderBy(orderBy);
+                queryable = ApplyThenBy(queryable.OrderBy(orderBy), thenBy, thenByDesc);
             }
 
             if (orderByDesc != null)
             {
-                queryable = queryable.OrderByDescending(orderByDesc);
+                queryable = ApplyThenBy(queryable.OrderByDescending(orderByDesc), thenBy, thenByDesc);
             }
 
             if (maxResults.HasValue)
@@ -233,6 +235,25 @@ namespace EfCoreRepository
             }
 
             return source;
+        }
+
+        // Applies optional secondary sort keys to an already-ordered query.
+        private static IQueryable<TSource> ApplyThenBy(
+            IOrderedQueryable<TSource> ordered,
+            Expression<Func<TSource, object>> thenBy,
+            Expression<Func<TSource, object>> thenByDesc)
+        {
+            if (thenBy != null)
+            {
+                ordered = ordered.ThenBy(thenBy);
+            }
+
+            if (thenByDesc != null)
+            {
+                ordered = ordered.ThenByDescending(thenByDesc);
+            }
+
+            return ordered;
         }
     }
 }

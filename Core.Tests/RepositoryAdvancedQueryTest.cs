@@ -54,6 +54,30 @@ public class RepositoryAdvancedQueryTest : AbstractRepositoryTest
   }
 
   [Fact]
+  public async Task Test_GetAll_WithThenByDescending()
+  {
+    // Arrange - two rows share the primary sort key so the secondary key decides their order.
+    var a1 = new DummyModel { Name = "A", Children = [] };
+    var a2 = new DummyModel { Name = "A", Children = [] };
+    var b1 = new DummyModel { Name = "B", Children = [] };
+
+    await Repository.For<DummyModel>().SaveMany([a1, a2, b1]);
+
+    // Act
+    var result = (await Repository.For<DummyModel>().GetAll<DummyModel>(
+        orderBy: x => x.Name,
+        thenByDesc: x => x.Id
+    )).ToList();
+
+    // Assert
+    result.Should().HaveCount(3);
+    result[0].Name.Should().Be("A");
+    result[1].Name.Should().Be("A");
+    result[0].Id.Should().BeGreaterThan(result[1].Id); // within "A", Id descending
+    result[2].Name.Should().Be("B");
+  }
+
+  [Fact]
   public async Task Test_GetAll_WithMaxResults()
   {
     // Arrange
