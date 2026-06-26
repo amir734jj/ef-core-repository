@@ -7,12 +7,6 @@ namespace EfCoreRepository.Interfaces
 {
     public interface IBasicCrudUtils<TSource> where TSource : class
     {
-        Task<int> Count(Expression<Func<TSource, bool>>[] filterExprs);
-
-        Task<bool> Any(Expression<Func<TSource, bool>>[] filterExprs);
-
-        Task<IEnumerable<TSource>> Take(int limit);
-
         Task<bool> HasReferences(TSource source);
     }
 }

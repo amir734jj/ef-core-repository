@@ -5,11 +5,11 @@ namespace EfCoreRepository.Interfaces
     public interface IBasicCrud<TSource> :
         IDisposable,
         IAsyncDisposable,
+        IReadOnlyCrud<TSource>,
         IBasicCrudSingles<TSource>,
         IBasicCrudMany<TSource>,
         IBasicCrudUtils<TSource>,
-        IBasicCrudBulk<TSource>,
-        IBasicCrudUnSafe<TSource>
+        IBasicCrudBulk<TSource>
         where TSource : class, new()
     {
         // For complex and multi-action where we want to defer the save until the dispose takes place

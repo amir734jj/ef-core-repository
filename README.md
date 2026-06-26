@@ -182,7 +182,65 @@ IBasicCrud<TSource, TId> Delayed();
 // This is useful if you want don't want to include all related entities
 // or turn entities into a "god" object
 IBasicCrud<TSource, TId> Light();
+
+// Join another entity set; continue querying on the read-only Joined<TSource, TInner> surface
+IReadOnlyCrud<Joined<TSource, TInner>> Join<TInner, TKey>(
+    Expression<Func<TSource, TKey>>, Expression<Func<TInner, TKey>>, JoinType = JoinType.Inner);
 ```
+
+#### Querying & joins
+
+`IBasicCrud<T>` also exposes a read-only surface, `IReadOnlyCrud<T>`, covering the query operations
+(`Get`, `GetAll`, `Any`, `Count`, `Take`, `Join`). A consumer that only needs to read can depend on
+`IReadOnlyCrud<T>` instead of the full CRUD interface — and, importantly, it keeps **join results
+query-only by construction** (there is nothing to guard against because the type simply has no
+write methods).
+
+##### Join
+
+`Join` lets you join two entity sets that have **no navigation property** between them. It returns an
+`IReadOnlyCrud<Joined<TOuter, TInner>>`, so the usual `GetAll`/`Get`/`Any`/`Count` surface — with
+`filterExprs` and `project` — applies directly to the joined rows. The underlying `IQueryable` is never
+exposed.
+
+```c#
+// repo.For<Order>() returns IBasicCrud<Order>
+var rows = await repo.For<Order>()
+    .Join<Customer, int>(o => o.CustomerId, c => c.Id, JoinType.Inner)
+    .GetAll(
+        filterExprs: [pair => pair.Outer.Total > 100],
+        orderByDesc:  pair => pair.Outer.CreatedAt,
+        project:      pair => new OrderSummary
+        {
+            OrderId      = pair.Outer.Id,
+            CustomerName = pair.Inner.Name,
+        });
+```
+
+Each joined row is a `Joined<TOuter, TInner>` exposing `.Outer` and `.Inner`. For outer joins the
+unmatched side is `null`. `JoinType` supports:
+
+| `JoinType` | SQL | Unmatched side |
+| --- | --- | --- |
+| `Inner` (default) | `INNER JOIN` | row excluded |
+| `Left` | `LEFT JOIN` | `Inner` is `null` |
+| `Right` | `RIGHT JOIN` | `Outer` is `null` |
+| `FullOuter` | full outer join (emitted as a `UNION ALL`) | either side `null` |
+
+> **Note:** `FullOuter` is composed as a `UNION ALL` of the left join and the unmatched-right rows.
+> Most providers translate this to SQL; verify against your provider if you rely on it.
+
+Joins are chainable — the read-only result itself exposes `Join`, keyed off the `Joined<,>` pair:
+
+```c#
+var rows = await repo.For<Order>()
+    .Join<Customer, int>(o => o.CustomerId, c => c.Id)        // -> Joined<Order, Customer>
+    .Join<Address, int>(pair => pair.Inner.AddressId, a => a.Id) // -> Joined<Joined<Order, Customer>, Address>
+    .GetAll(project: pair => new { pair.Outer.Outer.Id, City = pair.Inner.City });
+```
+
+Everything here is an interface (`IBasicCrud<T>`, `IReadOnlyCrud<T>`), so it all mocks cleanly in unit
+tests; the concrete implementations are internal.
 
 Notes:
 

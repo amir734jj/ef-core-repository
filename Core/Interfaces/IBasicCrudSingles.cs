@@ -7,8 +7,6 @@ namespace EfCoreRepository.Interfaces
     public interface IBasicCrudSingles<TSource> where TSource : class
     {
         Task<TSource> Get<TId>(TId id) where TId : struct;
-        
-        Task<TSource> Get(Expression<Func<TSource, bool>>[] filterExprs);
 
         Task<TSource> Update<TId>(TId id, TSource dto) where TId : struct;
 

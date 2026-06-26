@@ -13,14 +13,6 @@ namespace EfCoreRepository.Interfaces
         Task<IEnumerable<TSource>> DeleteMany<TId>(TId[] ids) where TId : struct;
 
         Task<IEnumerable<TSource>> DeleteMany(Expression<Func<TSource, bool>>[] filterExprs);
-
-        Task<IEnumerable<TProject>> GetAll<TProject>(
-            Expression<Func<TSource, bool>>[] filterExprs = null,
-            Func<IQueryable<TSource>, IQueryable<TSource>> includeExprs = null,
-            Expression<Func<TSource, object>> orderBy = null,
-            Expression<Func<TSource, object>> orderByDesc = null,
-            Expression<Func<TSource, TProject>> project = null,
-            int? maxResults = null) where TProject : class;
         
         Task<IEnumerable<TSource>> GetAll<TId>(TId[] ids) where TId : struct;
     }
