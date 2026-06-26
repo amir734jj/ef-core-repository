@@ -77,18 +77,22 @@ var serviceProvider = services
 ##### Optional profiles (`DefaultProfiles`)
 
 Writing an `EntityProfile<T>` per entity is optional. Call `DefaultProfiles()` and every entity type
-exposed by the `DbContext` (a `DbSet<T>` whose entity has a discoverable key) that has **no** explicit
-profile automatically gets a default one that **maps all properties** (`MapAll`) and adds **no eager
-includes**. Explicit profiles always win, so you can mix the two. This is especially handy for
-DB-first / scaffolded models where hand-writing profiles is tedious:
+exposed by the `DbContext` (every `DbSet<T>`, including non-public/scaffolded ones) that has **no**
+explicit profile automatically gets a default profile. Entities with a discoverable key get one that
+**maps all properties** (`MapAll`) and adds **no eager includes**; keyless entities (e.g. database
+views) get an **empty** profile so they stay usable for reads, inserts and filter-based updates.
+Explicit profiles always win, so you can mix the two. This is especially handy for DB-first /
+scaffolded models where hand-writing profiles is tedious:
 
 ```c#
 services.AddEfRepository<ScaffoldedDbContext>(options => options
     .Profile(Assembly.GetExecutingAssembly())          // explicit profiles (optional)
-    .DefaultProfiles());                                // default MapAll + no-include for the rest
+    .DefaultProfiles());                                // default profile for the rest
 ```
 
-> Entities still need a discoverable key — either a `[Key]` attribute or a property named `id`/`_id`.
+> By-id operations (`Get<TId>`, `Update<TId>`, `Delete<TId>`) still require a discoverable key —
+> either a `[Key]` attribute or a property named `id`/`_id`. Keyless entities can only be used
+> through the filter- and query-based methods.
 
 - Use `IBasicCrud`
 ```c#
@@ -179,10 +183,7 @@ Task<TSource> Update<TId>(TId, TSource);
 // Update entity manually
 Task<TSource> Update<TId>(TId, Action<TSource>);
 
-// Update entity by filter expression
-Task<TSource> Update(TSource, params Expression<Func<TSource, bool>>[]);
-
-// Update entity manually by filter expression
+// Update first entity matching a filter expression
 Task<TSource> Update(Expression<Func<TSource, bool>>[], Action<TSource>);
 
 // Delete entity by Id
@@ -245,6 +246,18 @@ var rows = await repo.For<Order>()
 
 > **Note:** `distinctBy` is composed as a `GroupBy`/`First` on the `IQueryable`. Whether it runs
 > server-side depends on your provider's translation support; verify if you rely on it.
+
+##### Ordering
+
+`GetAll` takes an optional `Ordering<TSource>` — a fluent, multi-key sort. Start with `Asc` / `Desc`,
+then chain `ThenAsc` / `ThenDesc` for secondary keys. The first key becomes `ORDER BY` and each
+subsequent key a `THEN BY`, keeping its own direction:
+
+```c#
+// ORDER BY LastName ASC, CreatedAt DESC
+var rows = await repo.For<Customer>().GetAll<Customer>(
+    orderBy: Ordering<Customer>.Asc(c => c.LastName).ThenDesc(c => c.CreatedAt));
+```
 
 Each joined row is a `Joined<TOuter, TInner>` exposing `.Outer` and `.Inner`. For outer joins the
 unmatched side is `null`. `JoinType` supports:
