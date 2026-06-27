@@ -34,6 +34,7 @@ public class MockabilityTest
                 It.IsAny<Ordering<DummyModel>>(),
                 It.IsAny<Expression<Func<DummyModel, DummyModel>>>(),
                 It.IsAny<int?>(),
+                It.IsAny<int?>(),
                 It.IsAny<Expression<Func<DummyModel, object>>>()))
             .ReturnsAsync([new DummyModel { Name = "Mocked" }]);
 
