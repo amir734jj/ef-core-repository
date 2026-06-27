@@ -46,6 +46,38 @@ public class MockabilityTest
     }
 
     [Fact]
+    public async Task GetAll_WithOrderingArgument_IsMockable()
+    {
+        // Mirrors the consumer call `GetAll(orderBy: Ordering<ApiToken>.Desc(t => t.CreatedAt))`:
+        // a real Ordering built from the public factory must flow through the mocked surface and
+        // be matchable both by It.IsAny and by the exact instance.
+        var ordering = Ordering<DummyModel>.Desc(t => t.Id);
+
+        var dal = new Mock<IBasicCrud<DummyModel>>();
+        dal.Setup(x => x.GetAll<DummyModel>(
+                It.IsAny<Expression<Func<DummyModel, bool>>[]>(),
+                It.IsAny<Func<IQueryable<DummyModel>, IQueryable<DummyModel>>>(),
+                ordering,
+                It.IsAny<Expression<Func<DummyModel, DummyModel>>>(),
+                It.IsAny<int?>(),
+                It.IsAny<int?>(),
+                It.IsAny<Expression<Func<DummyModel, object>>>()))
+            .ReturnsAsync([new DummyModel { Name = "Ordered" }]);
+
+        var result = await dal.Object.GetAll<DummyModel>(orderBy: ordering);
+
+        result.Single().Name.Should().Be("Ordered");
+        dal.Verify(x => x.GetAll<DummyModel>(
+            It.IsAny<Expression<Func<DummyModel, bool>>[]>(),
+            It.IsAny<Func<IQueryable<DummyModel>, IQueryable<DummyModel>>>(),
+            ordering,
+            It.IsAny<Expression<Func<DummyModel, DummyModel>>>(),
+            It.IsAny<int?>(),
+            It.IsAny<int?>(),
+            It.IsAny<Expression<Func<DummyModel, object>>>()), Times.Once);
+    }
+
+    [Fact]
     public void Join_ReturnsAMockableReadOnlyCrud()
     {
         var joinResult = new Mock<IReadOnlyCrud<Joined<DummyModel, NestedModel>>>().Object;
