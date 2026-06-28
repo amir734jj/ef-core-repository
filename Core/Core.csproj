@@ -6,9 +6,9 @@
         <Description>EntityFramework.Core repository pattern</Description>
         <RepositoryUrl>https://github.com/amir734jj/ef-core-repository</RepositoryUrl>
         <PackageProjectUrl>https://github.com/amir734jj/ef-core-repository</PackageProjectUrl>
-        <AssemblyVersion>3.11.0</AssemblyVersion>
-        <PackageReleaseNotes>Add optional skip (offset) parameter to GetAll for database-side pagination alongside maxResults.</PackageReleaseNotes>
-        <Version>3.11.0</Version>
+        <AssemblyVersion>3.11.1</AssemblyVersion>
+        <PackageReleaseNotes>Order by entity key before Take(1) in single-entity Delete to suppress the EF Core row-limiting-without-OrderBy warning.</PackageReleaseNotes>
+        <Version>3.11.1</Version>
         <RootNamespace>EfCoreRepository</RootNamespace>
         <AssemblyName>SimpleEfCoreRepository</AssemblyName>
         <LangVersion>latest</LangVersion>
