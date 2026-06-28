@@ -170,6 +170,14 @@ namespace EfCoreRepository
 
             if (single)
             {
+                // Take must run over an ordered query to be stable. Order by the entity key when
+                // one exists to suppress RowLimitingOperationWithoutOrderByWarning; a keyless view
+                // has none, so Take stays unordered for those.
+                if (TryFindIdProperty<TSource>() != null)
+                {
+                    queryable = queryable.OrderBy(IdSelectorExpr<TSource>());
+                }
+
                 queryable = queryable.Take(1);
             }
 
