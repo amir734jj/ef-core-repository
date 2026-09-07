@@ -9,7 +9,7 @@ on:
       - master
 
 env:
-  APIKEY: ${{ secrets.APIKEY }}
+  NUGET_USER: amir734jj
 
 jobs:
   test:
@@ -54,13 +54,19 @@ jobs:
 
   publish:
     runs-on: ubuntu-latest
-    container:
-      image: mcr.microsoft.com/dotnet/sdk:10.0
+    environment: NUGET_API_KEY
+    permissions:
+      id-token: write # enable GitHub OIDC token issuance for NuGet Trusted Publishing
     needs: test
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
 
       - name: Restore dependencies
         run: dotnet restore
@@ -68,6 +74,12 @@ jobs:
       - name: Build
         run: dotnet build
 
+      - name: NuGet login (OIDC -> temp API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ env.NUGET_USER }}
+
       - name: Publish to NuGet
         run: |
-          find Core -type f -name '*.nupkg' | xargs -I {} sh -c "dotnet nuget push {} --api-key $APIKEY --source https://api.nuget.org/v3/index.json --skip-duplicate"
+          find Core -type f -name '*.nupkg' | xargs -I {} sh -c "dotnet nuget push {} --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate"
