@@ -259,6 +259,28 @@ var rows = await repo.For<Customer>().GetAll<Customer>(
     orderBy: Ordering<Customer>.Asc(c => c.LastName).ThenDesc(c => c.CreatedAt));
 ```
 
+##### LIKE filters
+
+`Filter<T>.Like` builds a provider-translatable SQL `LIKE` predicate. Supply SQL wildcard characters
+in the pattern explicitly. `LikeAny` combines several selected string properties with `OR`:
+
+```c#
+var pattern = $"%{searchText.Trim()}%";
+var stations = await repo.For<Station>().GetAll<Station>(
+    filterExprs:
+    [
+        Filter<Station>.LikeAny(
+            pattern,
+            station => station.Name,
+            station => station.Genre,
+            station => station.StreamUrl)
+    ]);
+```
+
+Case sensitivity follows the database provider and column collation. PostgreSQL-specific `ILIKE`
+remains available through Npgsql's `EF.Functions.ILike` when case-insensitive matching must not depend
+on collation.
+
 Each joined row is a `Joined<TOuter, TInner>` exposing `.Outer` and `.Inner`. For outer joins the
 unmatched side is `null`. `JoinType` supports:
 

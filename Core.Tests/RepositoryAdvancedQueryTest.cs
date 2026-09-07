@@ -196,6 +196,43 @@ public class RepositoryAdvancedQueryTest : AbstractRepositoryTest
   }
 
   [Fact]
+  public async Task Test_GetAll_WithLikeFilter()
+  {
+    // Arrange
+    await Repository.For<DummyModel>().SaveMany([
+      new DummyModel { Name = "Alpha", Children = [] },
+      new DummyModel { Name = "Beta", Children = [] }
+    ]);
+
+    // Act
+    var result = (await Repository.For<DummyModel>().GetAll<DummyModel>(
+      filterExprs: [Filter<DummyModel>.Like(model => model.Name, "%pha")]
+    )).ToList();
+
+    // Assert
+    result.Should().ContainSingle().Which.Name.Should().Be("Alpha");
+  }
+
+  [Fact]
+  public async Task Test_GetAll_WithLikeAnyFilter()
+  {
+    // Arrange
+    await Repository.For<DummyModel>().SaveMany([
+      new DummyModel { Name = "First", SearchText = "none", Children = [] },
+      new DummyModel { Name = "Second", SearchText = "target value", Children = [] },
+      new DummyModel { Name = "Third", SearchText = "none", Children = [] }
+    ]);
+
+    // Act
+    var result = (await Repository.For<DummyModel>().GetAll<DummyModel>(
+      filterExprs: [Filter<DummyModel>.LikeAny("%target%", model => model.Name, model => model.SearchText)]
+    )).ToList();
+
+    // Assert
+    result.Should().ContainSingle().Which.Name.Should().Be("Second");
+  }
+
+  [Fact]
   public async Task Test_Take()
   {
     // Arrange

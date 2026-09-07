@@ -12,6 +12,8 @@ namespace Core.Tests.Models
 
         public string Name { get; set; }
 
+        public string SearchText { get; set; } = string.Empty;
+
         public List<NestedModel> Children { get; set; }
     }
 }
