@@ -186,6 +186,13 @@ Task<TSource> Update<TId>(TId, Action<TSource>);
 // Update first entity matching a filter expression
 Task<TSource> Update(Expression<Func<TSource, bool>>[], Action<TSource>);
 
+// Atomically update every matching row and return the affected-row count.
+// This bypasses change tracking; already tracked instances are not synchronized.
+Task<int> ExecuteUpdate(
+    Expression<Func<TSource, bool>>[],
+    Action<UpdateSettersBuilder<TSource>>,
+    CancellationToken = default);
+
 // Delete entity by Id
 Task<IEnumerable<TSource>> Delete<TId>(TId[]);
 

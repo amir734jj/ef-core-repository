@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using EfCoreRepository.Extensions;
 using EfCoreRepository.Interfaces;
 using EfCoreRepository.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Query;
 using static EfCoreRepository.EntityUtility;
 
 namespace EfCoreRepository
@@ -123,6 +125,15 @@ namespace EfCoreRepository
             }
 
             return result;
+        }
+
+        public Task<int> ExecuteUpdate(
+            Expression<Func<TSource, bool>>[] filterExprs,
+            Action<UpdateSettersBuilder<TSource>> setters,
+            CancellationToken cancellationToken = default)
+        {
+            return ApplyFilters(_dbSet.AsQueryable(), filterExprs)
+                .ExecuteUpdateAsync(setters, cancellationToken);
         }
 
         public async Task<IEnumerable<TSource>> SaveMany(TSource[] sources)

@@ -6,9 +6,9 @@
         <Description>EntityFramework.Core repository pattern</Description>
         <RepositoryUrl>https://github.com/amir734jj/ef-core-repository</RepositoryUrl>
         <PackageProjectUrl>https://github.com/amir734jj/ef-core-repository</PackageProjectUrl>
-        <AssemblyVersion>3.12.0</AssemblyVersion>
-        <PackageReleaseNotes>Add provider-translatable Filter Like and LikeAny predicates.</PackageReleaseNotes>
-        <Version>3.12.0</Version>
+        <AssemblyVersion>3.13.0</AssemblyVersion>
+        <PackageReleaseNotes>Added ExecuteUpdate bulk operation support.</PackageReleaseNotes>
+        <Version>3.13.0</Version>
         <RootNamespace>EfCoreRepository</RootNamespace>
         <AssemblyName>SimpleEfCoreRepository</AssemblyName>
         <LangVersion>latest</LangVersion>

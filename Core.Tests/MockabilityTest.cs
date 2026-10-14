@@ -114,7 +114,7 @@ public class MockabilityTest
         var expected = new[]
         {
             "Get", "GetAll", "Update", "Delete", "Save", "SaveMany", "DeleteMany",
-            "BulkUpdate", "Count", "Any", "Take", "HasReferences",
+            "BulkUpdate", "ExecuteUpdate", "Count", "Any", "Take", "HasReferences",
             "Delayed", "Light", "NoTracking", "SplitQuery", "Dispose", "DisposeAsync",
         };
 
